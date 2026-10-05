@@ -1,0 +1,9 @@
+mplsoccer
+pandas
+numpy
+scikit-learn
+NetworkX
+matplotlib
+seaborn
+plotly
+Streamlit
