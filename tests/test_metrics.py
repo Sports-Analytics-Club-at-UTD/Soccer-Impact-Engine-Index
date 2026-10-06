@@ -2,9 +2,9 @@
 import numpy as np
 import pandas as pd
 
-from recovery_coverage import add_per90, extract_recovery_events, recovery_counts
-from spatial_dominance import observed_spatial_dominance, team_control
-from zones import assign_zone, zone_xband
+from src.metrics.recovery_coverage import add_per90, extract_recovery_events, recovery_counts
+from src.metrics.spatial_dominance import observed_spatial_dominance, team_control
+from src.metrics.zones import assign_zone, zone_xband
 
 FULL_PITCH = [0, 0, 120, 0, 120, 80, 0, 80]
 LEFT_HALF = [0, 0, 60, 0, 60, 80, 0, 80]
@@ -23,7 +23,8 @@ def test_zone_missing_or_off_pitch_is_na():
 
 # ---------- recovery coverage ----------
 def _events():
-    base = dict(match_id=1, team="A", player_id=1, player="P1", location=None, duel_type=None,
+    base = dict(match_id=1, team="A", player="P1", competition_name="L", season_name="S",
+                location=None, duel_type=None,
                 duel_outcome=None, interception_outcome=None, ball_recovery_recovery_failure=None)
     rows = [
         dict(type="Duel", duel_type="Tackle", duel_outcome="Won", location=[10, 10]),            # counted
@@ -52,12 +53,12 @@ def test_three_event_types_stay_separate_and_correct():
 def test_per90_and_na_without_minutes():
     rec = extract_recovery_events(_events())
     totals, _ = recovery_counts(rec)
-    on = ["player_id", "player", "team"]
-    minutes = pd.DataFrame([dict(player_id=1, player="P1", team="A", minutes=180.0)])
+    on = ["player", "team", "competition_name", "season_name"]
+    minutes = pd.DataFrame([dict(player="P1", team="A", competition_name="L", season_name="S", minutes=180.0)])
     out = add_per90(totals, minutes, on).set_index("event_type")
     assert out.loc["Tackle", "per90"] == 1.0
     # player with no minutes row -> NaN, not a guess
-    other = totals.assign(player_id=2)
+    other = totals.assign(player="P2")
     out2 = add_per90(other, minutes, on)
     assert out2["per90"].isna().all()
 
@@ -119,3 +120,13 @@ def test_one_sided_frame_is_skipped():
     res, stats = observed_spatial_dominance(f, _events_for_spatial())
     assert res.empty
     assert stats["skipped_one_side_only"] == 1
+
+
+def test_min_matches_turns_small_samples_into_na():
+    f = pd.DataFrame(_frame("e2", [(True, 10, 40), (False, 70, 40)]))
+    res, _ = observed_spatial_dominance(f, _events_for_spatial())   # team B, 1 match
+    kept = team_control(res, min_matches=1)
+    assert kept["reportable"].all() and kept["control_rate"].notna().all()
+    na = team_control(res, min_matches=2)
+    assert (~na["reportable"]).all() and na["control_rate"].isna().all()
+    assert (na["observed_cells"] > 0).all()   # raw counts stay visible

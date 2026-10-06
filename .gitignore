@@ -1,6 +1,22 @@
-venv
+# environments and secrets
+venv/
+.venv/
 .env
-_pycache_/
+
+# python caches
+__pycache__/
 *.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# data lives on the shared Drive, not in git
 data/raw/
+data/processed/
+*.parquet
+
+# generated pictures
+figures/

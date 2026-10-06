@@ -1,8 +1,11 @@
 """Off-Ball Spatial Dominance - TEAM-LEVEL "Observed Spatial Dominance" (needs StatsBomb 360).
 
 DRAFT DEFINITION (replaces the player-level one)
-  Input   : 360 freeze frames (one row per visible player per event) + events table
-            (to know which team had possession at that event).
+  Input   : 360 freeze frames (one row per visible player per event) + an EVENT-META table
+            (id, match_id, team, possession_team) covering EVERY event type of the 360 matches.
+            NOTE: the shared statsbomb_team_events.parquet is NOT enough - it keeps only 6 event
+            types and has no possession_team, so most frame ids would not match. Use
+            src/ingestion/fetch_360_event_meta.py to build data/raw/statsbomb_360_event_meta.parquet.
   Calc    : for every 360 frame where the OPPONENT has possession:
               1. keep only the part of the pitch the camera actually saw (visible_area)
               2. split that area into small grid cells (default 2 x 2 yards)
@@ -36,11 +39,18 @@ from collections import Counter
 
 import numpy as np
 import pandas as pd
-from matplotlib.path import Path
+from matplotlib.path import Path as MplPath
 
-from zones import N_ZONES, PITCH_X, PITCH_Y, assign_zone, split_location
+from src.metrics.zones import N_ZONES, PITCH_X, PITCH_Y, assign_zone, split_location
 
 FLIP = np.array([PITCH_X, PITCH_Y])
+
+# Minimum matches a team needs in a zone before its control_rate is reported.
+# Below it, control_rate is NaN (N/A) - never a guess. Only 4 league-seasons have free 360 data
+# and they cover one club each (PSG 57, Barcelona 35, Leverkusen 31 matches; every other team
+# has <= 4, as opponents). Any value from 5 to 31 gives the same three teams; 10 is the
+# documented choice. A team decision - change here if the team agrees on another value.
+MIN_MATCHES = 10
 
 
 def _require(df, cols, label):
@@ -75,7 +85,7 @@ def frame_control(points, is_attacker, poly, centers, cell_zone):
     Returns (observed_cells_per_zone, defender_cells_per_zone), arrays of length N_ZONES + 1
     (index 0 unused), or None if no grid cell lies inside the visible area.
     """
-    observed = Path(poly).contains_points(centers)
+    observed = MplPath(poly).contains_points(centers)
     if not observed.any():
         return None
     c = centers[observed]
@@ -167,8 +177,12 @@ def observed_spatial_dominance(frames, events, cell=2.0):
     return result, stats
 
 
-def team_control(result):
-    """Roll match-level rows up to team x zone. Cell-weighted (pooled), not an average of ratios."""
+def team_control(result, min_matches=None):
+    """Roll match-level rows up to team x zone. Cell-weighted (pooled), not an average of ratios.
+
+    min_matches: if given, rows with fewer matches than this get control_rate = NaN (N/A) and
+    reportable = False. The raw cell counts stay visible so the N/A is explainable.
+    """
     g = result.groupby(["defending_team", "zone"]).agg(
         observed_cells=("observed_cells", "sum"),
         defender_cells=("defender_cells", "sum"),
@@ -176,12 +190,39 @@ def team_control(result):
         n_matches=("match_id", "nunique"),
     ).reset_index()
     g["control_rate"] = g["defender_cells"] / g["observed_cells"]
+    if min_matches is not None:
+        g["reportable"] = g["n_matches"] >= min_matches
+        g.loc[~g["reportable"], "control_rate"] = np.nan
     return g
 
 
 if __name__ == "__main__":
-    ev = pd.read_parquet("statsbomb_team_events.parquet", columns=["id", "match_id", "team", "possession_team"])
-    fr = pd.read_parquet("statsbomb_360_frames.parquet")
-    res, st = observed_spatial_dominance(fr, ev)
-    print(dict(st))
-    print(team_control(res).sort_values(["defending_team", "zone"]).head(20))
+    from pathlib import Path
+
+    raw = Path(__file__).resolve().parents[2] / "data" / "raw"
+    meta = pd.read_parquet(raw / "statsbomb_360_event_meta.parquet")
+    fr = pd.read_parquet(raw / "statsbomb_360_frames.parquet")
+    res, st = observed_spatial_dominance(fr, meta)
+    total = sum(st.values())
+    print("Frames used / skipped by reason:")
+    for k, v in sorted(st.items()):
+        print(f"  {k}: {v}")
+    print(f"  total frames seen: {total}")
+    tc = team_control(res, min_matches=MIN_MATCHES)
+    print("\ncontrol_rate range (must be within 0..1):", tc["control_rate"].min(), tc["control_rate"].max())
+    shown = tc[tc["reportable"]]
+    print(f"\nReportable (>= {MIN_MATCHES} matches): {shown['defending_team'].nunique()} teams; "
+          f"N/A for {tc.loc[~tc['reportable'], 'defending_team'].nunique()} teams")
+    print(shown.sort_values(["defending_team", "zone"]).to_string(index=False))
+
+    # --- diagnostics ---
+    per_team = tc.groupby("defending_team")["n_matches"].max().sort_values(ascending=False)
+    print(f"\nTeams with results: {len(per_team)}")
+    print("Matches per team (top 10):")
+    print(per_team.head(10).to_string())
+    print("Teams with only 1-2 matches:", int((per_team <= 2).sum()), "of", len(per_team))
+
+    unmatched = fr[~fr["id"].isin(meta["id"])]
+    print(f"\nFrames with no event match: {unmatched['id'].nunique()} frame ids in "
+          f"{unmatched['match_id'].nunique()} matches. Top matches:")
+    print(unmatched.groupby("match_id")["id"].nunique().sort_values(ascending=False).head(10).to_string())
