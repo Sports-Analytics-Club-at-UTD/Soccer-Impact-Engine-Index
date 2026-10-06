@@ -113,3 +113,20 @@ Contributions are welcome. Please open an issue to discuss proposed changes befo
 ## 📄 License
 
 *Add your chosen license here (e.g., MIT).*
+
+## Spatial + Defensive Recovery metrics
+
+Two metrics, documented in full in [docs/metric_documentation.md](docs/metric_documentation.md):
+
+- **Defensive Recovery Coverage** (per player): counts of won Tackles, Interceptions and Ball Recoveries, kept separate, tagged by pitch zone. Per-90 rates are added once the minutes-played table is available. No possession adjustment in V1.
+- **Observed Spatial Dominance** (team level only): share of each pitch zone closer to the defending team's visible players than to the attackers, from StatsBomb 360 frames. Not true pitch control. Free 360 data exists for four league-seasons covering one club each (127 matches); everything else is N/A.
+
+Run from the repo root:
+
+```
+python -W ignore -m src.metrics.build_metric_tables
+python -W ignore -m src.viz.zone_heatmap
+python -m pytest tests/test_metrics.py
+```
+
+Large data files are on the shared Drive, not in git.
