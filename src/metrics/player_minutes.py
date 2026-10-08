@@ -61,6 +61,25 @@ def parse_clock(value) -> float:
     parts = str(value).split(":")
     return int(parts[0]) + int(parts[1]) / 60.0
 
+def stint_minutes(from_time, to_time):
+    """Minutes played in each stint, from two Series of clock strings.
+    Missing start = 0:00. Missing end = 90:00. Both are capped to 0..90."""
+    start = from_time.map(parse_clock).fillna(0.0).clip(0, MATCH_MINUTES)
+    end = to_time.map(parse_clock).fillna(MATCH_MINUTES).clip(0, MATCH_MINUTES)
+    return (end - start).clip(lower=0.0)
+
+
+def assign_position_group(wide):
+    """Given min_GK, min_CB, ... columns, add minutes, tied_groups, position_group, in_scope.
+    The group with the most minutes wins. Ties go to the first group in GROUP_ORDER."""
+    min_cols = [f"min_{g}" for g in GROUP_ORDER]
+    wide = wide.copy()
+    wide["minutes"] = wide[min_cols].sum(axis=1)
+    top = wide[min_cols].max(axis=1)
+    wide["tied_groups"] = wide[min_cols].eq(top, axis=0).sum(axis=1)
+    wide["position_group"] = wide[min_cols].idxmax(axis=1).str.replace("min_", "", regex=False)
+    wide["in_scope"] = wide["position_group"].isin(IN_SCOPE)
+    return wide
 
 def main():
     lineups = pd.read_parquet(LINEUPS)
@@ -72,9 +91,7 @@ def main():
     print(f"Rows with a position stint: {len(played):,} (dropped {len(lineups) - len(played):,} non-playing rows)")
 
     # ---- 2. Stint minutes, everything capped at 90:00.
-    start = played["from_time"].map(parse_clock).fillna(0.0).clip(0, MATCH_MINUTES)
-    end = played["to_time"].map(parse_clock).fillna(MATCH_MINUTES).clip(0, MATCH_MINUTES)
-    played["minutes"] = (end - start).clip(lower=0.0)
+    played["minutes"] = stint_minutes(played["from_time"], played["to_time"])
 
     # ---- 3. Position group per stint. Unmapped labels are shown, never guessed.
     played["position_norm"] = played["position"].map(norm)
@@ -114,13 +131,7 @@ def main():
     )
     wide.columns = [f"min_{g}" for g in GROUP_ORDER]
     wide = wide.reset_index()
-    min_cols = [f"min_{g}" for g in GROUP_ORDER]
-
-    wide["minutes"] = wide[min_cols].sum(axis=1)
-    top = wide[min_cols].max(axis=1)
-    wide["tied_groups"] = (wide[min_cols].eq(top, axis=0)).sum(axis=1)
-    wide["position_group"] = wide[min_cols].idxmax(axis=1).str.replace("min_", "", regex=False)  # first max = GROUP_ORDER
-    wide["in_scope"] = wide["position_group"].isin(IN_SCOPE)
+    wide = assign_position_group(wide)
 
     matches = (
         pm[pm > 0].reset_index().merge(ms, on="match_id", how="left")
