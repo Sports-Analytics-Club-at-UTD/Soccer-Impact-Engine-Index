@@ -36,6 +36,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.metrics.team_names import clean_team
+from src.metrics.player_names import clean_player
 
 TOTALS ="data/processed/recovery_coverage_totals.parquet"
 MINUTES = "data/processed/player_minutes.parquet"
@@ -57,6 +58,7 @@ def main():
     totals = pd.read_parquet(TOTALS)
     # Same club under two names -> one name, then add up the counts that were split.
     totals["team"] = clean_team(totals["team"])
+    totals["player"] = clean_player(totals["player"])
     totals = totals.groupby(KEYS + ["event_type"], as_index=False)["count"].sum()
     mins = pd.read_parquet(MINUTES).rename(columns={"player_name": "player"})
 

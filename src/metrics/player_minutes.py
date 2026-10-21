@@ -26,6 +26,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.metrics.team_names import clean_team
+from src.metrics.player_names import clean_player
 
 LINEUPS ="data/raw/statsbomb_lineups.parquet"
 EVENTS = "data/raw/statsbomb_team_events.parquet"
@@ -84,6 +85,7 @@ def assign_position_group(wide):
 def main():
     lineups = pd.read_parquet(LINEUPS)
     lineups["team"] = clean_team(lineups["team"])  # same club under two names -> one name
+    lineups["player_name"] = clean_player(lineups["player_name"]) # same player under two names -> one name
     print(f"Lineup rows: {len(lineups):,}   matches: {lineups['match_id'].nunique()}")
 
     # ---- 1. Drop players who never played (no position stint).
@@ -159,6 +161,7 @@ def main():
     n_total = len(ev)
     ev = ev[ev["player"].notna()].copy()
     ev["team"] = clean_team(ev["team"])
+    ev["player"] = clean_player(ev["player"])
     print(f"\nJoin check on recovery-type events (Ball Recovery, Interception, Tackle; before any success filter):")
     print(f"  events: {n_total:,}   with no player name: {n_total - len(ev):,}")
     keyset = played[["match_id", "team", "player_name"]].drop_duplicates().rename(columns={"player_name": "player"})
