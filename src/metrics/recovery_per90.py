@@ -47,6 +47,26 @@ EVENT_TYPES = ["Tackle", "Interception", "Ball Recovery"]
 KEYS = ["player", "team", "competition_name", "season_name"]
 THRESHOLDS = [450, 900, 1350]
 
+def season_coverage(ev, full_season_matches):
+    """Matches per league-season, and whether it counts as full coverage."""
+    cov = (
+        ev.drop_duplicates()
+        .groupby(["competition_name", "season_name"])["match_id"].nunique()
+        .rename("season_matches").reset_index()
+    )
+    cov["full_coverage"] = cov["season_matches"] >= full_season_matches
+    return cov
+
+
+def finish_grid(grid, cov, min_minutes):
+    """Missing counts -> 0, then per90, reportable, meets_min, and full_coverage."""
+    grid = grid.copy()
+    grid["count"] = grid["count"].fillna(0).astype(int)
+    grid["per90"] = grid["count"] / grid["minutes"] * 90.0
+    grid["reportable"] = ~((grid["position_group"] == "GK") & (grid["event_type"] != "Ball Recovery"))
+    grid["meets_min"] = grid["minutes"] >= min_minutes
+    return grid.merge(cov, on=["competition_name", "season_name"], how="left")
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -85,8 +105,7 @@ def main():
 
     # ---- Season coverage, from the events file: how many matches does each league-season have?
     ev = pd.read_parquet(EVENTS, columns=["match_id", "competition_name", "season_name"]).drop_duplicates()
-    cov = ev.groupby(["competition_name", "season_name"])["match_id"].nunique().rename("season_matches").reset_index()
-    cov["full_coverage"] = cov["season_matches"] >= args.full_season_matches
+    cov = season_coverage(ev, args.full_season_matches)
     print(f"\nMatches per league-season in the events file (full_coverage = at least {args.full_season_matches}):")
     print(cov.to_string(index=False))
 
@@ -95,13 +114,8 @@ def main():
     grid = base.merge(pd.DataFrame({"event_type": EVENT_TYPES}), how="cross")
     grid = grid.merge(totals[KEYS + ["event_type", "count"]], on=KEYS + ["event_type"], how="left")
     n_zero = grid["count"].isna().sum()
-    grid["count"] = grid["count"].fillna(0).astype(int)
     print(f"\nPlayer-season x event-type rows: {len(grid):,} ({n_zero:,} had no events row and are counted as 0)")
-
-    grid["per90"] = grid["count"] / grid["minutes"] * 90.0
-    grid["reportable"] = ~((grid["position_group"] == "GK") & (grid["event_type"] != "Ball Recovery"))
-    grid["meets_min"] = grid["minutes"] >= args.min_minutes
-    grid = grid.merge(cov, on=["competition_name", "season_name"], how="left")
+    grid = finish_grid(grid, cov, args.min_minutes)
 
     # ---- Provisional percentile, only where there is a real comparison group.
     pool_cols = ["competition_name", "season_name", "position_group", "event_type"]
