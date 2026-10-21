@@ -8,8 +8,11 @@ splits their minutes and their event counts.
 This maps each pair to one name. It is an ASSUMPTION about identity (the two names are the
 same club). It was checked by confirming the two names never appear in the same match.
 
-If another duplicate is found (for example in Ligue 1 2022/2023, which lists 21 team names),
-add it here and rerun player_minutes and recovery_per90.
+Ligue 1 2022/2023 lists 21 team names; the extra name is the same Marseille pair (one match
+each), already covered by the mapping above. The two Marseille names never share a match
+anywhere in the events file.
+
+If another duplicate is found, add it here and rerun player_minutes and recovery_per90.
 """
 
 TEAM_ALIASES = {
