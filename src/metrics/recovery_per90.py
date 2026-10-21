@@ -42,9 +42,10 @@ TOTALS ="data/processed/recovery_coverage_totals.parquet"
 MINUTES = "data/processed/player_minutes.parquet"
 EVENTS = "data/raw/statsbomb_team_events.parquet"
 OUT = "data/processed/recovery_per90.parquet"
+XWALK = "data/processed/player_name_crosswalk.parquet"
 
 EVENT_TYPES = ["Tackle", "Interception", "Ball Recovery"]
-KEYS = ["player", "team", "competition_name", "season_name"]
+KEYS = ["player_id", "team", "competition_name", "season_name"]
 THRESHOLDS = [450, 900, 1350]
 
 def season_coverage(ev, full_season_matches):
@@ -79,6 +80,10 @@ def main():
     # Same club under two names -> one name, then add up the counts that were split.
     totals["team"] = clean_team(totals["team"])
     totals["player"] = clean_player(totals["player"])
+    totals = totals.groupby(["player", "team", "competition_name", "season_name", "event_type"], as_index=False)["count"].sum()
+    xw = pd.read_parquet(XWALK).rename(columns={"player_name_raw": "player"})
+    totals = totals.merge(xw, on=["player", "team", "competition_name", "season_name"], how="left")
+    print(f"Totals rows with no player_id after crosswalk: {totals['player_id'].isna().sum()} (events lost: {totals.loc[totals['player_id'].isna(), 'count'].sum():,})")
     totals = totals.groupby(KEYS + ["event_type"], as_index=False)["count"].sum()
     mins = pd.read_parquet(MINUTES).rename(columns={"player_name": "player"})
 

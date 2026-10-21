@@ -85,7 +85,10 @@ def assign_position_group(wide):
 def main():
     lineups = pd.read_parquet(LINEUPS)
     lineups["team"] = clean_team(lineups["team"])  # same club under two names -> one name
-    lineups["player_name"] = clean_player(lineups["player_name"]) # same player under two names -> one name
+    lineups["player_name_raw"] = clean_player(lineups["player_name"])  # spelling as used in events
+    canon = lineups.groupby("player_id")["player_name_raw"].agg(lambda s: s.mode().iloc[0])
+    lineups["player_name"] = lineups["player_id"].map(canon)  # one display name per player_id
+    print(f"Lineup rows with no player_id: {lineups['player_id'].isna().sum()}")
     print(f"Lineup rows: {len(lineups):,}   matches: {lineups['match_id'].nunique()}")
 
     # ---- 1. Drop players who never played (no position stint).
@@ -126,13 +129,14 @@ def main():
         print("WARNING: some player-match totals exceed 90 minutes (overlapping stints?).")
 
     # ---- 6. Season table: minutes per group, then the group with most minutes.
-    keys = ["player_id", "player_name", "team", "competition_name", "season_name"]
+    keys = ["player_id", "team", "competition_name", "season_name"]
     wide = (
         played.groupby(keys + ["group"])["minutes"].sum().unstack("group", fill_value=0.0)
         .reindex(columns=GROUP_ORDER, fill_value=0.0)
     )
     wide.columns = [f"min_{g}" for g in GROUP_ORDER]
     wide = wide.reset_index()
+    wide.insert(1, "player_name", wide["player_id"].map(canon))
     wide = assign_position_group(wide)
 
     matches = (
@@ -141,6 +145,12 @@ def main():
     )
     wide = wide.merge(matches, on=["player_id", "team", "competition_name", "season_name"], how="left")
 
+    xw = played[["player_id", "player_name_raw", "team", "competition_name", "season_name"]].drop_duplicates()
+    clash = xw.duplicated(["player_name_raw", "team", "competition_name", "season_name"], keep=False)
+    print(f"\nCrosswalk rows: {len(xw):,}   rows where one name maps to more than one player_id: {clash.sum()}")
+    if clash.any():
+        print(xw[clash].sort_values(["team", "season_name", "player_name_raw"]).head(10).to_string(index=False))
+    xw.to_parquet("data/processed/player_name_crosswalk.parquet", index=False)
     out = Path(OUT)
     out.parent.mkdir(parents=True, exist_ok=True)
     wide.to_parquet(out, index=False)
@@ -164,7 +174,7 @@ def main():
     ev["player"] = clean_player(ev["player"])
     print(f"\nJoin check on recovery-type events (Ball Recovery, Interception, Tackle; before any success filter):")
     print(f"  events: {n_total:,}   with no player name: {n_total - len(ev):,}")
-    keyset = played[["match_id", "team", "player_name"]].drop_duplicates().rename(columns={"player_name": "player"})
+    keyset = played[["match_id", "team", "player_name_raw"]].drop_duplicates().rename(columns={"player_name_raw": "player"})
     chk = ev.groupby(["match_id", "team", "player"]).size().rename("n").reset_index().merge(
         keyset, on=["match_id", "team", "player"], how="left", indicator=True)
     matched = chk.loc[chk["_merge"] == "both", "n"].sum()

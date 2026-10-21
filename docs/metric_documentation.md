@@ -1,7 +1,7 @@
 # Metric Documentation: Defensive Recovery Coverage and Observed Spatial Dominance
 
 Owner: Person 4 (Spatial + Defensive Recovery)
-Version: V1, updated 20 October 2026
+Version: V1, updated 21 October 2026
 Scope: midfielders, center-backs, goalkeepers (no attackers/wingers)
 
 ## 0. How to read this document
@@ -27,9 +27,9 @@ Every statement is labelled by what kind of thing it is:
 | `statsbomb_360_event_meta.parquet` | `src/ingestion/fetch_360_event_meta.py` | `id`, `match_id`, `team`, `possession_team` | Shared Drive (not git) |
 | `statsbomb_lineups.parquet` | `src/ingestion/fetch_lineups.py` | 86,743 rows, all 1,814 matches fetched. One row per player per position stint (a player with no stint has one row with empty position fields). | Shared Drive (not git) |
 
-Derived tables (in `data/processed/`, not in git): `recovery_coverage_totals`, `recovery_coverage_by_zone`, `spatial_dominance_team_zone`, `spatial_coverage`, `player_minutes`, `recovery_per90`.
+Derived tables (in `data/processed/`, not in git): `recovery_coverage_totals`, `recovery_coverage_by_zone`, `spatial_dominance_team_zone`, `spatial_coverage`, `player_minutes`, `player_name_crosswalk`, `recovery_per90`.
 
-Name-cleaning helpers (in git): `src/metrics/team_names.py` (clubs listed under two names, see limitation 17) and `src/metrics/player_names.py` (players listed under two spellings, see limitation 20).
+Name-cleaning helpers (in git): `src/metrics/team_names.py` (clubs listed under two names, see limitation 17) and `src/metrics/player_names.py` (players listed under two spellings, see limitations 20 and 23).
 
 The fetch scripts are in git so the data can be rebuilt. The parquet files are too large for git.
 
@@ -38,7 +38,7 @@ The fetch scripts are in git so the data can be rebuilt. The parquet files are t
 - Events: `match_id`, `type`, `minute`, `second`, `period`, `team`, `player`, `position`, `location`, `duel_type`, `duel_outcome`, `interception_outcome`, `ball_recovery_recovery_failure`, `competition_name`, `season_name`.
 - 360 frames: `id`, `visible_area`, `teammate`, `actor`, `keeper`, `location`.
 - Event-meta lookup: `id`, `match_id`, `team`, `possession_team`.
-- Lineups: `match_id`, `team`, `player_id`, `player_name`, `position`, `from_time`, `to_time`, `from_period`, `to_period`, `start_reason`, `end_reason`.
+- Lineups: `match_id`, `team`, `player_id`, `player_name`, `player_nickname`, `position`, `from_time`, `to_time`, `from_period`, `to_period`, `start_reason`, `end_reason`.
 
 ### 1.3 Coverage
 
@@ -91,18 +91,18 @@ How many times did a player win the ball back, and where on the pitch? Tackles, 
    - Tackle and Interception: outcome in `SUCCESS_OUTCOMES` = {Won, Success In Play, Success Out}. Lost In Play and Lost Out are excluded.
    - Ball Recovery: kept unless `ball_recovery_recovery_failure` is True.
 3. Assign each event to a pitch zone from its `location` using `src/metrics/zones.py` (currently a 3x3 placeholder grid).
-4. Count events per player, team, competition, season, event type, and (separately) per zone.
+4. Count events per player name, team, competition, season, event type, and (separately) per zone. These counts are name-based because the events file has no `player_id`; `player_id` is attached later in `recovery_per90` (see limitation 23).
 
 **Result:**
 
-- `recovery_coverage_totals.parquet`: one row per player-season-event type (columns: player, team, competition_name, season_name, event_type, count).
-- `recovery_coverage_by_zone.parquet`: one row per player-season-event type-zone.
-- Per-player and per-team zone heatmaps (`src/viz/zone_heatmap.py`, `--player` option).
+- `recovery_coverage_totals.parquet`: one row per player-season-event type (columns: player, team, competition_name, season_name, event_type, count). Name-based.
+- `recovery_coverage_by_zone.parquet`: one row per player-season-event type-zone. Name-based.
+- Per-player and per-team zone heatmaps (`src/viz/zone_heatmap.py`, `--player` option). Name-based.
 - Counted events (after the success filter): Tackle 43,290; Interception 27,449; Ball Recovery 175,654 (total 246,393). Of these, 132,036 come from in-scope players (GK, CB, DM, CM) and 114,357 from out-of-scope players, which are dropped when per-90 is built.
 
 ### 2.3 Minutes and position groups
 
-Script: `src/metrics/player_minutes.py`. Output: `player_minutes.parquet`, one row per player-team-competition-season (5,578 rows).
+Script: `src/metrics/player_minutes.py`. Output: `player_minutes.parquet`, one row per player_id + team + competition + season (5,576 rows). The script also writes `player_name_crosswalk.parquet` (see limitation 23).
 
 **Input (RAW):** lineups (position stints with start and end times). Competition and season for each match come from the events file.
 
@@ -118,9 +118,9 @@ Script: `src/metrics/player_minutes.py`. Output: `player_minutes.parquet`, one r
    - **Out of scope**: fullbacks and wing backs (FB), Left/Right Midfield (WM), attacking midfielders (AM), wingers and forwards (ATT)
 4. A player's position group for a season = the group where they played the most minutes. Ties (71 rows) are broken by the fixed order GK, CB, DM, CM, then the others.
 5. A player's minutes are **all** their minutes in that season, in any position. Their events are likewise counted from any position, so numerator and denominator match.
-6. Player and team names are cleaned before grouping (`clean_player`, `clean_team`).
+6. Club names are cleaned before grouping (`clean_team`). Players are grouped by `player_id` + team + competition + season, not by name. The display name (`player_name`) is the most frequent spelling of that `player_id` in the lineups (after `clean_player`); it is a label only.
 
-**Result (verified):** player-seasons per group: GK 422, CB 957, DM 704, CM 500 in scope; FB 958, WM 376, AM 238, ATT 1,423 out of scope. Maximum player-match minutes 90.00.
+**Result (verified):** player-seasons per group: GK 422, CB 957, DM 704, CM 499 in scope; FB 958, WM 376, AM 238, ATT 1,422 out of scope (5,576 total). Maximum player-match minutes 90.00. 0 duplicate player_id + team + competition + season keys.
 
 **Join check:** all 304,876 recovery-type events (Ball Recovery, Interception, Tackle, before the success filter) found their player in the lineups on match + team + player name (100.00%).
 
@@ -130,16 +130,16 @@ Script: `src/metrics/player_minutes.py`. Output: `player_minutes.parquet`, one r
 |---|---|---|---|---|
 | CB | 957 | 180 | 1,260 | 2,462 |
 | DM | 704 | 177 | 1,196 | 2,345 |
-| CM | 500 | 113 | 861 | 2,245 |
+| CM | 499 | 113 | 865 | 2,245 |
 | GK | 422 | 180 | 902 | 2,970 |
 
 ### 2.4 Per-90 rates and provisional percentile
 
-Script: `src/metrics/recovery_per90.py`. Output: `recovery_per90.parquet`, one row per in-scope player-season x event type (7,683 rows).
+Script: `src/metrics/recovery_per90.py`. Output: `recovery_per90.parquet`, one row per in-scope player-season x event type (7,680 rows).
 
 **Calculation (DERIVED):**
 
-1. Match recovery totals to the minutes table on player name + team + competition + season. All 246,393 events matched.
+1. Attach `player_id` to the recovery totals through the crosswalk (player name + team + competition + season), add up counts per `player_id`, then match to the minutes table on player_id + team + competition + season. All 246,393 events received a player_id and matched (0 lost).
 2. Keep players in scope with minutes above 0. A player with no totals row for an event type gets a count of 0 (1,869 rows). This is an ASSUMPTION: the player was on the pitch and the events data records none.
 3. Per-90 = count / minutes x 90.
 4. **Goalkeepers:** only Ball Recovery is reportable. Goalkeeper Tackle and Interception rows stay in the table with `reportable = False`. Person 4 decision, not yet agreed with the team. Reason: goalkeepers are 99.9% Ball Recovery (17,260 of 17,271 counted events; 5 Interception, 6 Tackle).
@@ -182,7 +182,8 @@ Script: `src/metrics/recovery_per90.py`. Output: `recovery_per90.parquet`, one r
 | SUCCESS_OUTCOMES set | ASSUMPTION, checked against real label counts |
 | Empty recovery-failure flag means a successful recovery | ASSUMPTION (the flag is only ever True or empty) |
 | 3x3 zone grid | ASSUMPTION (placeholder, team decision pending) |
-| Players identified by name + team + competition + season | ASSUMPTION, supported by the 100% join check |
+| Event counts are attached to a player_id through the lineups crosswalk (name + team + competition + season) | DERIVED, supported by the 100% join check and 0 crosswalk clashes |
+| Display name = most frequent spelling per player_id | DERIVED (label only, not used in any key) |
 | Player names cleaned with `clean_player` (`''` to `'`, strip whitespace) | DERIVED, applied to lineups and recovery totals only |
 | 90-minute cap, no extra time | Person 4 decision, not yet agreed with the team |
 | Position group = most minutes; all minutes and events count | Person 4 decision, not yet agreed with the team |
@@ -260,7 +261,7 @@ The free 360 table has no identity for off-ball players. Its columns are `id`, `
 
 5. Failed recoveries are flagged only as True. An empty flag is counted as a successful recovery.
 6. SUCCESS_OUTCOMES = Won, Success In Play, Success Out (checked against real label counts).
-7. The events file has no `player_id`. Players are matched to the lineups on match + team + player name, and recovery totals to minutes on player name + team + competition + season. The match check found no failures (100.00%). Two different players with the same name and team in a season would be merged; no such case is known, but the script warns if the minutes table has one.
+7. The events file has no `player_id`. Players are matched to the lineups on match + team + player name. In `recovery_per90` and `player_minutes`, records are keyed on `player_id` (see limitation 23). In the events file, `recovery_coverage_totals`, `recovery_coverage_by_zone` and the heatmaps, players are still identified by name + team + competition + season (events file and by-zone table only; see 23). The match check found no failures (100.00%). On the name-based side, two different players with the same name and team in a season would be merged; no such case is known.
 8. `fetch_normal` skipped match 3879594 (connection reset).
 9. The zone grid is a 3x3 placeholder (`zones.py`). It needs a team decision and must match any teammate zone logic. An 18-zone grid (6x3) was considered and left out because per-player cells would be mostly empty (median 4 to 10 recovery events per player-season).
 10. Goalkeepers are 99.9% Ball Recovery. Only Ball Recovery is reported for goalkeepers; Tackle and Interception are kept but marked not reportable. Person 4 decision, not yet agreed with the team. Goalkeeper Ball Recovery counts depend heavily on team style.
@@ -272,10 +273,11 @@ The free 360 table has no identity for off-ball players. Its columns are `id`, `
 16. Every match is counted as at most 90 minutes and extra time is ignored. A player on the pitch to the final whistle gets 90. Stoppage-time events still count, which slightly raises every per-90 rate equally. Person 4 decision, not yet agreed with the team.
 17. StatsBomb lists some clubs under two names. Marseille / Olympique de Marseille and Caen / Stade Malherbe Caen are mapped to one name in `src/metrics/team_names.py` for minutes and per-90. Without this, a player's season was split across two team names. This assumes they are the same clubs. The recovery by-zone table and the team heatmaps are not yet cleaned this way, and the original events file keeps both names. Check done: the paired names never appear in the same match. For Marseille this was checked across the whole events file (0 matches share both names). Caen's combined count is 38 matches (9 + 29), a full Ligue 1 season. Marseille's is 42 (12 + 30), which is unexplained. Ligue 1 2022/23 lists 21 team names; the extra name is the same Marseille / Olympique de Marseille pair (one match each), already covered by the mapping.
 18. Fullbacks, wing backs, wide midfielders (Left/Right Midfield), attacking midfielders, wingers and forwards are out of scope. Wide midfielders were not decided with the team.
-19. A missing event row is counted as 0 for a player who played. This affects 1,869 of 7,683 rows.
-20. Seven players appear on the same team under two spellings that differ only in a doubled vs single apostrophe in the raw events file: Cheikh M'Bengue (Rennes), Cheikh N'Doye (Angers), Eunan O'Kane (AFC Bournemouth), John O'Shea (Sunderland), Mamadou N'Diaye (Montpellier), N'Golo Kanté (Leicester City), Yann Gérard M'Vila (Sunderland). The cause is unknown. `clean_player` (`src/metrics/player_names.py`) collapses `''` to `'` and strips whitespace before grouping and joining, in `player_minutes` and `recovery_per90`. The raw files, `recovery_coverage_by_zone`, and the per-player heatmaps still use the raw spellings, so per-player zone data for these seven must be looked up under the doubled spelling (for example `--player "N''Golo Kanté"`). This changed player-season rows from 5,585 to 5,578 and per-90 rows from 7,695 to 7,683. The same check also found a trailing tab in one name (Daniel Arnaud N''Di); `clean_player` strips it. No other name was altered, for example "DaniloD''Ambrosio" keeps its missing space, as in the source.
+19. A missing event row is counted as 0 for a player who played. This affects 1,869 of 7,680 rows.
+20. **Some players are listed under two spellings that differ only in a doubled vs single apostrophe (plus one trailing tab).** The lineups show 9 such player_ids: M'Bengue (3424), N'Golo Kanté (3961), M'Vila (4429), N'Gosso Massouma (4469), N'Doye (5676), D'Ambrosio (6984), O'Kane (13248), O'Shea (16890), N'Diaye (40700). The first fix, found in the processed tables, covered seven of them on one team each: Cheikh M'Bengue (Rennes), Cheikh N'Doye (Angers), Eunan O'Kane (AFC Bournemouth), John O'Shea (Sunderland), Mamadou N'Diaye (Montpellier), N'Golo Kanté (Leicester City), Yann Gérard M'Vila (Sunderland). N'Gosso Massouma and D'Ambrosio are in the lineups list but were not in that seven; why has not been checked. The cause of the doubled apostrophes is unknown. `clean_player` (`src/metrics/player_names.py`) collapses `''` to `'` and strips whitespace. It is still used to line up spellings between the recovery totals and the lineups crosswalk, but player records themselves are now keyed on `player_id` (limitation 23), so a spelling difference no longer splits a player's minutes. The raw files, `recovery_coverage_by_zone` and the per-player heatmaps keep the raw spellings, so per-player zone data for these players must be looked up under the doubled spelling (for example `--player "N''Golo Kanté"`). The same check found a trailing tab in one name (Daniel Arnaud N''Di), which `clean_player` strips. No other name was altered; for example "DaniloD''Ambrosio" keeps its missing space, as in the source. Row-count history: this fix first changed player-season rows from 5,585 to 5,578 and per-90 rows from 7,695 to 7,683; limitation 23 later changed them to 5,576 and 7,680.
 21. 422 goalkeeper player-seasons are in `player_minutes`, but 400 are in `recovery_per90`, because per-90 keeps only players with minutes above 0.
 22. The in-scope event count moved from 132,035 to 132,036 (out-of-scope 114,358 to 114,357) after the name fix. One event changed side; the cause has not been checked.
+23. **Player records are keyed on player_id, not name.** `player_minutes` and `recovery_per90` have one row per player_id + team + competition + season. The display name is the most frequent spelling of that player_id in the lineups, and it is only a label. This replaced name-based keys after the same player appeared under different spellings (for example Fernando Luiz Rosa and Fernando Luiz Roza, player_id 3054), which had split one player's minutes into separate records. 11 player_ids in the lineups have more than one spelling: 9 differ only by a doubled apostrophe, one is Rosa/Roza (3054), and one differs by a double quote (David N'Gog, 401453). The events file has no player_id, so IDs are attached to event counts through a crosswalk built from the lineups (`player_name_crosswalk.parquet`: spelling + team + competition + season -> player_id). Checks: the match-level join of recovery events to lineup players is 100% (304,876 of 304,876), no spelling maps to two player_ids within a team and season (0 clashes; 0 clashes also within a match and team in the lineups), and 0 counted events were lost in the crosswalk. Effect: player-season rows 5,578 -> 5,576, per-90 rows 7,683 -> 7,680, in-scope CM 500 -> 499. Limitations: the by-zone table and the heatmaps are still name-based; a player who changes club mid-season remains two records, because team is part of the key. One display name keeps a double quote as in the source (David N"Gog; out of scope, label only).
 
 ### Sample size
 
@@ -296,7 +298,7 @@ Median events per player-season is 4 to 10 even for CB/DM, and the bottom quarte
 | Pooling across the four 2015/16 leagues | Open (index owner) |
 | Rates -> per-player score | Open (index owner) |
 | Wide midfielders and fullbacks out of scope | Person 4 decision; needs team agreement |
-| Processed-table format | Done: `recovery_per90.parquet` and `player_minutes.parquet` shared with the team (V1, provisional) |
+| Processed-table format | Done: `recovery_per90.parquet` and `player_minutes.parquet` shared with the team (V1, provisional; re-uploaded 21 Oct with player_id keys) |
 
 ---
 
@@ -313,7 +315,7 @@ python -W ignore -m src.viz.zone_heatmap
 python -m pytest -q
 ```
 
-`recovery_per90` takes `--min-minutes` (default 900) and `--full-season-matches` (default 300). `zone_heatmap` needs `--kind {recovery,spatial}`; see `--help` for the other options. Outputs are written to `data/processed/` and `figures/` (not in git). The test suite currently has 29 passing tests.
+`player_minutes` must run before `recovery_per90`: it writes both `player_minutes.parquet` and `player_name_crosswalk.parquet`, which `recovery_per90` reads. `recovery_per90` takes `--min-minutes` (default 900) and `--full-season-matches` (default 300). `zone_heatmap` needs `--kind {recovery,spatial}`; see `--help` for the other options. Outputs are written to `data/processed/` and `figures/` (not in git). The test suite currently has 29 passing tests.
 
 ---
 
@@ -334,5 +336,6 @@ Other open items:
 - Which club each partial season covers (confirmed only for Leverkusen 2023/24 and Barcelona 2016/17 and 2019/20).
 - Why Marseille's combined count is 42 matches (limitation 17).
 - Why one event changed from out-of-scope to in-scope after the name fix (limitation 22).
+- Which player-seasons merged in the player_id change (limitation 23); only the totals (5,578 -> 5,576, CM 500 -> 499) are recorded.
 - Whether a Ball Recovery often follows the same player's Tackle or Interception (double-counting). Not checked.
 - Whether `fetch_360.py` writes `statsbomb_360_frames.parquet` (inferred from the file name, not opened).
