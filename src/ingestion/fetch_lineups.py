@@ -20,11 +20,10 @@ Columns written:
 Usage (from the repo root, PowerShell):
 
     # 1) Test on ONE match first and look at the printed output
-    python -W ignore -m src.ingestion.fetch_statsbomb_lineups --match-id 3895266
+    python -W ignore -m src.ingestion.fetch_lineups --match-id 3895266
 
     # 2) Full run over every match in the events file
-    python -W ignore -m src.ingestion.fetch_statsbomb_lineups
-
+    python -W ignore -m src.ingestion.fetch_lineups
 Requires: pip install statsbombpy pandas pyarrow
 """
 

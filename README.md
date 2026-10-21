@@ -125,10 +125,17 @@ Run from the repo root:
 
 ```
 python -W ignore -m src.metrics.build_metric_tables
+python -W ignore -m src.ingestion.fetch_lineups
 python -W ignore -m src.metrics.player_minutes
 python -W ignore -m src.metrics.recovery_per90
 python -W ignore -m src.viz.zone_heatmap
-python -m pytest tests/test_metrics.py
+python -m pytest -q
 ```
+
+`zone_heatmap` needs `--kind` (recovery or spatial); see `--help` for options.
+
+Processed tables shared on the Drive (V1, provisional):
+- `player_minutes.parquet`: one row per player-season, with minutes and position group.
+- `recovery_per90.parquet`: one row per player-season x event type, with count, per-90 rate and a provisional percentile.
 
 Large data files are on the shared Drive, not in git.
