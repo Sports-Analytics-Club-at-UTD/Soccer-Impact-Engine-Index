@@ -1,0 +1,258 @@
+[
+  {
+    "id": 1,
+    "name": "Marcus Delacroix",
+    "team": "PSG",
+    "position": "CB",
+    "minutes": 2410,
+    "photo": "",
+    "pct": {
+      "T": 95,
+      "I": 75,
+      "C": 67,
+      "P": 45,
+      "LB": 37,
+      "REC": 65
+    }
+  },
+  {
+    "id": 2,
+    "name": "Tomas Brandl",
+    "team": "Leverkusen",
+    "position": "CB",
+    "minutes": 2875,
+    "photo": "",
+    "pct": {
+      "T": 42,
+      "I": 92,
+      "C": 64,
+      "P": 45,
+      "LB": 45,
+      "REC": 36
+    }
+  },
+  {
+    "id": 3,
+    "name": "Ilyas Benkarim",
+    "team": "Barcelona",
+    "position": "CB",
+    "minutes": 1980,
+    "photo": "",
+    "pct": {
+      "T": 74,
+      "I": 84,
+      "C": 71,
+      "P": 38,
+      "LB": 97,
+      "REC": 42
+    }
+  },
+  {
+    "id": 4,
+    "name": "Jonas Wirtz",
+    "team": "Leverkusen",
+    "position": "CB",
+    "minutes": 740,
+    "photo": "",
+    "pct": {
+      "T": 69,
+      "I": 81,
+      "C": 83,
+      "P": 82,
+      "LB": 32,
+      "REC": 97
+    }
+  },
+  {
+    "id": 5,
+    "name": "Dario Valenzuela",
+    "team": "Barcelona",
+    "position": "CB",
+    "minutes": 3120,
+    "photo": "",
+    "pct": {
+      "T": 61,
+      "I": 36,
+      "C": 48,
+      "P": 93,
+      "LB": 46,
+      "REC": 76
+    }
+  },
+  {
+    "id": 6,
+    "name": "Kofi Adjei-Mensah",
+    "team": "PSG",
+    "position": "CB",
+    "minutes": 2260,
+    "photo": "",
+    "pct": {
+      "T": 91,
+      "I": 63,
+      "C": 73,
+      "P": 64,
+      "LB": 49,
+      "REC": 77
+    }
+  },
+  {
+    "id": 7,
+    "name": "Henrik Solvang",
+    "team": "Leverkusen",
+    "position": "CB",
+    "minutes": 1530,
+    "photo": "",
+    "pct": {
+      "T": 36,
+      "I": 38,
+      "C": 56,
+      "P": 79,
+      "LB": 84,
+      "REC": 76
+    }
+  },
+  {
+    "id": 8,
+    "name": "Rafael Ouedraogo",
+    "team": "PSG",
+    "position": "CB",
+    "minutes": 2690,
+    "photo": "",
+    "pct": {
+      "T": 48,
+      "I": 96,
+      "C": 34,
+      "P": 60,
+      "LB": 31,
+      "REC": 59
+    }
+  },
+  {
+    "id": 9,
+    "name": "Nikolai Petrescu",
+    "team": "Leverkusen",
+    "position": "DM",
+    "minutes": 2990,
+    "photo": "",
+    "pct": {
+      "T": 97,
+      "I": 54,
+      "C": 79,
+      "P": 47,
+      "LB": 54,
+      "REC": 38
+    }
+  },
+  {
+    "id": 10,
+    "name": "Mateus Almeida-Reis",
+    "team": "Barcelona",
+    "position": "DM",
+    "minutes": 3340,
+    "photo": "",
+    "pct": {
+      "T": 49,
+      "I": 85,
+      "C": 79,
+      "P": 63,
+      "LB": 98,
+      "REC": 82
+    }
+  },
+  {
+    "id": 11,
+    "name": "Yusuf Demirkan",
+    "team": "PSG",
+    "position": "DM",
+    "minutes": 2150,
+    "photo": "",
+    "pct": {
+      "T": 70,
+      "I": 36,
+      "C": 63,
+      "P": 86,
+      "LB": 70,
+      "REC": 92
+    }
+  },
+  {
+    "id": 12,
+    "name": "Lukas Kreuzer",
+    "team": "Leverkusen",
+    "position": "DM",
+    "minutes": 860,
+    "photo": "",
+    "pct": {
+      "T": 83,
+      "I": 92,
+      "C": 45,
+      "P": 61,
+      "LB": 70,
+      "REC": 37
+    }
+  },
+  {
+    "id": 13,
+    "name": "Andre Lemaitre",
+    "team": "PSG",
+    "position": "DM",
+    "minutes": 2740,
+    "photo": "",
+    "pct": {
+      "T": 77,
+      "I": 62,
+      "C": 37,
+      "P": 94,
+      "LB": 79,
+      "REC": 68
+    }
+  },
+  {
+    "id": 14,
+    "name": "Sami Haddad",
+    "team": "Barcelona",
+    "position": "DM",
+    "minutes": 1710,
+    "photo": "",
+    "pct": {
+      "T": 97,
+      "I": 51,
+      "C": 61,
+      "P": 69,
+      "LB": 45,
+      "REC": 65
+    }
+  },
+  {
+    "id": 15,
+    "name": "Bruno Castellanos",
+    "team": "Barcelona",
+    "position": "DM",
+    "minutes": 2480,
+    "photo": "",
+    "pct": {
+      "T": 32,
+      "I": 64,
+      "C": 35,
+      "P": 69,
+      "LB": 98,
+      "REC": 48
+    }
+  },
+  {
+    "id": 16,
+    "name": "Oscar Lindqvist",
+    "team": "Leverkusen",
+    "position": "DM",
+    "minutes": 1290,
+    "photo": "",
+    "pct": {
+      "T": 28,
+      "I": 62,
+      "C": 30,
+      "P": 38,
+      "LB": 57,
+      "REC": 74
+    }
+  }
+]
