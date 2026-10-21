@@ -315,7 +315,7 @@ python -W ignore -m src.viz.zone_heatmap
 python -m pytest -q
 ```
 
-`player_minutes` must run before `recovery_per90`: it writes both `player_minutes.parquet` and `player_name_crosswalk.parquet`, which `recovery_per90` reads. `recovery_per90` takes `--min-minutes` (default 900) and `--full-season-matches` (default 300). `zone_heatmap` needs `--kind {recovery,spatial}`; see `--help` for the other options. Outputs are written to `data/processed/` and `figures/` (not in git). The test suite currently has 29 passing tests.
+`player_minutes` must run before `recovery_per90`: it writes both `player_minutes.parquet` and `player_name_crosswalk.parquet`, which `recovery_per90` reads. `recovery_per90` takes `--min-minutes` (default 900) and `--full-season-matches` (default 300). `zone_heatmap` needs `--kind {recovery,spatial}`; see `--help` for the other options. Outputs are written to `data/processed/` and `figures/` (not in git). The test suite currently has 35 passing tests, including `tests/test_player_id_keys.py` (display names and the crosswalk).
 
 ---
 
@@ -337,5 +337,6 @@ Other open items:
 - Why Marseille's combined count is 42 matches (limitation 17).
 - Why one event changed from out-of-scope to in-scope after the name fix (limitation 22).
 - Which player-seasons merged in the player_id change (limitation 23); only the totals (5,578 -> 5,576, CM 500 -> 499) are recorded.
-- Whether a Ball Recovery often follows the same player's Tackle or Interception (double-counting). Not checked.
+- Why N'Gosso Massouma (4469) and D'Ambrosio (6984) were not in the original seven apostrophe players (limitation 20).
+- Double-counting check (proxy), done with a one-line command, not yet a tested script: of 70,739 counted Tackles and Interceptions, 0.5% (3 s), 0.8% (5 s) and 1.3% (10 s) are followed by a Ball Recovery from the same player in the same match and period. This is not proof of the same underlying action; the reverse order (Recovery then Tackle) and other players were not checked. Possession is not available in the events file.
 - Whether `fetch_360.py` writes `statsbomb_360_frames.parquet` (inferred from the file name, not opened).

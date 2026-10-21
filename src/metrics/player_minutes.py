@@ -82,11 +82,24 @@ def assign_position_group(wide):
     wide["in_scope"] = wide["position_group"].isin(IN_SCOPE)
     return wide
 
+def display_names(lineups):
+    """One display name per player_id: the most frequent cleaned spelling.
+    Ties go to the alphabetically first spelling (mode() returns ties sorted)."""
+    return lineups.groupby("player_id")["player_name_raw"].agg(lambda s: s.mode().iloc[0])
+
+
+def build_crosswalk(played):
+    """Every spelling of every player, by team + competition + season, with its player_id.
+    Returns (crosswalk, number of rows where one spelling maps to more than one player_id)."""
+    xw = played[["player_id", "player_name_raw", "team", "competition_name", "season_name"]].drop_duplicates()
+    clash = xw.duplicated(["player_name_raw", "team", "competition_name", "season_name"], keep=False)
+    return xw, int(clash.sum())
+
 def main():
     lineups = pd.read_parquet(LINEUPS)
     lineups["team"] = clean_team(lineups["team"])  # same club under two names -> one name
     lineups["player_name_raw"] = clean_player(lineups["player_name"])  # spelling as used in events
-    canon = lineups.groupby("player_id")["player_name_raw"].agg(lambda s: s.mode().iloc[0])
+    canon = display_names(lineups)
     lineups["player_name"] = lineups["player_id"].map(canon)  # one display name per player_id
     print(f"Lineup rows with no player_id: {lineups['player_id'].isna().sum()}")
     print(f"Lineup rows: {len(lineups):,}   matches: {lineups['match_id'].nunique()}")
@@ -145,9 +158,9 @@ def main():
     )
     wide = wide.merge(matches, on=["player_id", "team", "competition_name", "season_name"], how="left")
 
-    xw = played[["player_id", "player_name_raw", "team", "competition_name", "season_name"]].drop_duplicates()
+    xw, n_clash = build_crosswalk(played)
     clash = xw.duplicated(["player_name_raw", "team", "competition_name", "season_name"], keep=False)
-    print(f"\nCrosswalk rows: {len(xw):,}   rows where one name maps to more than one player_id: {clash.sum()}")
+    print(f"\nCrosswalk rows: {len(xw):,}   rows where one name maps to more than one player_id: {n_clash}")
     if clash.any():
         print(xw[clash].sort_values(["team", "season_name", "player_name_raw"]).head(10).to_string(index=False))
     xw.to_parquet("data/processed/player_name_crosswalk.parquet", index=False)
