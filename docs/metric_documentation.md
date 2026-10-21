@@ -331,7 +331,6 @@ Spatial items, still unchecked against the code:
 
 Other open items:
 
-- Ligue 1 2022/23 lists 21 team names, so one more duplicate is likely. It is a single-club season, so percentiles are unaffected, but team names would show twice.
 - Why Ligue 1 2015/16 (377) and Serie A 2015/16 (379) have fewer than 380 matches.
 - Which club each partial season covers (confirmed only for Leverkusen 2023/24 and Barcelona 2016/17 and 2019/20).
 - Why Marseille's combined count is 42 matches (limitation 17).
