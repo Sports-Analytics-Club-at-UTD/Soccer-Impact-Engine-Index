@@ -1,308 +1,174 @@
 
-import pandas as pd
+"""V1 press resistance: 2015/16, four complete leagues, DM+CM combined.
+
+Run from anywhere: python src/metrics/press_resistance.py
+Requires: pandas, pyarrow (or another parquet engine).
+"""
 from pathlib import Path
+import pandas as pd
 
-# ============================================================
-# STEP 1: Locate datasets
-# ============================================================
+ROOT = Path(__file__).resolve().parents[2] if Path(__file__).resolve().parent.name == 'metrics' else Path.cwd()
+RAW = ROOT / 'data' / 'raw' / 'statsbomb_team_events.parquet'
+MINUTES = ROOT / 'data' / 'processed' / 'player_minutes.parquet'
+RECOVERY = ROOT / 'data' / 'processed' / 'recovery_per90.parquet'
+OUT = ROOT / 'data' / 'processed'
+SEASON = '2015/2016'
+LEAGUES = {'La Liga', 'Premier League', 'Serie A', 'Ligue 1'}
+KEY = ['player_id', 'team', 'competition_name', 'season_name']
+MIN_MINUTES = 900
+MIN_ACTIONS = 30
 
-BASE_DIR = Path(__file__).resolve().parents[2]
 
-DATA_PATH = (
-    BASE_DIR / "data" / "raw"
-    / "statsbomb_team_events.parquet"
+def require(df, cols, label):
+    missing = sorted(set(cols) - set(df.columns))
+    if missing:
+        raise ValueError(f'{label} missing columns: {missing}. Available: {list(df.columns)}')
+
+
+def main():
+    for path in (RAW, MINUTES, RECOVERY):
+        if not path.exists():
+            raise FileNotFoundError(f'Missing {path}. Check the file location before running.')
+
+    events = pd.read_parquet(RAW)
+    minutes = pd.read_parquet(MINUTES)
+    recovery = pd.read_parquet(RECOVERY)
+    require(events, ['match_id', 'type', 'player', 'team', 'competition_name',
+                     'season_name', 'under_pressure', 'pass_outcome', 'dribble_outcome'], 'events')
+    require(minutes, KEY + ['minutes', 'position_group'], 'player_minutes')
+    require(recovery, KEY + ['full_coverage'], 'recovery_per90')
+
+    # The recovery file may have three event-type rows per player; reduce its coverage
+    # information to exactly one flag per player-season key.
+    recovery = recovery.loc[
+        recovery['season_name'].eq(SEASON) & recovery['competition_name'].isin(LEAGUES),
+        KEY + ['full_coverage']
+    ].copy()
+    recovery['full_coverage'] = recovery['full_coverage'].fillna(False).astype(bool)
+    inconsistent = recovery.groupby(KEY, dropna=False)['full_coverage'].nunique()
+    if (inconsistent > 1).any():
+        raise ValueError('Conflicting full_coverage values for the same player-season.')
+    coverage = recovery.drop_duplicates(KEY)
+
+    minutes = minutes.loc[
+        minutes['season_name'].eq(SEASON)
+        & minutes['competition_name'].isin(LEAGUES)
+        & minutes['position_group'].isin(['DM', 'CM'])
+    ].copy()
+    if minutes.duplicated(KEY).any():
+        raise ValueError('player_minutes has duplicate player-season keys; resolve before joining.')
+
+    # Keep only the complete-league reference population. Bundesliga is excluded.
+    players = minutes.merge(coverage, on=KEY, how='left', validate='one_to_one')
+    players = players.loc[players['full_coverage'].eq(True)].copy()
+    if players.empty:
+        raise ValueError('No full-coverage DM/CM players found. Inspect league labels and coverage flags.')
+
+    # Resolve event names to IDs using the name column in player_minutes.
+    # Name is ONLY a temporary crosswalk; final merge is strictly by KEY.
+    possible_name_cols = ['player_name', 'player', 'name']
+    name_col = next((c for c in possible_name_cols if c in players.columns), None)
+    if name_col is None:
+        raise ValueError(
+            'player_minutes lacks a player-name field for mapping events to player_id. '
+            'Provide a player_id column in events or a verified player-name crosswalk.'
+        )
+    if players[name_col].isna().any():
+        raise ValueError('Missing player names in player_minutes; cannot safely map events.')
+
+    crosswalk = players[KEY + [name_col]].rename(columns={name_col: 'player'}).copy()
+    crosswalk['player'] = (
+        crosswalk['player']
+        .astype('string')
+        .str.replace("''", "'", regex=False)
+)
+    name_key = ['player', 'team', 'competition_name', 'season_name']
+    ambiguous = crosswalk.groupby(name_key, dropna=False)['player_id'].nunique()
+    if (ambiguous > 1).any():
+        raise ValueError('Ambiguous name-to-ID mappings found. Resolve them before proceeding.')
+    crosswalk = crosswalk.drop_duplicates(name_key)
+
+    events = events.loc[
+        events['season_name'].eq(SEASON)
+        & events['competition_name'].isin(LEAGUES)
+        & events['under_pressure'].fillna(False).eq(True)
+        & events['type'].isin(['Pass', 'Dribble'])
+        & events['player'].notna()
+    ].copy()
+    events['player'] = (
+        events['player']
+        .astype('string')
+        .str.replace("''", "'", regex=False)
 )
 
-MINUTES_PATH = (
-    BASE_DIR / "data" / "processed"
-    / "player_minutes_2015_16.csv"
-)
+    # This mapping is necessary because the supplied events schema has names but no IDs.
+    mapped = events.merge(crosswalk, on=name_key, how='left', validate='many_to_one', indicator=True)
+    unmatched = mapped['_merge'].ne('both').sum()
+    print(f'Pressured pass/dribble events without an eligible DM/CM ID mapping: {unmatched:,}')
+    mapped = mapped.loc[mapped['_merge'].eq('both')].copy()
+    if mapped.empty:
+        raise ValueError('No events mapped to eligible players; check naming and schema.')
 
-OUTPUT_DIR = BASE_DIR / "data" / "processed"
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    is_pass = mapped['type'].eq('Pass')
+    mapped['successful'] = (
+        (is_pass & mapped['pass_outcome'].isna())
+        | (~is_pass & mapped['dribble_outcome'].eq('Complete'))
+    )
+    mapped['pressured_pass_attempts'] = is_pass.astype(int)
+    mapped['pressured_pass_completed'] = (is_pass & mapped['successful']).astype(int)
+    mapped['pressured_dribble_attempts'] = (~is_pass).astype(int)
+    mapped['pressured_dribble_completed'] = (~is_pass & mapped['successful']).astype(int)
 
-OUTPUT_PATH = OUTPUT_DIR / "press_resistance_2015_16.csv"
-
-
-# ============================================================
-# STEP 2: Load datasets
-# ============================================================
-
-df = pd.read_parquet(
-    DATA_PATH,
-    columns=[
-        "player",
-        "team",
-        "position",
-        "season_name",
-        "type",
-        "under_pressure",
-        "pass_outcome",
-        "dribble_outcome"
+    stats = mapped.groupby(KEY, as_index=False).agg(
+        pressured_pass_attempts=('pressured_pass_attempts', 'sum'),
+        pressured_pass_completed=('pressured_pass_completed', 'sum'),
+        pressured_dribble_attempts=('pressured_dribble_attempts', 'sum'),
+        pressured_dribble_completed=('pressured_dribble_completed', 'sum'),
+    )
+    result = players.merge(stats, on=KEY, how='left', validate='one_to_one')
+    count_cols = [
+        'pressured_pass_attempts', 'pressured_pass_completed',
+        'pressured_dribble_attempts', 'pressured_dribble_completed'
     ]
-)
-
-minutes = pd.read_csv(MINUTES_PATH)
-
-print("\nDatasets loaded successfully.")
-
-
-# ============================================================
-# STEP 3: Filter to 2015/16 season
-# ============================================================
-
-season = df[
-    df["season_name"] == "2015/2016"
-].copy()
-
-
-# ============================================================
-# STEP 4: Define midfielder positions
-# ============================================================
-
-midfield_positions = [
-    "Center Defensive Midfield",
-    "Left Defensive Midfield",
-    "Right Defensive Midfield",
-    "Center Midfield",
-    "Left Center Midfield",
-    "Right Center Midfield",
-    "Center Attacking Midfield",
-    "Left Attacking Midfield",
-    "Right Attacking Midfield",
-    "Left Midfield",
-    "Right Midfield"
-]
-
-# Determine each player-team's primary recorded position
-primary_positions = (
-    season.dropna(subset=["player", "position"])
-    .groupby(["player", "team"])["position"]
-    .agg(lambda x: x.value_counts().idxmax())
-    .reset_index()
-)
-
-# Keep midfielders only
-midfielders = primary_positions[
-    primary_positions["position"].isin(midfield_positions)
-].copy()
-
-
-# ============================================================
-# STEP 5: Select pressured passes and dribbles
-# ============================================================
-
-actions = season[
-    (season["under_pressure"] == True)
-    & (season["type"].isin(["Pass", "Dribble"]))
-].copy()
-
-
-# ============================================================
-# STEP 6: Identify successful actions
-# ============================================================
-
-# Completed passes have a missing pass_outcome.
-# Successful dribbles have dribble_outcome == "Complete".
-
-actions["successful"] = (
-    (
-        (actions["type"] == "Pass")
-        & (actions["pass_outcome"].isna())
+    result[count_cols] = result[count_cols].fillna(0).astype(int)
+    result['pressured_actions'] = result['pressured_pass_attempts'] + result['pressured_dribble_attempts']
+    result['successful_pressured_actions'] = (
+        result['pressured_pass_completed'] + result['pressured_dribble_completed']
     )
-    |
-    (
-        (actions["type"] == "Dribble")
-        & (actions["dribble_outcome"] == "Complete")
+    result['press_resistance_rate'] = (
+        100 * result['successful_pressured_actions']
+        / result['pressured_actions'].where(result['pressured_actions'].gt(0))
     )
-)
-
-
-# ============================================================
-# STEP 7: Aggregate player statistics
-# ============================================================
-
-scores = (
-    actions.groupby(
-        ["player", "team"],
-        as_index=False
+    result['tier_eligible'] = (
+        result['minutes'].ge(MIN_MINUTES) & result['pressured_actions'].ge(MIN_ACTIONS)
     )
-    .agg(
-        pressured_actions=("successful", "size"),
-        successful_actions=("successful", "sum")
+    result['pooled_midfielder_percentile'] = float('nan')
+    eligible = result['tier_eligible']
+    result.loc[eligible, 'pooled_midfielder_percentile'] = (
+        result.loc[eligible, 'press_resistance_rate'].rank(method='average', pct=True) * 100
     )
-)
+    p = result['pooled_midfielder_percentile']
+    result['tier'] = 'Unranked'
+    result.loc[eligible & p.ge(70), 'tier'] = 'Silver'
+    result.loc[eligible & p.ge(90), 'tier'] = 'Gold'
+
+    OUT.mkdir(parents=True, exist_ok=True)
+    csv_path = OUT / 'press_resistance_v1.csv'
+    parquet_path = OUT / 'press_resistance_v1.parquet'
+    result.sort_values(['tier_eligible', 'pooled_midfielder_percentile'], ascending=False).to_csv(csv_path, index=False)
+    result.to_parquet(parquet_path, index=False)
+
+    print('\nLeagues:', sorted(result['competition_name'].unique().tolist()))
+    print('DM/CM player-season rows:', len(result))
+    print('Tier eligible:', int(eligible.sum()))
+    print('Tier counts:\n' + result['tier'].value_counts().to_string())
+    display = [c for c in ['player_name', 'player', 'name', 'team', 'competition_name',
+                            'minutes', 'pressured_actions', 'press_resistance_rate',
+                            'pooled_midfielder_percentile', 'tier'] if c in result.columns]
+    print('\nTop 15 eligible players:\n' + result.loc[eligible].nlargest(
+        15, 'pooled_midfielder_percentile')[display].to_string(index=False))
+    print(f'\nSaved:\n{csv_path}\n{parquet_path}')
 
 
-# ============================================================
-# STEP 8: Attach midfielder positions
-# ============================================================
-
-scores = scores.merge(
-    midfielders,
-    on=["player", "team"],
-    how="inner",
-    validate="one_to_one"
-)
-
-
-# ============================================================
-# STEP 9: Attach seasonal minutes played
-# ============================================================
-
-scores = scores.merge(
-    minutes[["player", "team", "minutes_played"]],
-    on=["player", "team"],
-    how="left",
-    validate="one_to_one"
-)
-
-# Check for missing minutes
-missing_minutes = scores["minutes_played"].isna().sum()
-
-if missing_minutes > 0:
-    raise ValueError(
-        f"{missing_minutes} players have missing minutes. "
-        "Check player/team names in both datasets."
-    )
-
-
-# ============================================================
-# STEP 10: Apply eligibility requirements
-# ============================================================
-
-# Must play at least 1,000 minutes
-# Must attempt at least 30 pressured actions
-
-scores = scores[
-    (scores["minutes_played"] >= 1000)
-    & (scores["pressured_actions"] >= 30)
-].copy()
-
-if scores.empty:
-    raise ValueError(
-        "No midfielders meet the eligibility requirements."
-    )
-
-
-# ============================================================
-# STEP 11: Calculate press resistance score
-# ============================================================
-
-scores["press_resistance_score"] = (
-    100
-    * scores["successful_actions"]
-    / scores["pressured_actions"]
-)
-
-
-# ============================================================
-# STEP 12: Calculate midfielder percentile
-# ============================================================
-
-# Compare only eligible midfielders.
-# Keep full precision until output.
-
-scores["midfielder_percentile"] = (
-    scores["press_resistance_score"]
-    .rank(pct=True, method="average")
-    .mul(100)
-)
-
-
-# ============================================================
-# STEP 13: Assign Gold / Silver tiers
-# ============================================================
-
-def assign_tier(percentile):
-    if percentile >= 90:
-        return "Gold"
-    elif percentile >= 70:
-        return "Silver"
-    else:
-        return "Unranked"
-
-
-scores["tier"] = (
-    scores["midfielder_percentile"]
-    .apply(assign_tier)
-)
-
-
-# ============================================================
-# STEP 14: Sort rankings
-# ============================================================
-
-scores = scores.sort_values(
-    [
-        "midfielder_percentile",
-        "pressured_actions"
-    ],
-    ascending=[False, False]
-)
-
-
-# ============================================================
-# STEP 15: Select output columns
-# ============================================================
-
-columns = [
-    "player",
-    "team",
-    "position",
-    "minutes_played",
-    "pressured_actions",
-    "successful_actions",
-    "press_resistance_score",
-    "midfielder_percentile",
-    "tier"
-]
-
-output = scores[columns].copy()
-
-# Round only for presentation and export
-output[
-    ["press_resistance_score", "midfielder_percentile"]
-] = output[
-    ["press_resistance_score", "midfielder_percentile"]
-].round(2)
-
-
-# ============================================================
-# STEP 16: Preview top 15 midfielders
-# ============================================================
-
-print(
-    "\nTOP 15 MIDFIELDERS - "
-    "PRESS RESISTANCE (2015/16)\n"
-)
-
-print(
-    output.head(15).to_string(index=False)
-)
-
-
-# ============================================================
-# STEP 17: Summary
-# ============================================================
-
-print(
-    f"\nTotal qualifying midfielders: {len(output)}"
-)
-
-print("\nTier Distribution:")
-print(output["tier"].value_counts())
-
-
-# ============================================================
-# STEP 18: Export CSV
-# ============================================================
-
-output.to_csv(
-    OUTPUT_PATH,
-    index=False
-)
-
-print(f"\nResults saved to: {OUTPUT_PATH}")
-
-print("\nPRESS RESISTANCE ANALYSIS COMPLETE")
+if __name__ == '__main__':
+    main()
