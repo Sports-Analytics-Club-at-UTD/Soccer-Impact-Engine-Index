@@ -113,3 +113,7 @@ Contributions are welcome. Please open an issue to discuss proposed changes befo
 ## 📄 License
 
 *Add your chosen license here (e.g., MIT).*
+
+## Delivery validation (M1)
+
+See [the read-only validator guide](docs/m1-validation.md) for explicit-path dataset checks, comparison, and synthetic tests.
