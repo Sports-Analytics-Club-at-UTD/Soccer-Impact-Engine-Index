@@ -369,7 +369,9 @@ python -W ignore -m src.viz.zone_heatmap
 python -m pytest -q
 ```
 
-`player_minutes` must run before `recovery_per90`: it writes both `player_minutes.parquet` and `player_name_crosswalk.parquet`, which `recovery_per90` reads. `recovery_scores` reads `recovery_per90.parquet`. `recovery_per90` takes `--min-minutes` (default 900) and `--full-season-matches` (default 300). `zone_heatmap` needs `--kind {recovery,spatial}`; see `--help` for the other options. Outputs are written to `data/processed/` and `figures/` (not in git). The test suite currently has 35 passing tests, including `tests/test_player_id_keys.py` (display names and the crosswalk). `recovery_scores.py` has no unit tests yet.
+`player_minutes` must run before `recovery_per90`: it writes both `player_minutes.parquet` and `player_name_crosswalk.parquet`, which `recovery_per90` reads. `recovery_scores` reads `recovery_per90.parquet`. `recovery_per90` takes `--min-minutes` (default 900) and `--full-season-matches` (default 300). `zone_heatmap` needs `--kind {recovery,spatial}`; see `--help` for the other options. Outputs are written to `data/processed/` and `figures/` (not in git).
+
+The test suite currently has 44 passing tests (run 26 Oct 2026), including `tests/test_player_id_keys.py` (display names and the crosswalk) and `tests/test_recovery_scores.py` (9 tests for `recovery_scores.py`). The `recovery_scores` tests use small made-up tables, not real football data, and check: DM and CM share one pool while CB stays separate; a goalkeeper Tackle gets N/A while a goalkeeper Ball Recovery is scored; a player below the minimum minutes gets N/A; ineligible rows do not change the pool; the Gold (90) and Silver (75) boundaries; the three event types are scored separately; and the rating (a constant pool gives 65, the 99 clip, mean 65 and spread 10 when not clipped). Not covered by a test: ties sitting on a tier boundary (limitation 27).
 
 ---
 

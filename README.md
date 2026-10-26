@@ -116,26 +116,32 @@ Contributions are welcome. Please open an issue to discuss proposed changes befo
 
 ## Spatial + Defensive Recovery metrics
 
-Two metrics, documented in full in [docs/metric_documentation.md](docs/metric_documentation.md):
+Two metrics, documented in full in [docs/metric_documentation.md](docs/metric_documentation.md). Team V1 scope is 2015/16 only. Everything below is provisional until the team agrees the open decisions listed in that document.
 
-- **Defensive Recovery Coverage** (per player): counts of won Tackles, Interceptions and Ball Recoveries, kept separate, tagged by pitch zone. Per-90 rates use minutes played from StatsBomb lineups (every match capped at 90 minutes). Players are grouped GK / CB / DM / CM by most minutes played. A provisional percentile (within league-season and position group) exists only for the four full 2015/16 league-seasons; single-club seasons get per-90 rates but no percentile. Goalkeepers: Ball Recovery only. No possession adjustment in V1.
-- **Observed Spatial Dominance** (team level only): share of each pitch zone closer to the defending team's visible players than to the attackers, from StatsBomb 360 frames. Not true pitch control. Free 360 data exists for four league-seasons covering one club each (127 matches); everything else is N/A.
+- **Defensive Recovery Coverage** (per player): counts of successful Tackles, Interceptions and Ball Recoveries, kept as three separate event types and never blended, tagged by pitch zone (3x3 placeholder grid).
+  - Per-90 rates use minutes played from StatsBomb lineups (every match capped at 90 minutes). Players are keyed on `player_id` and grouped GK / CB / DM / CM by most minutes played. Fullbacks, wide midfielders, attacking midfielders and forwards are out of scope.
+  - Scores (`recovery_scores`): for each event type, a percentile, a display rating and a Gold / Silver tier. DM and CM are ranked together as Midfielders; CB and GK are separate. The pool is the four full 2015/16 leagues together (La Liga, Ligue 1, Premier League, Serie A). Eligible players have at least 900 minutes (provisional). Single-club seasons (for example Bundesliga) get per-90 rates but no score.
+  - Goalkeepers: Ball Recovery only. No possession adjustment in V1.
+  - `pctl` in `recovery_per90` is an older within-league helper and is separate from `recovery_scores`.
+- **Observed Spatial Dominance** (team level only): share of each pitch zone closer to the defending team's visible players than to the attackers, from StatsBomb 360 frames. Not true pitch control. Free 360 data exists for four league-seasons covering one club each (127 matches). Only PSG, Barcelona and Bayer Leverkusen have enough matches to report; everything else is N/A (Premier League and Serie A have no free 360 data).
 
-Run from the repo root:
+Run from the repo root, in this order:
 
 ```
 python -W ignore -m src.metrics.build_metric_tables
 python -W ignore -m src.ingestion.fetch_lineups
 python -W ignore -m src.metrics.player_minutes
 python -W ignore -m src.metrics.recovery_per90
+python -W ignore -m src.metrics.recovery_scores
 python -W ignore -m src.viz.zone_heatmap
 python -m pytest -q
 ```
 
 `zone_heatmap` needs `--kind` (recovery or spatial); see `--help` for options.
 
-Processed tables shared on the Drive (V1, provisional):
-- `player_minutes.parquet`: one row per player-season, with minutes and position group.
-- `recovery_per90.parquet`: one row per player-season x event type, with count, per-90 rate and a provisional percentile.
+Processed tables (in `data/processed/`, not in git):
+- `player_minutes.parquet`: one row per player_id + team + competition + season, with minutes and position group. Shared on the Drive (V1, provisional).
+- `recovery_per90.parquet`: one row per player-season x event type, with count, minutes, per-90 rate and the within-league `pctl`. Shared on the Drive (V1, provisional).
+- `recovery_scores.parquet`: one row per player-season x event type, with percentile, rating, tier and a note explaining any N/A. Not yet shared on the Drive.
 
 Large data files are on the shared Drive, not in git.
