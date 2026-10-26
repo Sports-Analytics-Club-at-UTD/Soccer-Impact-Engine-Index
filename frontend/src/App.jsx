@@ -1,13 +1,23 @@
-import { useEffect, useState } from "react";
-import About from "./components/About.jsx";
-import Archetypes from "./components/Archetypes.jsx";
-import Description from "./components/Description.jsx";
-import Footer from "./components/Footer.jsx";
-import Hero from "./components/Hero.jsx";
-import Nav from "./components/Nav.jsx";
-import Search from "./components/Search.jsx";
-import Teams from "./components/Teams.jsx";
-import { useRevealAll } from "./lib/hooks.js";
+import { Component, lazy, Suspense, useEffect, useState } from "react";
+import { loadPlayerExperience, playerDataMode } from "./lib/playerDataMode.js";
+
+let Experience, configurationError;
+try {
+  const mode = playerDataMode(import.meta.env.VITE_PLAYER_DATA_MODE);
+  Experience = lazy(() => loadPlayerExperience(mode));
+} catch (error) {
+  configurationError = error;
+}
+
+class ExperienceBoundary extends Component {
+  state = { error: null };
+  static getDerivedStateFromError(error) { return { error }; }
+  render() {
+    return this.state.error
+      ? <main className="wrap mode-notice" role="alert">Unable to load the selected interface: {String(this.state.error.message)}. No demo fallback was used.</main>
+      : this.props.children;
+  }
+}
 
 export default function App() {
   const [theme, setTheme] = useState(() => document.documentElement.getAttribute("data-theme") || "dark");
@@ -17,21 +27,8 @@ export default function App() {
     try { localStorage.setItem("sac-theme", theme); } catch (e) { /* private mode: fine */ }
   }, [theme]);
 
-  useRevealAll();
-
-  return (
-    <>
-      <Nav theme={theme} onToggle={() => setTheme(theme === "dark" ? "light" : "dark")} />
-      <main>
-        <p className="wrap mono" role="note">Demo mode: fictional players with illustrative percentiles, OVR and archetypes. No production scorecard is connected.</p>
-        <Hero />
-        <Description />
-        <Archetypes />
-        <Search />
-        <Teams />
-        <About />
-      </main>
-      <Footer />
-    </>
-  );
+  if (configurationError) return <main className="wrap mode-notice" role="alert">{configurationError.message}</main>;
+  return <ExperienceBoundary><Suspense fallback={<main className="wrap mode-notice" role="status">Loading selected interface…</main>}>
+    <Experience theme={theme} onToggle={() => setTheme(theme === "dark" ? "light" : "dark")} />
+  </Suspense></ExperienceBoundary>;
 }

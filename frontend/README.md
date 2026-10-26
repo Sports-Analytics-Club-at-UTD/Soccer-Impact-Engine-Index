@@ -1,13 +1,14 @@
 # SAC Midfielder/Defender Index
 
-## Integration status: demo only
+## Integration status: explicit demo and raw modes
 
-The current UI uses fictional players and illustrative percentiles, OVR and
-archetypes. Do not replace its demo JSON with raw backend measurements or run
-the legacy converter for production. The isolated M5A contract and adapters
-are documented in [the frontend contract](../docs/m5a-frontend-contract.md).
-Real-metric React integration is a later milestone. Existing demo commands below
-do not certify production scoring or data coverage.
+The default demo UI uses fictional players and illustrative percentiles, OVR and
+archetypes. Raw mode loads the existing M5A contract into a separate search and
+measurement-card experience, without demo scoring or charts. Do not replace demo
+JSON with backend measurements or run the legacy converter for production.
+See [the frontend contract](../docs/m5a-frontend-contract.md) and
+[M5B integration](../docs/m5b-react-metric-integration.md). No production player
+JSON is supplied; structural validation does not certify source coverage.
 
 Single-page site for the UTD Sports Analytics Club scouting model.
 Vite + React. Deploys to Vercel with no configuration.
@@ -53,27 +54,32 @@ Put files in `/public` and reference them from `src/content.js` with a leading s
 
 Any slot left as `""` shows a labelled placeholder.
 
-## Swapping in the real data
+## Loading raw scorecards without replacing the demo
 
-Browsers can't read parquet, so convert it to JSON before deploying:
+With dependencies already available, choose the mode explicitly in PowerShell
+before starting Vite (restart after configuration changes):
 
-```bash
-pip install pandas pyarrow
-python scripts/parquet_to_json.py path/to/players.parquet
+```powershell
+$env:VITE_PLAYER_DATA_MODE = "raw"
+npm run dev
 ```
 
-1. Open `scripts/parquet_to_json.py` and edit `COLUMN_MAP` so the right-hand names match your parquet columns.
-2. Run it. It overwrites `src/data/players.json`. Commit that file.
-3. Delete `scripts/make_mock_players.mjs` (it only generates the fictional placeholder players).
-4. Remove the "Placeholder data" banner at the bottom of `src/components/Search.jsx`.
+Unset mode defaults to `demo`; `VITE_PLAYER_DATA_MODE=demo` explicitly selects
+the original demo. Other values, including a blank configured value, fail.
 
-The site expects **percentiles (0–100) vs positional peers**, not raw counts, for:
-`T` tackles, `I` interceptions, `C` clearances, `P` playing under pressure, `LB` line-breaking passes,
-and `REC` ball recoveries (used by Sweeper and Ball-Winning Midfielder; not shown on the card).
+Raw mode requests `data/scorecard.json` relative to Vite's `BASE_URL`, corresponding
+to `public/data/scorecard.json` in a future deployment. Only supply an explicitly
+verified, appropriately scoped `soccer-scorecard/v1` export through the M5A
+adapter. No file is created there by the application. Missing/invalid data shows
+an error or empty state, never fictional players. Keep synthetic fixtures under
+tests, and do not publish them at this asset path.
 
-Positions must be `CB` or `DM`; anything else is dropped.
+Do not run `parquet_to_json.py` against the project datasets: it expects approved
+percentiles, uses sequential IDs and overwrites the demo. Preserve
+`src/data/players.json`. Raw mode retains all canonical contexts, observed role
+groups and N/A values; it does not fill the legacy T/I/C/P/LB/REC radar axes.
 
-## How archetypes are assigned
+## How archetypes are assigned (demo only)
 
 Each player gets **one primary archetype**: whichever of their position's archetypes has the
 highest percentile. Tier by that percentile: **+** ≥ 90, **−** 75–90, **Standard** below 75.

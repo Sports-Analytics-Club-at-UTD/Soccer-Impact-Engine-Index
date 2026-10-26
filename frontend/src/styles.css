@@ -401,3 +401,29 @@ main, footer { overflow-x: clip; }
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; }
 }
+/* Raw scorecard additions reuse the existing surfaces, typography and grid. */
+.mode-notice { padding-top: 96px; padding-bottom: 20px; line-height: 1.6; }
+.raw-home { padding-top: 132px; }
+.raw-search-grid { margin-top: 28px; }
+.raw-control-label { display: block; margin: 18px 0 10px; font-size: 12px; }
+.raw-position { padding: 12px; color: var(--text); background: var(--surface); border: 1px solid var(--line); max-width: 100%; }
+.raw-browse { list-style: none; padding: 0; }
+.raw-browse-row { display: grid; gap: 8px; overflow-wrap: anywhere; }
+.raw-browse-row .nm { font-size: 1rem; }
+.raw-note { font-size: 13px; line-height: 1.65; color: var(--mute); overflow-wrap: anywhere; }
+.raw-card-column { min-width: 0; scroll-margin-top: 92px; }
+.raw-card-column:focus { outline: 2px solid var(--a1); outline-offset: 5px; }
+.raw-player-card .close { display: inline-flex; }
+.raw-player-card h3 { margin-top: 14px; }
+.raw-player-card p { margin-top: 10px; }
+.raw-metric-group { border-top: 1px solid var(--line); padding-top: 22px; margin-top: 24px; }
+.raw-metric-group h4 { font-size: 1.25rem; }
+.raw-component { margin-top: 18px; }
+.raw-component h5 { font-size: 1rem; }
+.raw-measurements { display: grid; gap: 12px; margin-top: 16px; }
+.raw-measurements .stat { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between; }
+.raw-measurements dt { flex: 1 1 180px; font-size: 13px; color: var(--mute); }
+.raw-measurements dd { margin: 0; overflow-wrap: anywhere; font-size: 13px; }
+.raw-retry { margin-top: 16px; padding: 10px 16px; border: 1px solid var(--line); }
+.raw-experience ul { padding-left: 20px; }
+.raw-experience .raw-browse { padding-left: 0; }

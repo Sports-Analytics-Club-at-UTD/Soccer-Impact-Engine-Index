@@ -154,7 +154,7 @@ export default function Search() {
             </div>
 
             <div className="placeholder-banner mono angular-sm">
-              Placeholder data: fictional players until the real parquet file is converted (see README).
+              Demo data: fictional players and illustrative ratings. Raw scorecards use a separate mode (see README).
             </div>
           </div>
 

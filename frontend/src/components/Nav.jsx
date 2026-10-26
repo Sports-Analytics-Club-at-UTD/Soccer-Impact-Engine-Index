@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NAV } from "../content.js";
 import { IconClose, IconMenu, IconMoon, IconSun, Mark } from "./ui.jsx";
 
-export default function Nav({ theme, onToggle }) {
+export default function Nav({ theme, onToggle, sections = NAV }) {
   const [open, setOpen] = useState(false);
   const [solid, setSolid] = useState(false);
   const [active, setActive] = useState("home");
@@ -20,12 +20,12 @@ export default function Nav({ theme, onToggle }) {
       (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id)),
       { rootMargin: "-45% 0px -50% 0px" }
     );
-    NAV.forEach((n) => {
+    sections.forEach((n) => {
       const el = document.getElementById(n.id);
       if (el) io.observe(el);
     });
     return () => io.disconnect();
-  }, []);
+  }, [sections]);
 
   const light = theme === "light";
 
@@ -38,7 +38,7 @@ export default function Nav({ theme, onToggle }) {
         </a>
 
         <nav className="nav-links mono" aria-label="Sections">
-          {NAV.map((n) => (
+          {sections.map((n) => (
             <a key={n.id} href={`#${n.id}`} className={active === n.id ? "active" : ""}>{n.label}</a>
           ))}
         </nav>
@@ -60,7 +60,7 @@ export default function Nav({ theme, onToggle }) {
 
       {open && (
         <div className="mobile-menu mono">
-          {NAV.map((n) => (
+          {sections.map((n) => (
             <a key={n.id} href={`#${n.id}`} onClick={() => setOpen(false)}>{n.label}</a>
           ))}
         </div>
