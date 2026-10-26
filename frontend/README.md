@@ -11,24 +11,31 @@ See [the frontend contract](../docs/m5a-frontend-contract.md) and
 JSON is supplied; structural validation does not certify source coverage.
 
 Single-page site for the UTD Sports Analytics Club scouting model.
-Vite + React. Deploys to Vercel with no configuration.
+Vite + React with static production output. Both modes compile; the Integration
+Lead reports limited manual Brave checks. Populated raw-data, comprehensive
+accessibility and hosting acceptance remain pending (see [M5C verification](../docs/m5c-frontend-build-verification.md)).
 
 ## Run it
 
 ```bash
-npm install
+npm ci --no-audit --no-fund # install the locked dependencies when needed
 npm run dev            # local site at http://localhost:5173
 npm run build          # production build into /dist (what Vercel runs)
 npm run preview:single # one self-contained file at preview/index.html
 ```
 
-## Deploy to Vercel
+## Static hosting configuration (not deployed)
 
-1. Push this folder to a GitHub repo.
-2. In Vercel, choose **Add New → Project** and import the repo.
-3. Vercel detects Vite automatically (build command `npm run build`, output `dist`). Click **Deploy**.
+Configure the hosting project root as `frontend`, its build command as
+`npm run build`, and its output directory as `dist`. Select the intended
+`VITE_PLAYER_DATA_MODE` explicitly; unset mode defaults to the fictional demo.
+For a subpath deployment, configure the Vite base path for that destination.
 
-Every push to `main` redeploys.
+No deployment or automatic redeploy setup is established by these checks.
+Complete the remaining M5C acceptance checklist before release. Raw mode additionally
+needs verified, appropriately scoped scorecard data; a passing build does not
+prove production data coverage or approved scoring. Do not assume that changes
+to any Git branch trigger deployment.
 
 ## Where to edit things
 

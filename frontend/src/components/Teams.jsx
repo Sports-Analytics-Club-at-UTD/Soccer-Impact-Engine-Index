@@ -3,6 +3,16 @@ import { TEAMS, TEAMS_SECTION } from "../content.js";
 import { useTilt } from "../lib/hooks.js";
 import { IconDown, Photo, SectionHead } from "./ui.jsx";
 
+function TeamImage({ image, teamName }) {
+  const [failed, setFailed] = useState(false);
+  if (!image.src || failed) return <Photo label={`${image.label} · image`} />;
+
+  const src = `${import.meta.env.BASE_URL}${image.src.replace(/^\//, "")}`;
+  return <div className="photo team-image">
+    <img src={src} alt={image.alt ?? `${teamName}: ${image.label}`} loading="lazy" onError={() => setFailed(true)} />
+  </div>;
+}
+
 function Badge({ t, open, onToggle }) {
   const tilt = useTilt({ max: 7, scale: 1.03 });
   return (
@@ -47,7 +57,7 @@ export default function Teams() {
                 <div className="slots">
                   {team.images.map((im) => (
                     <figure key={im.label} className="slot" style={{ margin: 0 }}>
-                      <Photo src={im.src} label={`${im.label} · image`} />
+                      <TeamImage key={`${team.id}:${im.label}:${im.src}`} image={im} teamName={team.name} />
                       <figcaption className="mono t10 up">
                         <b>{im.label}</b>{im.caption}
                       </figcaption>

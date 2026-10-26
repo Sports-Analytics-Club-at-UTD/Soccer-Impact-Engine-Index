@@ -69,7 +69,7 @@ export const TEAMS = [
     name: "Paris Saint-Germain",
     note: "Placeholder: one or two lines on what stands out about this team's spatial profile.",
     images: [
-      { label: "Spatial dominance", src: "", caption: "Zone control map" },
+      { label: "Spatial dominance", src: "/team/spatial_Paris_Saint-Germain.png", alt: "Paris Saint-Germain spatial dominance heatmap: defender-nearest share of observed space while opponents have possession.", caption: "Zone control map" },
       { label: "Pressing zones", src: "", caption: "Where possession is won back" },
       { label: "Off-ball dominance", src: "", caption: "Team-level only" },
     ],
@@ -80,7 +80,7 @@ export const TEAMS = [
     name: "FC Barcelona",
     note: "Placeholder: one or two lines on what stands out about this team's spatial profile.",
     images: [
-      { label: "Spatial dominance", src: "", caption: "Zone control map" },
+      { label: "Spatial dominance", src: "/team/spatial_Barcelona.png", alt: "Barcelona spatial dominance heatmap: defender-nearest share of observed space while opponents have possession.", caption: "Zone control map" },
       { label: "Pressing zones", src: "", caption: "Where possession is won back" },
       { label: "Off-ball dominance", src: "", caption: "Team-level only" },
     ],
@@ -91,7 +91,7 @@ export const TEAMS = [
     name: "Bayer 04 Leverkusen",
     note: "Placeholder: one or two lines on what stands out about this team's spatial profile.",
     images: [
-      { label: "Spatial dominance", src: "", caption: "Zone control map" },
+      { label: "Spatial dominance", src: "/team/spatial_Bayer_Leverkusen.png", alt: "Bayer Leverkusen spatial dominance heatmap: defender-nearest share of observed space while opponents have possession.", caption: "Zone control map" },
       { label: "Pressing zones", src: "", caption: "Where possession is won back" },
       { label: "Off-ball dominance", src: "", caption: "Team-level only" },
     ],
@@ -107,7 +107,7 @@ export const ABOUT = {
     { name: "Vibhor Rajan", role: "Project Manager", does: "Scope, timeline and keeping the five of us shipping.", photo: "" },
     { name: "Pratyush Malaviya", role: "Lead Developer", does: "Architecture, pipeline and the build you're looking at.", photo: "" },
     { name: "Arpit Gupta", role: "Engineer", does: "Placeholder: what Arpit worked on.", photo: "" },
-    { name: "Ayush", role: "Engineer", does: "Placeholder: what Ayush worked on.", photo: "" }, // add last name
+    { name: "Ayush Mendhe", role: "Engineer", does: "Placeholder: what Ayush worked on.", photo: "" },
     { name: "Joseph Olutayo", role: "Engineer", does: "Placeholder: what Joseph worked on.", photo: "" },
   ],
 };
