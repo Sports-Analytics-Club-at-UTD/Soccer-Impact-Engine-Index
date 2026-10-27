@@ -1,37 +1,41 @@
-import { METRICS } from "../lib/archetypes.js";
+import { METRICS, percentileValue } from "../lib/archetypes.js";
+import { scoreLabel } from "../lib/ratingCard.js";
 
-/* Hand-drawn SVG spider chart for T · I · C · P · LB (percentiles, 0–100). */
+/* A missing axis has a label but no point. Incomplete profiles have no polygon. */
 const CX = 160, CY = 150, R = 100;
 const pt = (i, frac, n) => {
   const a = -Math.PI / 2 + (i * 2 * Math.PI) / n;
   return [CX + Math.cos(a) * R * frac, CY + Math.sin(a) * R * frac];
 };
 
-export default function Radar({ pct }) {
-  const n = METRICS.length;
-  const poly = (fr) => METRICS.map((_, i) => pt(i, fr, n).join(",")).join(" ");
-  const shape = METRICS.map((m, i) => pt(i, Math.max(0.04, (pct[m.key] || 0) / 100), n).join(",")).join(" ");
-  const summary = METRICS.map((m) => `${m.label} ${Math.round(pct[m.key] || 0)}`).join(", ");
+export default function Radar({ attributes = METRICS.map((m) => ({ ...m, value: null })), label = "FIFA-style rating profile" }) {
+  const n = attributes.length;
+  const poly = (fr) => attributes.map((_, i) => pt(i, fr, n).join(",")).join(" ");
+  const values = attributes.map((m) => percentileValue(m.value));
+  const complete = values.every((v) => v !== null);
+  const shape = complete ? values.map((v, i) => pt(i, v / 100, n).join(",")).join(" ") : null;
+  const summary = attributes.map((m, i) => `${m.label} ${scoreLabel(values[i])}`).join(", ");
 
   return (
     <div className="radar">
-      <svg viewBox="0 0 320 300" role="img" aria-label={`Percentile profile: ${summary}`}>
+      <svg viewBox="0 0 320 300" role="img" aria-label={`${label}: ${summary}`}>
         {[0.25, 0.5, 0.75, 1].map((f) => <polygon key={f} className="ring" points={poly(f)} />)}
-        {METRICS.map((_, i) => {
+        {attributes.map((m, i) => {
           const [x, y] = pt(i, 1, n);
-          return <line key={i} className="axis" x1={CX} y1={CY} x2={x} y2={y} />;
+          return <line key={m.key} className="axis" x1={CX} y1={CY} x2={x} y2={y} />;
         })}
-        <polygon key={shape} className="shape" points={shape} />
-        {METRICS.map((m, i) => {
-          const [x, y] = pt(i, Math.max(0.04, (pct[m.key] || 0) / 100), n);
+        {complete && <polygon key={shape} className="shape" points={shape} />}
+        {attributes.map((m, i) => {
+          if (values[i] === null) return null;
+          const [x, y] = pt(i, values[i] / 100, n);
           return <circle key={m.key} className="dot" cx={x} cy={y} r="3.4" />;
         })}
-        {METRICS.map((m, i) => {
+        {attributes.map((m, i) => {
           const [x, y] = pt(i, 1.3, n);
           return (
             <g key={m.key}>
               <text className="lab" x={x} y={y + 4}>{m.key}</text>
-              <text className="labv" x={x} y={y + 18}>{Math.round(pct[m.key] || 0)}</text>
+              <text className="labv" x={x} y={y + 18}>{scoreLabel(values[i])}</text>
             </g>
           );
         })}

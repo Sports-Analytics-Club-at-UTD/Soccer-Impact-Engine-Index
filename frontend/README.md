@@ -43,7 +43,7 @@ to any Git branch trigger deployment.
 |---|---|
 | All page text, nav labels, team panels, About Us members | `src/content.js` |
 | Archetype names, descriptions, tier cut-offs (90 / 75) | `src/lib/archetypes.js` |
-| **OVR formula** (placeholder: mean of the 5 percentiles) | `overall()` in `src/lib/archetypes.js` |
+| Fictional demo OVR only (mean of historical five percentiles) | `demoOverall()` in `src/lib/archetypes.js` |
 | Minutes warning threshold (1000) | `MIN_MINUTES` in `src/lib/data.js` |
 | Hero title lines | `LINES` at the top of `src/components/Hero.jsx` |
 | Colors for dark and light mode | the top of `src/styles.css` |
@@ -92,3 +92,9 @@ Each player gets **one primary archetype**: whichever of their position's archet
 highest percentile. Tier by that percentile: **+** ≥ 90, **−** 75–90, **Standard** below 75.
 Ties go to whichever archetype is listed first in `ARCHETYPES`.
 Off-ball dominance is team-level only and appears in the Teams section.
+
+## Future five-attribute rating cards (D3F)
+
+See [the D3F contract and policy blockers](../docs/d3f-frontend-rating-alignment.md).
+`PlayerCard` defaults to explicit ratings; Search explicitly selects its historical
+fictional percentile demo. No new real-rating mode or production import is enabled.

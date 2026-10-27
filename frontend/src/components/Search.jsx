@@ -27,7 +27,7 @@ function TopCard({ p, rank, onPick, on }) {
       <div className="meta">{p.team} · {p.archetype.name}{p.archetype.tier ? ` ${p.archetype.tier}` : ""}</div>
       <div className="ovr">
         <div className="ovr-num display">{p.ovr}</div>
-        <div className="mono t9 up dim">OVR</div>
+        <div className="mono t9 up dim">Demo OVR</div>
       </div>
     </button>
   );
@@ -154,14 +154,14 @@ export default function Search() {
             </div>
 
             <div className="placeholder-banner mono angular-sm">
-              Demo data: fictional players and illustrative ratings. Raw scorecards use a separate mode (see README).
+              Demo data: fictional players, percentile profiles and illustrative demo OVR. Raw scorecards use a separate mode (see README).
             </div>
           </div>
 
           {isMobile && cardOpen && <div className="backdrop" onClick={() => setSelected(null)} />}
           <aside className={`card-col ${cardOpen ? "open" : ""}`} aria-live="polite">
             {selected ? (
-              <PlayerCard player={selected} onClose={() => setSelected(null)} />
+              <PlayerCard demo player={selected} onClose={() => setSelected(null)} />
             ) : (
               <div className="empty-card angular">
                 <Photo label="FIFA 16 photo" />
