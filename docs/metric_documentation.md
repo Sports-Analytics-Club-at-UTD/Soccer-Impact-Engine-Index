@@ -1,7 +1,7 @@
 # Metric Documentation: Defensive Recovery Coverage and Observed Spatial Dominance
 
 Owner: Person 4 (Spatial + Defensive Recovery)
-Version: V1, updated 26 October 2026
+Version: V1, updated 27 October 2026
 Scope: midfielders, center-backs, goalkeepers (no attackers/wingers). Team V1 scope: 2015/16 only.
 
 ## 0. How to read this document
@@ -26,8 +26,11 @@ Every statement is labelled by what kind of thing it is:
 | `statsbomb_360_frames.parquet` | `src/ingestion/fetch_360.py` (confirmed: the script writes this file) | 7,562,022 rows, 445,569 frame ids, 127 matches | Shared Drive (not git) |
 | `statsbomb_360_event_meta.parquet` | `src/ingestion/fetch_360_event_meta.py` | `id`, `match_id`, `team`, `possession_team` | Shared Drive (not git) |
 | `statsbomb_lineups.parquet` | `src/ingestion/fetch_lineups.py` | 86,743 rows, all 1,814 matches fetched. One row per player per position stint (a player with no stint has one row with empty position fields). | Shared Drive (not git) |
+| `statsbomb_fixtures_2015_16.parquet` | `src/ingestion/fetch_fixtures.py` | StatsBomb's match list (`sb.matches`) for the four full 2015/16 leagues: 1,517 matches (La Liga 380, Ligue 1 377, Premier League 380, Serie A 380), with a `fetched_on` date column. Fresh fetch on 27 Oct 2026. Some manager columns held two IDs in one cell and are saved as text. | Shared Drive (not git) |
 
-Derived tables (in `data/processed/`, not in git): `recovery_coverage_totals`, `recovery_coverage_by_zone`, `spatial_dominance_team_zone`, `spatial_coverage`, `player_minutes`, `player_name_crosswalk`, `recovery_per90`, `recovery_scores`.
+Derived tables (in `data/processed/`, not in git): `recovery_coverage_totals`, `recovery_coverage_by_zone`, `spatial_dominance_team_zone`, `spatial_coverage`, `player_minutes`, `player_name_crosswalk`, `recovery_per90`, `recovery_scores`, `match_metadata`.
+
+`match_metadata.parquet`: one row per match (1,814 rows) with `match_id`, `competition_name` and `season_name`, taken from the events file with `drop_duplicates`. Each match has exactly one competition and season. It was extracted from `statsbomb_team_events.parquet`, not from `sb.matches`, so it is derived, not original StatsBomb match data. It has no teams, dates, scores or StatsBomb competition/season IDs. It was created with a one-line pandas command that is not in git yet. It does not include match 3879594, because that match is not in the events file.
 
 Name-cleaning helpers (in git): `src/metrics/team_names.py` (clubs listed under two names, see limitation 17) and `src/metrics/player_names.py` (players listed under two spellings, see limitations 20 and 23).
 
@@ -39,6 +42,7 @@ The fetch scripts are in git so the data can be rebuilt. The parquet files are t
 - 360 frames: `id`, `visible_area`, `teammate`, `actor`, `keeper`, `location`.
 - Event-meta lookup: `id`, `match_id`, `team`, `possession_team`.
 - Lineups: `match_id`, `team`, `player_id`, `player_name`, `player_nickname`, `position`, `from_time`, `to_time`, `from_period`, `to_period`, `start_reason`, `end_reason`.
+- Fixtures: `match_id`, `competition_name`, `season_name` (used for the coverage comparison).
 
 ### 1.3 Coverage
 
@@ -49,11 +53,20 @@ The fetch scripts are in git so the data can be rebuilt. The parquet files are t
 | **Full league season** | La Liga 2015/16 (380), Ligue 1 2015/16 (377), Premier League 2015/16 (380), Serie A 2015/16 (379) |
 | **Partial (one club's season)** | Bundesliga 2015/16 (34), Bundesliga 2023/24 (34), La Liga 2016/17 (34), 2017/18 (36), 2018/19 (34), 2019/20 (33), 2020/21 (35), Ligue 1 2021/22 (26), Ligue 1 2022/23 (32) |
 
-Nothing falls between 36 and 377 matches. Each partial season was checked from the per-90 match counts (the team whose players appear in the most matches): Bayer Leverkusen for Bundesliga 2015/16 and 2023/24 (33 matches each), Barcelona for La Liga 2016/17 to 2020/21 (32, 35, 33, 31 and 35 matches) and Paris Saint-Germain for Ligue 1 2021/22 and 2022/23 (24 and 32 matches). These counts are the highest per-player match count for the club, so they can sit slightly below the season's match total. For Bundesliga 2015/16, players of every other team appear in at most 2 matches (they are opponents). In the full league-seasons the top team has 38 matches, as expected. The four full league-seasons are all 2015/2016.
+Nothing falls between 36 and 377 matches. Each partial season was checked from the per-90 match counts (the team whose players appear in the most matches): Bayer Leverkusen for Bundesliga 2015/16 and 2023/24 (33 matches each), Barcelona for La Liga 2016/17 to 2020/21 (32, 35, 33, 31 and 35 matches) and Paris Saint-Germain for Ligue 1 2021/22 and 2022/23 (24 and 32 matches). These counts are the highest per-player match count for the club, so they can sit slightly below the season's match total. For Bundesliga 2015/16, players of every other team appear in at most 2 matches (they are opponents). In the full league-seasons the top team has 38 matches, as expected. The four full league-seasons are all 2015/2016. The partial seasons were not checked against StatsBomb's match list (only the four 2015/16 leagues were fetched).
 
-**Missing matches in the full seasons (checked against StatsBomb's match list, 26 Oct 2026).**
-- Serie A 2015/16 has 379 of 380 matches. The one match StatsBomb lists that is not in the events file is 3879594, the match the events fetch skipped (connection reset).
-- Ligue 1 2015/16 has 377 of 380 matches. No match in StatsBomb's Ligue 1 2015/16 list is missing from the events file, so the 377 appears to be what StatsBomb lists, not a fetch failure. (The size of StatsBomb's list was not printed; this is inferred from the empty difference.)
+**Full seasons checked against StatsBomb's match list.** First checked on 26 Oct 2026 (in memory, nothing saved), then re-checked on 27 Oct 2026 against a fresh fetch saved as `statsbomb_fixtures_2015_16.parquet` (competition_id / season_id: La Liga 11/27, Ligue 1 7/27, Premier League 2/27, Serie A 12/27).
+
+| League 2015/16 | Listed by StatsBomb | In events file | Listed but not in events file | In events file but not listed | Listed but not in lineups |
+|---|---|---|---|---|---|
+| La Liga | 380 | 380 | none | none | none |
+| Ligue 1 | 377 | 377 | none | none | none |
+| Premier League | 380 | 380 | none | none | none |
+| Serie A | 380 | 379 | 3879594 | none | 3879594 |
+
+- Serie A 2015/16 has 379 of 380 matches. The one gap is 3879594, the match the events fetch skipped (connection reset). It is also absent from the lineups.
+- Ligue 1 2015/16 has 377 matches because StatsBomb lists 377. It is complete, not a fetch failure.
+- The 27 Oct list is a fresh fetch, not the list used on 26 Oct. Both checks gave the same result.
 
 **360 frames (Spatial Dominance):** free only for four league-seasons, each covering one club.
 
@@ -179,7 +192,9 @@ Script: `src/metrics/recovery_per90.py`. Output: `recovery_per90.parquet`, one r
 |---|---|
 | Event type, outcome fields, location, position, player, team | RAW |
 | Lineup positions, start and end times, player_id | RAW |
+| StatsBomb match list (fixtures file) | RAW |
 | Counts, per-zone counts, minutes, per-90 rates, percentiles | DERIVED |
+| `match_metadata` (match_id -> competition, season, from the events file) | DERIVED |
 | Tackles identified through `duel_type == "Tackle"` | RAW field, our selection rule |
 | SUCCESS_OUTCOMES set | ASSUMPTION, checked against real label counts |
 | Empty recovery-failure flag means a successful recovery | ASSUMPTION (the flag is only ever True or empty) |
@@ -222,7 +237,7 @@ Script: `src/metrics/recovery_scores.py`. Output: `recovery_scores.parquet`, one
 5. **Rating** = 65 + 10 x z, where z = (per-90 - pool mean) / pool standard deviation, clipped to 1-99. The mean and standard deviation are calculated per pool. Display layer only; tiers do not use it.
 6. **Tier** (on the percentile, not the rating): Gold = 90 or higher, Silver = 75 up to (not including) 90, otherwise none. N/A rows get tier N/A.
 
-**Result (verified from the run on 23 Oct 2026):**
+**Result (verified from the run on 23 Oct 2026, re-run on 26 Oct 2026 with the same pool sizes and tier counts):**
 
 - `recovery_scores.parquet` columns: player_id, player, team, competition_name, season_name, position_group, score_group, minutes, event_type, count, per90, percentile, rating, pool_n, tier, score_note.
 - Pool sizes (all 2015/16, four leagues together): MID 294 for each event type, CB 255 for each event type, GK 98 (Ball Recovery only). 1,745 scored rows in total (sum of the printed pool sizes).
@@ -306,7 +321,7 @@ The reportable counts are below the matches in the free 360 set (Leverkusen 31 o
 5. Failed recoveries are flagged only as True. An empty flag is counted as a successful recovery.
 6. SUCCESS_OUTCOMES = Won, Success In Play, Success Out (checked against real label counts). Interception outcome counts in the events file: Won 17,673; Success In Play 9,508; Success Out 268 (total 27,449, the counted interceptions); Lost In Play 10,456 and Lost Out 6,675 are excluded. No interception has an empty outcome. Success Out is about 1% of counted interceptions, so including or excluding it barely moves any rate.
 7. The events file has no `player_id`. Players are matched to the lineups on match + team + player name. In `recovery_per90`, `recovery_scores` and `player_minutes`, records are keyed on `player_id` (see limitation 23). In the events file, `recovery_coverage_totals`, `recovery_coverage_by_zone` and the heatmaps, players are still identified by name + team + competition + season (events file and by-zone table only; see 23). The match check found no failures (100.00%). On the name-based side, two different players with the same name and team in a season would be merged; no such case is known.
-8. `fetch_normal` skipped match 3879594 (connection reset). Confirmed: this match is absent from the events file, and it is the one Serie A 2015/16 match missing from StatsBomb's match list, so Serie A has 379 of 380 matches. Retrying it would add one match but would change row counts and scores.
+8. `fetch_normal` skipped match 3879594 (connection reset). Confirmed against StatsBomb's match list on 26 Oct and again against a fresh fetch on 27 Oct: this match is absent from the events file and from the lineups, and it is the only Serie A 2015/16 match missing, so Serie A has 379 of 380 matches. Retrying it would add one match but would change row counts and scores. Nobody has asked for the retry; it needs a team decision.
 9. The zone grid is a 3x3 placeholder (`zones.py`). It needs a team decision and must match any teammate zone logic. An 18-zone grid (6x3) was considered and left out because per-player cells would be mostly empty (median 4 to 10 recovery events per player-season).
 10. Goalkeepers are 99.9% Ball Recovery. Only Ball Recovery is reported for goalkeepers; Tackle and Interception are kept but marked not reportable. Person 4 decision, not yet agreed with the team. Goalkeeper Ball Recovery counts depend heavily on team style.
 11. Per-90 is built from the lineups-based minutes table. The 900-minute threshold is provisional and not agreed with the team.
@@ -329,6 +344,7 @@ The reportable counts are below the matches in the free 360 set (Leverkusen 31 o
 28. **DM and CM are ranked together (team working decision).** A DM may rank higher than a CM on recoveries because of the role. This has not been checked.
 29. **Goalkeepers are scored on Ball Recovery only** (pool of 98). Tackle and Interception rows for goalkeepers get no score.
 30. **Bundesliga and other single-club seasons get no percentile, rating or tier.** The team plans to display Bundesliga statistics with coverage limitations flagged; any comparison against the four-league pool is provisional and is built on the team's side, not in these files.
+31. **Playing time comes from the lineups, not from substitution events.** The events file keeps only six event types, so it has no substitutions or Starting XI events, and no other events file exists. Minutes are built from the lineups' start and end times (see 2.3). No fixture lists or fetch logs from the original downloads were saved; the 27 Oct fixtures file is a fresh fetch made to verify coverage.
 
 ### Sample size
 
@@ -351,7 +367,8 @@ Median events per player-season is 4 to 10 even for CB/DM, and the bottom quarte
 | Pooling across the four 2015/16 leagues | Done for `recovery_scores` (all four pooled) |
 | Rates -> one per-player score | Open (index owner) |
 | Wide midfielders and fullbacks out of scope | Agreed for V1 with the press resistance owner |
-| Processed-table format | Done: `recovery_per90.parquet` and `player_minutes.parquet` shared with the team (V1, provisional; re-uploaded 21 Oct with player_id keys). `recovery_scores.parquet` to be shared |
+| Retry of match 3879594 (Serie A) | Open; would change row counts and scores, needs a team yes |
+| Processed-table format | Done: `player_minutes.parquet`, `recovery_per90.parquet`, `player_name_crosswalk.parquet`, `statsbomb_lineups.parquet` and `match_metadata.parquet` (derived from the events file) uploaded to the shared Drive by Person 4 on 26 Oct (player_id-keyed, rebuilt in one run); `statsbomb_fixtures_2015_16.parquet` uploaded on 27 Oct. `recovery_scores.parquet` to be shared |
 
 ---
 
@@ -362,6 +379,7 @@ Run from the repo root (Windows PowerShell):
 ```
 python -W ignore -m src.metrics.build_metric_tables
 python -W ignore -m src.ingestion.fetch_lineups
+python -W ignore -m src.ingestion.fetch_fixtures
 python -W ignore -m src.metrics.player_minutes
 python -W ignore -m src.metrics.recovery_per90
 python -W ignore -m src.metrics.recovery_scores
@@ -371,7 +389,9 @@ python -m pytest -q
 
 `player_minutes` must run before `recovery_per90`: it writes both `player_minutes.parquet` and `player_name_crosswalk.parquet`, which `recovery_per90` reads. `recovery_scores` reads `recovery_per90.parquet`. `recovery_per90` takes `--min-minutes` (default 900) and `--full-season-matches` (default 300). `zone_heatmap` needs `--kind {recovery,spatial}`; see `--help` for the other options. Outputs are written to `data/processed/` and `figures/` (not in git).
 
-The test suite currently has 44 passing tests (run 26 Oct 2026), including `tests/test_player_id_keys.py` (display names and the crosswalk) and `tests/test_recovery_scores.py` (9 tests for `recovery_scores.py`). The `recovery_scores` tests use small made-up tables, not real football data, and check: DM and CM share one pool while CB stays separate; a goalkeeper Tackle gets N/A while a goalkeeper Ball Recovery is scored; a player below the minimum minutes gets N/A; ineligible rows do not change the pool; the Gold (90) and Silver (75) boundaries; the three event types are scored separately; and the rating (a constant pool gives 65, the 99 clip, mean 65 and spread 10 when not clipped). Not covered by a test: ties sitting on a tier boundary (limitation 27).
+`fetch_fixtures` needs no other script to run first. It fetches StatsBomb's match list for the four 2015/16 leagues, saves it to `data/raw/statsbomb_fixtures_2015_16.parquet`, and prints a comparison against the events and lineups files. It changes no other file and stops with an error if a fetch fails (no silent skipping). It is not used by any metric; it only verifies coverage.
+
+The test suite currently has 44 passing tests (run 26 Oct 2026), including `tests/test_player_id_keys.py` (display names and the crosswalk) and `tests/test_recovery_scores.py` (9 tests for `recovery_scores.py`). The `recovery_scores` tests use small made-up tables, not real football data, and check: DM and CM share one pool while CB stays separate; a goalkeeper Tackle gets N/A while a goalkeeper Ball Recovery is scored; a player below the minimum minutes gets N/A; ineligible rows do not change the pool; the Gold (90) and Silver (75) boundaries; the three event types are scored separately; and the rating (a constant pool gives 65, the 99 clip, mean 65 and spread 10 when not clipped). Not covered by a test: ties sitting on a tier boundary (limitation 27), and `fetch_fixtures.py`.
 
 ---
 
@@ -383,3 +403,4 @@ Open items that remain (everything else listed earlier was checked and is record
 - Why one event moved from out-of-scope to in-scope after the name fix (limitation 22). One event of 246,393; the earlier state is not available to recompute.
 - Double-counting check (proxy), done with a one-line command, not yet a tested script: of 70,739 counted Tackles and Interceptions, 0.5% (3 s), 0.8% (5 s) and 1.3% (10 s) are followed by a Ball Recovery from the same player in the same match and period. This is not proof of the same underlying action; the reverse order (Recovery then Tackle) and other players were not checked. Possession is not available in the events file.
 - Team formula document (Metric Formulas.docx) versus these files: it says "Total Interceptions" while the data counts successful interceptions only, so the wording should change to "Successful". It calls mu and sigma "constants for each category"; here they are computed from the eligible pool (same season, group and event type, four leagues pooled, 900+ minutes), which is assumed to be what the team means. It has no 1-99 clip and no percentile or tiers.
+- The partial seasons (single-club) were not compared against StatsBomb's match list; only the four 2015/16 leagues were.
