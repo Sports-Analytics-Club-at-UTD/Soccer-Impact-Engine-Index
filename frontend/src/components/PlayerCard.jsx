@@ -20,7 +20,7 @@ export default function PlayerCard({ player, onClose, demo = false }) {
       <div className="pcard-top">
         <Photo src={player.photo} label="FIFA 16 photo" className="lg" />
         <div>
-          <div className="mono t10 up c2">{player.position === "CB" ? "Centre-back" : "Defensive midfielder"}</div>
+          <div className="mono t10 up c2">{player.position === "CB" ? "Centre-back" : player.position === "DM" ? "Defensive midfielder" : "Role unavailable"}</div>
           <h3 className="display" style={{ marginTop: 10 }}>{player.name}</h3>
           <div className="team">{player.team}</div>
 
@@ -40,6 +40,7 @@ export default function PlayerCard({ player, onClose, demo = false }) {
       </div>
 
       <p className="mono t10">{card.profileLabel}</p>
+      {player.ratingNotice && <p className="warn mono" role="note">{player.ratingNotice}</p>}
       <div className="viz">
         <Radar attributes={card.attributes} label={card.profileLabel} />
         <div className="stat-grid">
@@ -50,6 +51,8 @@ export default function PlayerCard({ player, onClose, demo = false }) {
                 <span className="mono t11">{m.text}</span>
               </div>
               <div className="bar">{m.value !== null && <i style={{ width: `${m.value}%` }} />}</div>
+              {player.ratingNotice && <p className="mono t10">Percentile: {m.percentile === null ? "N/A" : String(Math.round(m.percentile))}
+                {player.attributes[m.id]?.reasons?.length ? ` · ${player.attributes[m.id].reasons.join("; ")}` : ""}</p>}
             </div>
           ))}
         </div>
