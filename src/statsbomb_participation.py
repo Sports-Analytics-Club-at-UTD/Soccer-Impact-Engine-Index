@@ -12,6 +12,7 @@ import hashlib
 import json
 import re
 
+from src.identity import TEAM_ALIASES
 from src.participation_intervals import (Clock, ClockPolicy, Context, PeriodBoundary,
                                          Stint, Issue, CONFLICT, INCOMPLETE,
                                          validate_participation)
@@ -87,6 +88,15 @@ class AdaptedPlayer:
 
 
 @dataclass(frozen=True)
+class TeamNameNormalization:
+    team_id: int
+    fixture_name: str
+    observed_name: str
+    canonical_name: str
+    source_reference: str
+
+
+@dataclass(frozen=True)
 class AdaptedMatch:
     match_id: int
     competition_name: str
@@ -96,6 +106,7 @@ class AdaptedMatch:
     boundaries: tuple
     warnings: tuple
     provenance: tuple
+    team_name_normalizations: tuple = ()
 
     def validate(self):
         results = []
@@ -130,6 +141,31 @@ def _lineup_clock(value):
     return int(m), int(s)
 
 
+def _team_name_agrees(team_id, fixture_name, observed_name, match):
+    """Two established spellings, pinned to original Ligue 1 team IDs/context.
+
+    Fixture IDs 147/140 and canonical labels are supported by the retained
+    7/27 fixture document and original paired rosters/events. Names alone never
+    establish team identity. Exact names retain the existing general behavior.
+    """
+    _text(observed_name)
+    if fixture_name is None:
+        return False
+    if fixture_name == observed_name:
+        return True
+    competition, season = match['competition'], match['season']
+    if (type(competition.get('competition_id')) is not int
+            or competition.get('competition_id') != 7
+            or competition.get('competition_name') != 'Ligue 1'
+            or type(season.get('season_id')) is not int
+            or season.get('season_id') != 27
+            or season.get('season_name') != '2015/2016'):
+        return False
+    alias = {147: 'Marseille', 140: 'Caen'}.get(team_id)
+    canonical = TEAM_ALIASES.get(alias)
+    return canonical is not None and {fixture_name, observed_name} == {alias, canonical}
+
+
 def _adapt_match(match_id, matches, lineups, events, *, clock_document_reference):
     """Adapt ONE roster; zero-position bench players remain nonparticipants.
 
@@ -144,6 +180,19 @@ def _adapt_match(match_id, matches, lineups, events, *, clock_document_reference
     if len(selected) != 1:
         raise SourceSchemaError("match must occur exactly once in provider inventory")
     match = selected[0]
+    normalizations = {}
+
+    def team_name_agrees(tid, name, kind, reference):
+        fixture_name = expected.get(tid)
+        if not _team_name_agrees(tid, fixture_name, name, match):
+            return False
+        if fixture_name != name:
+            # One immutable example reference per original spelling/document;
+            # every unmodified source occurrence remains in the byte-bound JSON.
+            normalizations.setdefault((kind, tid, name), TeamNameNormalization(
+                tid, fixture_name, name, TEAM_ALIASES.get(name, name), reference))
+        return True
+
     try:
         _id(match["match_id"])
         competition = _text(match["competition"]["competition_name"])
@@ -154,7 +203,8 @@ def _adapt_match(match_id, matches, lineups, events, *, clock_document_reference
         roster = {}
         for team in ls:
             tid = _id(team["team_id"])
-            if tid in roster or expected.get(tid) != team["team_name"]:
+            if tid in roster or not team_name_agrees(tid, team['team_name'], 'lineups',
+                                                    f'{lineups.reference}#/team/{tid}'):
                 raise SourceSchemaError("fixture/lineup team identity conflict")
             roster[tid] = {}
             for player in team["lineup"]:
@@ -193,7 +243,8 @@ def _adapt_match(match_id, matches, lineups, events, *, clock_document_reference
                 raise SourceSchemaError("event timestamp/offset clock disagreement")
             _text(e["type"]["name"])
             tid = _id(e["team"]["id"])
-            if expected.get(tid) != e["team"]["name"]:
+            if not team_name_agrees(tid, e['team']['name'], 'events',
+                                   f'{events.reference}#/event/{eid}'):
                 raise SourceSchemaError("event/fixture team identity conflict")
             actors = ([e["player"]] if "player" in e else [])
             if e["type"]["name"] == "Substitution":
@@ -323,7 +374,8 @@ def _adapt_match(match_id, matches, lineups, events, *, clock_document_reference
             checks = _check_original_transitions(tid, pid, observations, es, ref)
             players.append(AdaptedPlayer(context, player["player_name"], tid, tuple(observations), tuple(raw_positions), checks))
     return AdaptedMatch(match_id, competition, season, tuple(players), policy,
-                        tuple(boundaries), tuple(sorted(warnings)), provenance)
+                        tuple(boundaries), tuple(sorted(warnings)), provenance,
+                        tuple(normalizations[k] for k in sorted(normalizations)))
 
 
 def _check_original_transitions(tid, pid, observations, events, reference):

@@ -147,7 +147,8 @@ def manifest_from_phase1(root):
 
 def code_revision():
     paths = [Path(__file__), Path(__file__).parents[1]/"src/statsbomb_participation.py",
-             Path(__file__).parents[1]/"src/participation_intervals.py"]
+             Path(__file__).parents[1]/"src/participation_intervals.py",
+             Path(__file__).parents[1]/"src/identity.py"]
     return digest(payload({p.name:digest(p.read_bytes()) for p in paths}))
 
 
@@ -269,6 +270,7 @@ class EvidenceStore:
                           artifact_validation="BYTE_BOUND_SOURCE_SCHEMA_REVIEWED",artifacts=bindings,
                           fixture_document=fixture,clock_policy=asdict(adapted.policy),
                           boundaries=[asdict(b) for b in adapted.boundaries],warnings=adapted.warnings,
+                          team_name_normalizations=[asdict(n) for n in adapted.team_name_normalizations],
                           players=players,inclusion_policy=row["inclusion_policy"],
                           active_status_counts=dict(Counter(r.status for p,r in zip(adapted.players,results) if p.observations or p.source_checks)),
                           production_certified=False,source_independently_verified=False,
