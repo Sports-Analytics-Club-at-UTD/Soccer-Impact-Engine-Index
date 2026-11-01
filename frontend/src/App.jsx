@@ -1,11 +1,15 @@
 import { Component, lazy, Suspense, useEffect, useState } from "react";
+import { loadPlayerExperience, playerDataMode } from "./lib/playerDataMode.js";
 
 let Experience, configurationError;
 try {
-  if (import.meta.env.PROD) {
-    Experience = lazy(() => import("./components/RealPlayerExperience.jsx"));
+  const configuredMode = playerDataMode(import.meta.env.VITE_PLAYER_DATA_MODE);
+  const requestedView = new URLSearchParams(window.location.search).get("view");
+  const mode = ["limited-data", "five-attribute-synthetic"].includes(requestedView) ? requestedView : configuredMode;
+  if (import.meta.env.DEV && requestedView === "five-attribute-experimental") {
+    Experience = lazy(() => import("./dev/FiveAttributeExperimentalExperience.jsx"));
   } else {
-    Experience = lazy(() => import("./dev/DevelopmentExperience.jsx"));
+    Experience = lazy(() => loadPlayerExperience(mode));
   }
 } catch (error) {
   configurationError = error;

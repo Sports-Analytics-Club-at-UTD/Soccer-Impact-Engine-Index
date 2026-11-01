@@ -1,8 +1,8 @@
 # Soccer Impact Index frontend
 
 React/Vite local scouting website: **Home | Players | Leaderboards | Compare |
-Teams | About**. Production serves the team-approved final 2015/16 real-player
-ratings. The loopback development homepage retains the existing private adapter.
+Teams | About**. Production serves the fictional demo. The loopback development
+homepage serves the existing authorized real-player experiment.
 
 ## Start
 
@@ -57,28 +57,11 @@ receipts/local paths and a running loopback server (some assume port 5173).
 The portable test commands above are the contributor entry point.
 
 Both production configurations disable automatic public-directory copying and
-use the same default-deny admission guard. Three fingerprint-pinned heatmaps
-and the exact approved `public/data/player-ratings-2015-16-v1.json` release are
-emitted. All other public data remains denied. Fictional and synthetic data
-imports retain their existing pins for development tools, but production has
-no dependency on those tools and emits no fictional player modules.
-
-Production fetches the versioned JSON over same-origin HTTP, checks its byte
-length and SHA256, validates the public contract, Formula B parity and eligible
-population counts, then renders the existing cards/comparisons/navigation.
-Failures show a data error with Retry; there is no fictional fallback.
-
-Vercel: keep the existing frontend project root (`frontend`), `npm run build`
-and `dist` output. `frontend/vercel.json` records these settings and applies
-immutable caching and `nosniff` to this versioned release. Hash routes need no
-server-side player API or rewrite. Python/private inputs are unnecessary for
-production builds. The single HTML sharing build also needs its sibling
-`data/` JSON and `team/` PNGs and must be served over HTTP.
-
-Release contents, approval scope, reproduction and verification are in
-[public ratings production delivery](../docs/public-ratings-production-delivery.md).
-Do not edit an immutable release in place: publish a new filename/version and
-review its new exact hash/size in `src/lib/publicRatingsRelease.js`.
+use the same default-deny admission guard. Only three fingerprint-pinned images
+in `public/team/` are copied; fictional `src/data/players.json` and explicit
+synthetic fixtures are separately pinned. `public/data/` observations, local
+endpoints and real numeric payloads are excluded. No environment flag approves
+publication. Actual build outputs are checked by `test:packaging`.
 
 New files placed in `public/` are not automatically production-admitted. Any new
 asset needs explicit scope/rights and guard review; image paths are

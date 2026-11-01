@@ -12,7 +12,8 @@
     "rawIntegration.test.js",
     "scorecardAdapter.test.js",
     "unifiedLocal.test.js",
-    "publicRatings.test.js"
+    "publicRatings.test.js",
+    "foundationPlayers.test.js"
   ],
   "private_files": [
     "localExperimentalRatings.test.js",
@@ -24,9 +25,9 @@
     "componentClassification.test.js": "bebc4a688ebc1bd5e55846bdaf5be1fb3ec793d76677fcb373f6ca7697a6e848",
     "diagnosticIntegration.test.js": "7b0e0b0f4aa6a693277ae194ffd9d592a9ac6319f0d1eed1b2e847e66da11fda",
     "fiveAttributePresentation.test.js": "bbafe3140943466202ba329be067779862fa39cc1948ec9704b8515f5a96a35c",
-    "localExperimentalRatings.test.js": "5f299f293a42c6ba5e493736a744e9b2cc6cddad19897960546d005c91bf306c",
+    "localExperimentalRatings.test.js": "505d8237886e4e70d328782351ac79152eb0305283db7cdc70cde017dbf1b80b",
     "productionDataAdmission.private.test.js": "c5b7cc093681b38dd58c5fc34a544cbff5027d8fe0ec138832b562fca192c9bb",
-    "productionDataAdmission.test.js": "953218a6df7c95c0baf1facb5ad53b82d47f3b981ae7034b0d0c9f5cd060a5d7",
+    "productionDataAdmission.test.js": "959cfe80957519bc926cc596818d3f193068ac1037a447ea3d4762075a2b8f98",
     "provisionalDelivery.private.test.js": "143fdc79c4ca2e48959fcf5b01607b4b8c7514c90f1a7ee80c3086fc4b52e544",
     "provisionalDelivery.test.js": "723a6fd0ae8632ba0b4b1ad2372aa100e10bb4c11f0373f674c9e28da277a961",
     "provisionalOvr.test.js": "d81be8883c07b990734c30eb1c230eb7f03b0bb707489328634f8f4eb8b50b04",
@@ -35,7 +36,8 @@
     "rawIntegration.test.js": "a31208e8d502162a0b23e7fd34141a4d60a6147671351177bf3fb0483083f13e",
     "scorecardAdapter.test.js": "50812dd0291dbd031d9d047b1c1b98a3c110e3f2b9b0e96d2d63c36bf3af011e",
     "unifiedLocal.test.js": "9e4252313a1749b37325b5e53abb6d45a87c6f91963505261eef4a70dbec75b9",
-    "publicRatings.test.js": "2e1e2d08c6340fb89155ece850ed3fae39fa1399c6f477b994f6cc64f05c6f67"
+    "publicRatings.test.js": "9daf7de9762a50803628d74c6103f4463e16fee668ceaae0bfcf12a4613679a7",
+    "foundationPlayers.test.js": "f49d661c49f3a7e3de872bcdc3de274434f61bbde5298dbcbba75338f214ac3f"
   },
   "network_tests": {
     "public": [
