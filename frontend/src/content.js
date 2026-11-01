@@ -100,7 +100,7 @@ export const ABOUT = {
     { name: "Vibhor Rajan", role: "Project Manager", does: "Led the project and shaped the website experience.", photo: "" },
     { name: "Pratyush Malaviya", role: "Lead Developer", does: "Brought the five skills together and developed the press resistance analysis.", photo: "" },
     { name: "Arpit Gupta", role: "Engineer", does: "Developed the ball-winning analysis and team defensive maps using StatsBomb match data.", photo: "" },
-    { name: "Ayush", role: "Integration Engineer", does: "Connected the match evidence, checked the ratings and brought the player profiles to the website.", photo: "" },
+    { name: "Ayush Mendhe", role: "Integration Engineer", does: "Connected the match evidence, checked the ratings and brought the player profiles to the website.", photo: "" },
     { name: "Joseph Olutayo", role: "Engineer", does: "Developed the progressive passing analysis to explore how players move the ball forward.", photo: "" },
   ],
 };
