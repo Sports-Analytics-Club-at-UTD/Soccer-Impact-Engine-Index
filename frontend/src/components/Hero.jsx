@@ -11,10 +11,10 @@ const LINES = [
 
 const TICKER = [
   `${SITE.season} season`,
-  "Centre-backs · Defensive midfielders",
-  "Percentiles vs positional peers",
-  "5 metrics · 1 primary archetype",
-  "Spatial data: team level only",
+  "Centre-backs · Midfielders",
+  "Compare players in the same position",
+  "Five skills · Distinct playing styles",
+  "Explore how teams defend space",
   SITE.org,
 ];
 
@@ -62,11 +62,10 @@ export default function Hero() {
       <div className="hero-glow" />
       <div className="grain" />
       <div className="hero-fade" />
-      {!HERO.videoSrc && <div className="video-note mono t10 up">Hero clip placeholder · 1920×1080 · MP4</div>}
 
       <div className="wrap hero-in">
         <div className={`fade-in ${ready ? "" : "pre"}`}>
-          <div className="eyebrow">{SITE.season} · CB · DM</div>
+          <div className="eyebrow">{SITE.season} · Centre-backs · Midfielders</div>
         </div>
 
         <h1 className="display hero-title">

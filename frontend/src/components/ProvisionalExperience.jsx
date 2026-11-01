@@ -21,7 +21,7 @@ export default function ProvisionalExperience({ theme, onToggle }) {
       <h1 className="display">Bundesliga · 2015/16</h1>
       <p className="warn mono" role="note">LIMITED DATA · PARTIAL SEASON</p>
       <p>Verified observed samples, including supported transfers. Numeric ratings are withheld.</p>
-      {error ? <p role="alert">{error}. No demo fallback was used.</p> : players === null ? <p role="status">Loading verified observations…</p> : <>
+      {error ? <p role="alert">These match observations are unavailable. Please try again later.</p> : players === null ? <p role="status">Loading match observations…</p> : <>
         <div className="diagnostic-controls"><label>Search name, player ID, club or league<input value={query} onChange={(e) => { setQuery(e.target.value); setSelected(null); }} /></label>
           <label><input type="checkbox" checked={all} onChange={(e) => { setAll(e.target.checked); setSelected(null); }} />Include other positions and identity-only profiles</label></div>
         <p role="status">{matches.length} player-season cards · {players.filter((p) => p.bundesliga_candidate).length} supported Bundesliga MID/CB candidates</p>

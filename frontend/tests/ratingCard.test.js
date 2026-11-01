@@ -107,7 +107,7 @@ test("no invented OVR, no legacy/raw/DRI/progressive passing fallback", () => {
   assert.equal(ratingCard(p).attributes[4].value, null);
   assert.equal(ratingCard(p).ovr, null);
   assert.equal(ratingCard(fixture()).ovr, null);
-  assert.match(renderCard(p), /N\/A — POLICY NOT FINALIZED/);
+  assert.match(renderCard(p), /N\/A: POLICY NOT FINALIZED/);
   assert.equal(ratingCard({ ...base, pct: { T: 99 } }).attributes[0].value, null);
   assert.equal(classify({ ...base, pct: { T: 99 } }).value, null);
 });

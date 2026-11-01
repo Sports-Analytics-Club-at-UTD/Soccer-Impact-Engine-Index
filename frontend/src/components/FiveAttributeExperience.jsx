@@ -21,7 +21,7 @@ export default function FiveAttributeExperience({ theme, onToggle }) {
       <h1 className="display">Five-attribute card readiness</h1>
       <p className="warn mono" role="note">{FIVE_NOTICE}</p>
       <p>Invented players and frozen test references. Explore a transfer, a centre-back, limited Bundesliga coverage and missing measurements.</p>
-      {error && <p role="alert">{error}. No fallback or real-player data was loaded.</p>}
+      {error && <p role="alert">These example profiles are unavailable. Please refresh the page.</p>}
       {!players.length && !error && <p role="status">Validating synthetic fixtures…</p>}
       {!!players.length && <>
         <label>Player-season <select value={selected?.id ?? ""} onChange={(e) => setSelected(players.find((p) => p.id === e.target.value) ?? null)}>

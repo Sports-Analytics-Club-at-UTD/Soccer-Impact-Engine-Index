@@ -91,7 +91,7 @@ test("diagnostic dependency graph contains no demo ratings or network loader", (
   assert.doesNotMatch(source, /import .*?(?:archetypes|players|Radar|PlayerCard|scorecardLoader)/);
   assert.doesNotMatch(source, /\bfetch\s*\(|localStorage|sessionStorage/);
   assert.match(source, /Not yet assessed/);
-  assert.match(source, /DIAGNOSTIC — PROVISIONAL REAL DATA/);
+  assert.match(source, /DIAGNOSTIC: PROVISIONAL REAL DATA/);
 });
 test("incomplete collection withholds per90 even with observed recovery", () => {
   const p = parseDiagnosticProfiles(generated.incomplete).profiles[0];

@@ -42,7 +42,7 @@ test('normal production build admits the approved release and excludes demo and 
   assert.deepEqual(files.filter((p) => /\.json$/.test(p)), [release.path]);
   const javascript = (await Promise.all(files.filter((p) => p.endsWith('.js')).map((p) => readFile(join(normal, p), 'utf8')))).join('\n');
   assert.doesNotMatch(javascript, /Marcus Delacroix|\/__local_experimental\/five-attributes|403c1d9ab93def/);
-  assert.match(javascript, /Top 3 eligible overall/);
+  assert.match(javascript, /Top 3 includes ranked players only/);
   assert.doesNotMatch(javascript, /unified-destinations/);
   for (const p of PUBLIC_ASSETS) assert.equal(sha(await readFile(join(normal, p.path))), p.sha256);
 });
@@ -53,7 +53,7 @@ test('single-file sharing build has the same approved release and admission boun
   assert.deepEqual(files.filter((p) => p.endsWith('.json')), [release.path]);
   const html = await readFile(join(single, 'index.html'), 'utf8');
   assert.doesNotMatch(html, /Marcus Delacroix|\/__local_experimental\/five-attributes|403c1d9ab93def/);
-  assert.match(html, /Top 3 eligible overall/);
+  assert.match(html, /Top 3 includes ranked players only/);
   assert.doesNotMatch(html, /unified-destinations/);
   assert.equal(sha(await readFile(join(single, release.path))), release.sha256);
 });

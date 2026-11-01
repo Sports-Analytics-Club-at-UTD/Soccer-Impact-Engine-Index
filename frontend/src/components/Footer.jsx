@@ -14,6 +14,7 @@ export default function Footer() {
         <div className="footer-row mono t10 up">
           <span className="mute">{SITE.title} · {SITE.season}</span>
           <span className="dim">{SITE.org}</span>
+          <a href="https://sac-utd-website.vercel.app/" target="_blank" rel="noopener noreferrer" className="sac-link">Visit SAC Website <span aria-hidden="true">↗</span><span className="sr-only"> (opens in a new tab)</span></a>
         </div>
       </div>
       <div className="wordmark display" aria-hidden="true">SAC</div>

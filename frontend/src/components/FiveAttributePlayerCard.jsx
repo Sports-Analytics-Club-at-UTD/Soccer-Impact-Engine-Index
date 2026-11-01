@@ -4,6 +4,8 @@ import AttributeBadge from "./AttributeBadge.jsx";
 import { FIVE_METRICS, presentationMinutes, validateFiveAttributeCard } from "../lib/fiveAttributePresentation.js";
 
 const format = (v) => v.toLocaleString(undefined, { maximumFractionDigits: 2 });
+// Keep validated fixture labels intact; apply typography only when rendering.
+const metricLabel = (label) => label.replaceAll("\u2014", ":");
 export default function FiveAttributePlayerCard({ player, onClose }) {
   const { presentation: p, reference } = player;
   validateFiveAttributeCard(p, reference);
@@ -12,7 +14,7 @@ export default function FiveAttributePlayerCard({ player, onClose }) {
 
 // Shared rendering only. Each caller keeps its own data-validation boundary.
 export function FiveAttributeCardView({ presentation: p, reference, onClose, ovr, componentClassification, compactCoverage = false, notice = "SYNTHETIC TEST FIXTURE", radarLabel = "Synthetic five-axis FIFA-style ratings" }) {
-  const axes = FIVE_METRICS.map((m) => ({ ...m, value: p.attributes[m.id].rating }));
+  const axes = FIVE_METRICS.map((m) => ({ ...m, label: metricLabel(m.label), value: p.attributes[m.id].rating }));
   return <article className="five-card card-surface" aria-label={`${p.name} five-attribute player card`}>
     <header className="five-card-header">
       <div>{!compactCoverage && notice && <p className="mono">{notice}</p>}<h2 className="display">{p.name}</h2>
@@ -29,7 +31,7 @@ export function FiveAttributeCardView({ presentation: p, reference, onClose, ovr
     <ProvisionalOvrSummary ovr={ovr} presentation={p} />
     <div className="five-card-viz"><Radar attributes={axes} label={radarLabel} />
       <div className="five-score-summary">{FIVE_METRICS.map((m) => <div key={m.id}>
-        <span>{m.label}</span><span className="attribute-rating"><strong className="display">{p.attributes[m.id].rating === null ? "N/A" : format(p.attributes[m.id].rating)}</strong><AttributeBadge tier={componentClassification?.tiers[m.id]} label={m.label} /></span>
+        <span>{metricLabel(m.label)}</span><span className="attribute-rating"><strong className="display">{p.attributes[m.id].rating === null ? "N/A" : format(p.attributes[m.id].rating)}</strong><AttributeBadge tier={componentClassification?.tiers[m.id]} label={metricLabel(m.label)} /></span>
         <span>Percentile: {p.attributes[m.id].percentile === null ? "N/A" : format(p.attributes[m.id].percentile)} · {p.comparison_position ?? "N/A"}</span>
       </div>)}</div>
     </div>
@@ -43,14 +45,14 @@ export function FiveAttributeCardView({ presentation: p, reference, onClose, ovr
         {!compactCoverage && (m.limited_data || m.partial_season) && <p className="warn" role="note">{m.limited_data ? "LIMITED DATA" : ""} {m.partial_season ? "PARTIAL SEASON" : ""}</p>}
         {o?.action_sample_size < 40 && o?.action_sample_size !== null && <p className={compactCoverage ? undefined : 'warn'}>Fewer than 40 pressured actions ({o.action_sample_size}); measured sample retained.</p>}
         {!!warnings?.length && <p className={compactCoverage ? undefined : 'warn'}>{warnings.join(" · ")}</p>}
-        {m.exclusions.length > 0 && <p className={compactCoverage ? undefined : 'warn'}>Excluded appearances: {m.exclusions.map((e) => `${e.match_id} — ${e.reasons.join("; ")}`).join(" · ")}</p>}
+        {m.exclusions.length > 0 && <p className={compactCoverage ? undefined : 'warn'}>Excluded appearances: {m.exclusions.map((e) => `${e.match_id}: ${e.reasons.join("; ")}`).join(" · ")}</p>}
       </>;
-      return <section key={id} aria-label={label}>
-        <h3>{label}</h3>
+      return <section key={id} aria-label={metricLabel(label)}>
+        <h3>{metricLabel(label)}</h3>
         <p>Measured: <strong>{o ? `${format(o.value)}${o.unit === "percent" ? "%" : " per 90"}` : "N/A"}</strong></p>
         {o && <>
           <p>{o.numerator} {o.denominator_unit === "actions" ? "successful pressured actions" : "events"} / {format(o.denominator)} {o.denominator_unit === "actions" ? "pressured attempts" : "supported minutes"}</p>
-          {o.denominator_unit === "actions" && <p>Known supported minutes: {o.supported_minutes === null ? "N/A — duration unresolved; the ratio uses attempts" : format(presentationMinutes(o.supported_minutes))}</p>}
+          {o.denominator_unit === "actions" && <p>Known supported minutes: {o.supported_minutes === null ? "N/A: duration unresolved; the ratio uses attempts" : format(presentationMinutes(o.supported_minutes))}</p>}
         </>}
         {!compactCoverage && evidenceNotes}
         {m.missingness.length > 0 && <p>Unavailable: {m.missingness.join("; ")}</p>}

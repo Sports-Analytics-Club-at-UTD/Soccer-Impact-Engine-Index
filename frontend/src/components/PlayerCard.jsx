@@ -14,17 +14,18 @@ export default function PlayerCard({ player, onClose, demo = false }) {
 }
 
 function StandardPlayerCard({ player, onClose, demo = false }) {
-  const tilt = useTilt({ max: 4, scale: 1.01 });
+  const tilt = useTilt({ max: 0, scale: 1 });
   const card = player.publicRating ? publicRatingCard(player) : ratingCard(player, { demo });
   const animatedOvr = useCountUp(card.ovr ?? 0);
   const ovr = player.publicRating ? displayOverall(card.ovr) : card.ovr === null ? "N/A" : animatedOvr;
   const a = card.archetype;
   const low = demo && player.minutes < 1000;
+  const extraExplanations = player.ratingDetails?.explanations.filter((reason) => !player.ratingNotice?.includes(reason)) ?? [];
 
   return (
-    <article {...tilt} className="tilt sheen card-surface on angular pcard" key={player.id} aria-label={`${player.name} player card`}>
+    <article {...tilt} className="tilt sheen card-surface on angular pcard" key={player.id} tabIndex={0} aria-label={`${player.name} player card`}>
       <span className="ghost-ovr display" aria-hidden="true">{player.publicRating ? displayOverall(card.ovr) : card.ovr ?? ""}</span>
-      <button type="button" className="close" onClick={onClose} aria-label="Close player card"><IconClose size={16} /></button>
+      <div className="card-close-rail"><button type="button" className="close" onClick={onClose} aria-label="Close player card"><IconClose size={16} /></button></div>
 
       <div className="pcard-top">
         <Photo src={player.photo} label={player.publicRating ? "Player photo" : "FIFA 16 photo"} className="lg" />
@@ -48,7 +49,6 @@ function StandardPlayerCard({ player, onClose, demo = false }) {
         </div>
       </div>
 
-      <p className="mono t10">{card.profileLabel}</p>
       {player.ratingNotice && <p className="warn mono" role="note">{player.ratingNotice}</p>}
       <div className="viz">
         <Radar attributes={card.attributes} label={card.profileLabel} />
@@ -60,17 +60,27 @@ function StandardPlayerCard({ player, onClose, demo = false }) {
                 <span className="mono t11">{m.text}</span>
               </div>
               <div className="bar">{m.value !== null && <i style={{ width: `${m.value}%` }} />}</div>
-              {player.ratingNotice && <p className="mono t10">Percentile: {m.percentile === null ? "N/A" : String(Math.round(m.percentile))}
+              {player.ratingNotice && !player.publicRating && <p className="mono t10">Percentile: {m.percentile === null ? "N/A" : String(Math.round(m.percentile))}
                 {player.attributes[m.id]?.reasons?.length ? ` · ${player.attributes[m.id].reasons.join("; ")}` : ""}</p>}
-              {player.publicRating && [...player.attributes[m.id].missingness, ...player.attributes[m.id].warnings].length > 0 && <p className="mono t10">{[...player.attributes[m.id].missingness, ...player.attributes[m.id].warnings].join(" · ")}</p>}
             </div>
           ))}
         </div>
       </div>
 
       <div className="minutes mono">
-        Minutes played: <b>{Number.isFinite(player.minutes) ? player.minutes.toLocaleString() : "N/A"}</b>
+        {player.publicRating ? "Confirmed minutes" : "Minutes played"}: <b>{Number.isFinite(player.minutes) ? player.minutes.toLocaleString(undefined, { maximumFractionDigits: 1 }) : "N/A"}</b>
+        {player.publicRating && <> · {player.coverage.observed_fixtures} recorded {player.coverage.observed_fixtures === 1 ? 'match' : 'matches'}</>}
       </div>
+      {player.publicRating && <details className="card-detail mono t10">
+        <summary>Rating details</summary>
+        {player.canonicalName !== player.name && <p>Full name: {player.canonicalName}</p>}
+        {player.ranked && <p>Included in the position rankings.</p>}
+        {extraExplanations.length > 0 && <ul>{extraExplanations.map((reason) => <li key={reason}>{reason}</li>)}</ul>}
+        {card.attributes.map((m) => <div key={m.id}>
+          <b>{m.label}</b> · Percentile: {m.percentile === null ? "N/A" : String(Math.round(m.percentile))}
+          {player.ratingDetails.attributeNotes[m.id] && <p>{player.ratingDetails.attributeNotes[m.id]}</p>}
+        </div>)}
+      </details>}
       {low && (
         <div className="warn mono angular-sm" role="note">
           (Warning: Under 1000 mins, data might not be representative)

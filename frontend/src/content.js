@@ -12,7 +12,7 @@ export const SITE = {
 
 export const NAV = [
   { id: "home", label: "Home" },
-  { id: "description", label: "Description" },
+  { id: "description", label: "How it works" },
   { id: "archetypes", label: "Archetypes" },
   { id: "search", label: "Search" },
   { id: "teams", label: "Teams" },
@@ -20,8 +20,8 @@ export const NAV = [
 ];
 
 export const HERO = {
-  subtitle: "(football clips)",
-  tagline: "Centre-backs and defensive midfielders, ranked by what they actually do.",
+  subtitle: "The game behind the numbers",
+  tagline: "Discover the strengths of centre-backs and midfielders through their performances in 2015/16.",
   cta: "Search a player",
   // Drop your clips in /public and set the path, e.g. "/clips/hero.mp4".
   // Leave empty to show the animated pitch placeholder.
@@ -30,34 +30,34 @@ export const HERO = {
 };
 
 export const DESCRIPTION = {
-  eyebrow: "(Project)",
-  title: "Description",
+  eyebrow: "Understanding the index",
+  title: "How our ratings work",
   intro:
-    "The SAC Midfielder/Defender Index scores centre-backs and midfielders on five measures — tackles, interceptions, ball recoveries, press resistance and progressive passing as a line-breaking proxy. Player cards show approved ratings and percentiles against positional peers. Eligible profiles receive one primary archetype.",
+    "Real match performances from 2015/16, rated across five football skills. These are independent SAC project ratings, not official FIFA or EA ratings.",
   points: [
     {
-      label: "One season of data",
+      label: "Five football skills",
       body:
-        "We could only use 2015/16 data. It was the only season available to us because of financial constraints, so every number on this site comes from that single season.",
+        "Tackling, interceptions, recoveries, press resistance and progressive passing: explore how players win the ball, keep it and move play forward.",
     },
     {
-      label: "Spatial data is team-level",
+      label: "Compare by position",
       body:
-        "The spatial data we had is provided on a team basis only. We have no player-level spatial data, so spatial work is done per team, not per player.",
+        "Centre-backs and midfielders are compared separately. The overall rating combines all five skills, giving greater weight to a player’s strongest abilities.",
     },
     {
-      label: "Pivoting to teams",
+      label: "Know the coverage",
       body:
-        "Because of that, the project pivots to teams: player cards show individual percentile profiles, and the Teams section shows how each side controls space. Off-ball dominance is measured for teams only.",
+        "Available matches may not cover a full season. Some players have individual ratings but lack enough verified evidence for rankings. Their available ratings are still shown; missing scores display N/A.",
     },
   ],
 };
 
 export const TEAMS_SECTION = {
-  eyebrow: "Spatial data",
+  eyebrow: "Defending as a team",
   title: "Teams",
   intro:
-    "Pick a team to view its off-ball spatial dominance in one team-level heat map.",
+    "Explore the space nearest to each team’s defenders while the opposition had possession. These maps describe the team, rather than individual player ratings.",
 };
 
 /* Each team shows one heat map: { label, src, alt, caption }. */
@@ -66,7 +66,7 @@ export const TEAMS = [
     id: "psg",
     short: "PSG",
     name: "Paris Saint-Germain",
-    note: "Team-level zone control while opponents have possession, showing the defender-nearest share of observed space.",
+    note: "The heat map shows the share of recorded space nearest to this team’s defenders when opponents have the ball. It describes defensive positioning, rather than the chance of winning possession.",
     images: [
       { label: "OFF-BALL SPATIAL DOMINANCE", src: "/team/spatial_Paris_Saint-Germain.png", alt: "Paris Saint-Germain team-level off-ball spatial dominance heat map: defender-nearest share of observed space while opponents have possession.", caption: "TEAM-LEVEL HEAT MAP" },
     ],
@@ -75,7 +75,7 @@ export const TEAMS = [
     id: "barca",
     short: "Barça",
     name: "FC Barcelona",
-    note: "Team-level zone control while opponents have possession, showing the defender-nearest share of observed space.",
+    note: "The heat map shows the share of recorded space nearest to this team’s defenders when opponents have the ball. It describes defensive positioning, rather than the chance of winning possession.",
     images: [
       { label: "OFF-BALL SPATIAL DOMINANCE", src: "/team/spatial_Barcelona.png", alt: "Barcelona team-level off-ball spatial dominance heat map: defender-nearest share of observed space while opponents have possession.", caption: "TEAM-LEVEL HEAT MAP" },
     ],
@@ -84,7 +84,7 @@ export const TEAMS = [
     id: "leverkusen",
     short: "Leverkusen",
     name: "Bayer 04 Leverkusen",
-    note: "Team-level zone control while opponents have possession, showing the defender-nearest share of observed space.",
+    note: "The heat map shows the share of recorded space nearest to this team’s defenders when opponents have the ball. It describes defensive positioning, rather than the chance of winning possession.",
     images: [
       { label: "OFF-BALL SPATIAL DOMINANCE", src: "/team/spatial_Bayer_Leverkusen.png", alt: "Bayer Leverkusen team-level off-ball spatial dominance heat map: defender-nearest share of observed space while opponents have possession.", caption: "TEAM-LEVEL HEAT MAP" },
     ],
@@ -97,10 +97,10 @@ export const ABOUT = {
   intro: "Five members of the UTD Sports Analytics Club, eight weeks, one index.",
   // photo: "/team/name.jpg" — leave "" for a placeholder
   members: [
-    { name: "Vibhor Rajan", role: "Project Manager", does: "Scope, timeline, and website frontend development.", photo: "" },
-    { name: "Pratyush Malaviya", role: "Lead Developer", does: "Backend architecture, bringing the metric modules into one consistent codebase, and the press resistance rebuild.", photo: "" },
-    { name: "Arpit Gupta", role: "Engineer", does: "Built the StatsBomb data pipeline and the Defensive Recovery and Observed Spatial Dominance metrics.", photo: "" },
-    { name: "Ayush", role: "Integration Engineer", does: "Combined the team's metrics, matched player data across sources, validated the ratings, and integrated the results into the website.", photo: "" },
-    { name: "Joseph Olutayo", role: "Engineer", does: "Developed the Progressive Line-Breaking Pass metric.", photo: "" },
+    { name: "Vibhor Rajan", role: "Project Manager", does: "Led the project and shaped the website experience.", photo: "" },
+    { name: "Pratyush Malaviya", role: "Lead Developer", does: "Brought the five skills together and developed the press resistance analysis.", photo: "" },
+    { name: "Arpit Gupta", role: "Engineer", does: "Developed the ball-winning analysis and team defensive maps using StatsBomb match data.", photo: "" },
+    { name: "Ayush", role: "Integration Engineer", does: "Connected the match evidence, checked the ratings and brought the player profiles to the website.", photo: "" },
+    { name: "Joseph Olutayo", role: "Engineer", does: "Developed the progressive passing analysis to explore how players move the ball forward.", photo: "" },
   ],
 };

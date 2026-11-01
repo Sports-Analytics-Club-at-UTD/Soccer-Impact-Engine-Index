@@ -1,6 +1,6 @@
 import { METRICS, DEMO_METRICS, classify, classifyDemo, demoOverall, percentileValue } from "./archetypes.js";
 
-export const OVR_PENDING = "N/A — POLICY NOT FINALIZED";
+export const OVR_PENDING = "N/A: POLICY NOT FINALIZED";
 export const ratingValue = (value) => percentileValue(value) !== null && value >= 1 ? value : null;
 export const scoreLabel = (value) => value === null ? "N/A" : String(Math.round(value));
 
