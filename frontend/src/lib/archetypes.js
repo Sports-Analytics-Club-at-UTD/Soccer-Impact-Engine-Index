@@ -47,6 +47,13 @@ export function percentileValue(value) {
   return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100 ? value : null;
 }
 
+// Strength of one supplied component percentile, never an eligibility decision.
+// Unavailable is distinct from a measured Standard component.
+export function componentTier(percentile) {
+  const value = percentileValue(percentile);
+  return value === null ? null : value >= TIER.plus ? "Gold" : value >= TIER.minus ? "Silver" : "Standard";
+}
+
 function selectArchetype(position, percentile) {
   const list = ARCHETYPES[position] || [];
   let best = null;
@@ -55,8 +62,9 @@ function selectArchetype(position, percentile) {
     if (v === null) continue;
     if (!best || v > best.value) best = { a, value: v }; // ties keep the first listed
   }
-  if (!best || best.value < TIER.minus) return { name: "Standard", tier: null, metric: null, value: best ? best.value : null };
-  return { name: best.a.name, tier: best.value >= TIER.plus ? "+" : "−", metric: best.a.metric, value: best.value };
+  const strength = componentTier(best?.value);
+  if (!strength || strength === "Standard") return { name: "Standard", tier: null, metric: null, value: best ? best.value : null };
+  return { name: best.a.name, tier: strength === "Gold" ? "+" : "−", metric: best.a.metric, value: best.value };
 }
 
 /* Only explicitly supplied rank percentiles classify future rating cards. */

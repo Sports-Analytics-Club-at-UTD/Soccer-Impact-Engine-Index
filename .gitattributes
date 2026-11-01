@@ -1,0 +1,24 @@
+# Keep checksum-bound source bytes stable even with core.autocrlf=true.
+# No working files or frozen evidence are normalized by adding this policy.
+* text=auto eol=lf
+*.py text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.mjs text eol=lf
+*.css text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+*.png -text
+*.jpg -text
+*.jpeg -text
+*.pdf -text
+*.parquet -text
+*.woff -text
+*.woff2 -text
+*.zip -text

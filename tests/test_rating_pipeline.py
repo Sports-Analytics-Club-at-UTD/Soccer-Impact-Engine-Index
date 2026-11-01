@@ -217,24 +217,6 @@ REAL_READINESS=Path(__file__).resolve().parents[1]/"data/source-evidence/phase1b
 REAL_MINUTES=Path(__file__).resolve().parents[1]/"data/validation/arpit-2026-10-21/player_minutes.parquet"
 
 
-@unittest.skipUnless(REAL_READINESS.is_file() and REAL_MINUTES.is_file(),"optional local readiness/minutes unavailable")
-class RealReadinessDeliveryTests(unittest.TestCase):
-    def test_all_549_real_contexts_remain_withheld_in_memory(self):
-        from src.identity import normalize_team_names
-        r=json.loads(REAL_READINESS.read_text(encoding="utf-8"))
-        table=pd.read_parquet(REAL_MINUTES)
-        table["team"]=normalize_team_names(table.team)
-        names={};roles={}
-        for row in table.to_dict("records"):
-            c=PlayerContext(**{k:row[k] for k in ("player_id","team","competition_name","season_name")})
-            names[c]=row["player_name"];roles[c]=row["position_group"]
-        p=readiness_rating_delivery(r,names=names,roles=roles,source=str(REAL_READINESS),cohort_id="withheld-current-549/v1")
-        self.assertEqual(len(p["players"]),549)
-        self.assertTrue(all(a["rating"] is None and a["percentile"] is None for row in p["players"] for a in row["attributes"].values()))
-        self.assertTrue(all(row["minutes"] is None for row in p["players"]))
-        self.assertFalse(p["publication_authorized"])
-        # This JSON remains in memory and is never written as a player export.
-        self.assertEqual(len(parse_delivery(serialize_delivery(p))["players"]),549)
 
 
 class TransferTests(unittest.TestCase):

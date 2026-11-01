@@ -3,3 +3,9 @@ dist
 preview
 .DS_Store
 *.parquet
+# Nonpublication observations and future local data are provisioned separately.
+/public/data/
+/coverage/
+/test-results/
+/playwright-report/
+.vite/

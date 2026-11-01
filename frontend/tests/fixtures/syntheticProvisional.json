@@ -1,0 +1,159 @@
+{
+  "baseline": null,
+  "definitions_id": "statsbomb-successful-defense-press-pass-dribble/v1",
+  "numeric_ratings_enabled": false,
+  "players": [
+    {
+      "attributes": {
+        "interceptions": {
+          "observation": {
+            "count": 0,
+            "match_ids": [
+              "11"
+            ],
+            "minutes": {
+              "denominator": 1,
+              "numerator": 10
+            },
+            "unit": "per90",
+            "value": 0
+          },
+          "percentile": null,
+          "rating": null,
+          "reason": "Unsupported"
+        },
+        "line_breaking_passes": {
+          "observation": null,
+          "percentile": null,
+          "rating": null,
+          "reason": "Unsupported"
+        },
+        "press_resistance": {
+          "observation": {
+            "at_least_40": false,
+            "attempts": 2,
+            "dribble_attempts": 0,
+            "dribble_successes": 0,
+            "match_ids": [
+              "11",
+              "12"
+            ],
+            "pass_attempts": 2,
+            "pass_successes": 1,
+            "successes": 1,
+            "unit": "percent",
+            "value": 50
+          },
+          "percentile": null,
+          "rating": null,
+          "reason": "Unsupported"
+        },
+        "recoveries": {
+          "observation": {
+            "count": 0,
+            "match_ids": [
+              "11"
+            ],
+            "minutes": {
+              "denominator": 1,
+              "numerator": 10
+            },
+            "unit": "per90",
+            "value": 0
+          },
+          "percentile": null,
+          "rating": null,
+          "reason": "Unsupported"
+        },
+        "tackles": {
+          "observation": {
+            "count": 0,
+            "match_ids": [
+              "11"
+            ],
+            "minutes": {
+              "denominator": 1,
+              "numerator": 10
+            },
+            "unit": "per90",
+            "value": 0
+          },
+          "percentile": null,
+          "rating": null,
+          "reason": "Unsupported"
+        }
+      },
+      "bundesliga_candidate": true,
+      "bundesliga_sample": {
+        "comparison_group": "CB",
+        "excluded_match_ids": [
+          "12"
+        ],
+        "match_ids": [
+          "11",
+          "12"
+        ],
+        "position_minutes": {
+          "CB": {
+            "denominator": 1,
+            "numerator": 10
+          }
+        },
+        "press_attempts": 2,
+        "press_successes": 1,
+        "supported_minutes": {
+          "denominator": 1,
+          "numerator": 10
+        }
+      },
+      "comparison_group": "CB",
+      "contexts": [
+        {
+          "competition_name": "1. Bundesliga",
+          "match_ids": [
+            "11",
+            "12"
+          ],
+          "team": "Invented Club"
+        }
+      ],
+      "excluded_match_ids": [
+        "12"
+      ],
+      "id": "101:2015/2016",
+      "limited_data": true,
+      "name": "Invented Player",
+      "observed_exposure_complete": false,
+      "observed_positions": [
+        "Center Back"
+      ],
+      "partial_season": true,
+      "player_id": "101",
+      "position_minutes": {
+        "CB": {
+          "denominator": 1,
+          "numerator": 10
+        }
+      },
+      "provenance_ids": [
+        "synthetic"
+      ],
+      "reference_member": false,
+      "season_name": "2015/2016",
+      "supported_minutes": {
+        "denominator": 1,
+        "numerator": 10
+      }
+    }
+  ],
+  "publication_authorized": false,
+  "schema_version": "soccer-provisional-observations/v1",
+  "sources": [
+    {
+      "id": "synthetic",
+      "label": "Invented synthetic evidence",
+      "path": "tests/invented.json",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ]
+}

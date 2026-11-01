@@ -1,119 +1,104 @@
-# Soccer Defensive Control & Midfield Engine Index
-### *(The Rodri & Cubarsí Model)*
+# Soccer Impact Index
 
-An analytical scouting framework built exclusively for **Midfielders, Center-Backs, and Goalkeepers** — the players whose value is systematically underrated by traditional stat sheets.
+Local experimental scouting website for supported midfielder (MID) and centre-back
+(CB) player-seasons. The React/Vite website integrates **Home, Players,
+Leaderboards, Compare, Teams and About**. Goalkeeper ratings and individual
+spatial-control ratings are research ambitions, not current supported features.
 
----
+## Setup (PowerShell)
 
-## 📋 Project Description
+Use Python **3.11 or newer** (`hashlib.file_digest` is required); the accepted
+reproducibility environment is **Python 3.13.0, Node 24.21.0, npm 11.19.0**.
+`.python-version` and `.node-version` record those tested versions. Other versions
+have not received equivalent acceptance testing. Git must honor `.gitattributes`.
 
-Most public scouting models are built around attacking output — goals, assists, shot-creating actions. That leaves the players who *prevent* goals and *control* the game with almost no rigorous, publicly reproducible framework for evaluation.
-
-This project shifts the focus entirely away from scoring output to build a spatial, event-driven model that quantifies the qualities that actually define elite defensive and midfield play:
-
-- **Off-ball spatial dominance** — how much of the pitch a player effectively controls or denies, independent of the ball
-- **Press resistance under high pressure** — a player's ability to retain and progress the ball when closed down
-- **Progressive line-breaking pass value** — passes that meaningfully advance the ball past opposition defensive/midfield lines, weighted by risk and space created
-- **Defensive recovery coverage** — the area and frequency of ball recoveries, interceptions, and defensive actions relative to a player's positional role
-
-Named after two archetypes of the modern game — the deep-lying playmaker who dictates tempo (Rodri) and the ball-playing center-back who breaks lines from the back (Cubarsí) — the model aims to surface players with these profiles across Europe's top leagues, using spatial event data rather than box-score totals.
-
----
-
-## 🛠️ Tech Stack
-
-| Category | Tools |
-|---|---|
-| **Language** | Python 3.10+ |
-| **Data Sources & Libraries** | StatsBomb Open Data / Opta event data, `mplsoccer` |
-| **Data Science & Graph Theory** | `pandas`, `numpy`, `scikit-learn`, `NetworkX` (passing network analysis) |
-| **Visualization & Reporting** | `matplotlib`, `seaborn`, `plotly`, `Streamlit` |
-| **Version Control** | Git / GitHub |
-
----
-
-## 👥 Recommended Team Roles & Requirements
-
-### Project Manager (PM)
-- Strong organizational capabilities to manage deliverable timelines across data cleaning, metric calculation, and visualization phases
-- Responsible for ensuring clear, documented definitions of non-standard soccer metrics (e.g., press resistance thresholds, what counts as a "line-breaking" pass) so the team works from a shared, unambiguous spec
-
-### Lead Developer
-- Intermediate-to-advanced Python skills
-- Experience handling nested, spatial JSON datasets (StatsBomb/Opta event data is deeply nested and coordinate-heavy)
-- Familiarity with graph theory algorithms (`NetworkX`) or spatial indexing techniques (e.g., via `scikit-learn`)
-
-### Engineer / Researcher
-- Foundational Python knowledge with hands-on `pandas` experience
-- Interest in spatial data mapping and a willingness to learn `mplsoccer` for pitch visualizations
-- Comfort constructing and iterating on custom metric algorithms from a written spec
-
----
-
-## 🚀 Getting Started
-
-```bash
-# Clone the repository
-git clone https://github.com/<your-org>/soccer-defensive-control-index.git
-cd soccer-defensive-control-index
-
-# Create and activate a virtual environment
-python3.10 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
+```powershell
+git clone https://github.com/Sports-Analytics-Club-at-UTD/Soccer-Impact-Engine-Index.git
+cd Soccer-Impact-Engine-Index
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements-test.txt
+cd frontend
+npm ci --no-audit --no-fund
+npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
-### Running the app
+Open <http://127.0.0.1:5173/>. Activate the Python environment in the same shell
+that launches Vite: its local adapter invokes `python`. Runtime-only installation
+uses `requirements.txt`; `requirements-test.txt` adds pytest.
+`requirements-research.txt` contains optional historical research libraries.
+Direct runtime/test versions are pinned to the accepted environment; transitive
+Python dependencies are resolved by pip, so these files are not a universal
+platform lock. The existing npm lockfile is authoritative; use `npm ci`.
 
-```bash
-streamlit run app/main.py
+**Repository access does not authorize private data access.** A source-only
+checkout builds the fictional production demo and runs the public/synthetic
+checks. The development homepage needs seven separately authorized frozen
+inputs; without them it shows an explicit data error and never substitutes demo
+players. See [private provisioning](docs/private-local-provisioning.md).
+Use <http://127.0.0.1:5173/?view=demo> for the fictional development demo.
+
+## Current model and limitations
+
+- Five independent attributes: TAC (tackles), INT (interceptions), REC (ball
+  recoveries), PRS (press resistance) and LB (progressive-passing proxy).
+  LB measures supported progressive passes; it does not establish actual
+  defenders or tactical lines bypassed. See [method](docs/fifth-attribute-progressive-passing.md).
+- Provisional **Formula B OVR** sorts the five full-precision ratings descending
+  and weights them 30/25/20/15/10%. Only presentation rounds. All five valid
+  ratings are required. This is experimental, not an official EA rating.
+- Individual-attribute Gold badges use unrounded percentiles >=90; Silver uses
+  >=75 and <90, for existing strict-eligible profiles only. There is no Gold/
+  Silver overall OVR tier or inferred DM/CM positional archetype.
+- Authorized frozen inputs yield 691 profiles, 686 complete OVRs and five N/A
+  profiles. Strict leaderboards contain 124 MID and 107 CB players. Limited Data
+  includes coverage limitations and ranking exclusions; excluded players retain
+  their observed scores. Observed fixtures do not certify full-season coverage.
+- Teams preserves Arpit's three team-level Off-Ball Spatial Dominance heatmaps.
+  They describe defender-nearest observed space during opponent possession,
+  not true pitch control or player ratings. Image-specific source/run provenance
+  and redistribution rights remain a contributor/team handoff.
+
+[Formula B](docs/provisional-formula-b-ovr.md),
+[badges](docs/local-attribute-badges.md),
+[Limited Data](docs/limited-data-status-consistency.md) and
+[unified integration](docs/unified-local-website-integration.md) give the details.
+Historical methodology reports describe their dated approval scope.
+
+## Verify
+
+From the repository root, with the environment active:
+
+```powershell
+python -B -m scripts.run_backend_tests public -q
+cd frontend
+npm run test:public
+npm run build
+npm run preview:single
 ```
 
----
+Outputs are `frontend/dist/` and `frontend/preview/` (HTML plus the three team
+PNGs for the standalone build). Production remains the fictional demonstration.
+Both configurations enforce default-deny packaging; environment variables cannot
+approve real-player publication. Do not put real payloads in distributable assets.
 
-## 📁 Project Structure
+After separate private provisioning, run `python -B -m scripts.verify_local_inputs`
+from the root, `python -B -m scripts.run_backend_tests private -q`, and, from
+`frontend/`, `npm run test:private`. `npm test` and
+`python -B -m scripts.run_backend_tests all -q` retain the complete suites.
+Private checks require more research fixtures than the seven runtime files and
+an immutable Joseph contributor Git object; see [test prerequisites](docs/source-handoff.md).
+Missing inputs are incomplete verification, never a passing private acceptance.
 
-```
-soccer-defensive-control-index/
-├── data/                # Raw and processed event data (StatsBomb / Opta)
-├── src/
-│   ├── ingestion/       # Data loading & parsing from JSON event data
-│   ├── metrics/         # Core metric calculations (press resistance, line-breaking, etc.)
-│   ├── networks/        # Passing network construction (NetworkX)
-│   └── viz/             # mplsoccer pitch visualizations & plotting utilities
-├── app/                 # Streamlit dashboard
-├── notebooks/           # Exploratory analysis & metric prototyping
-├── tests/                # Unit tests
-├── requirements.txt
-└── README.md
-```
+## Handoff and contribution boundaries
 
----
+See [source handoff and test contract](docs/source-handoff.md) for file review,
+checkout verification and the staging-approval boundary. Private/processed/
+derived evidence, local observations, caches and builds stay excluded from Git.
+Never use a blanket staging operation. Do not regenerate frozen data to repair
+setup or checksum errors. The historical `streamlit run app/main.py` instruction
+is obsolete: that entry point does not exist; Vite is the current website.
 
-## 🧭 Roadmap
-
-- [ ] Define and document metric specs (press resistance thresholds, line-breaking pass criteria, recovery coverage zones)
-- [ ] Build data ingestion pipeline for StatsBomb Open Data
-- [ ] Implement core metric calculations
-- [ ] Build passing network analysis module
-- [ ] Design pitch visualizations with `mplsoccer`
-- [ ] Ship v1 Streamlit scouting dashboard
-- [ ] Expand coverage across top 5 European leagues
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome. Please open an issue to discuss proposed changes before submitting a pull request, and make sure any new metric includes a written definition in line with the PM's metric-spec documentation.
-
----
-
-## 📄 License
-
-*Add your chosen license here (e.g., MIT).*
-
-## Delivery validation (M1)
-
-See [the read-only validator guide](docs/m1-validation.md) for explicit-path dataset checks, comparison, and synthetic tests.
+No project-wide redistribution license has been selected. Existing demo build
+admission does not confer data or contributor-asset publication rights. Public
+real-player delivery remains disabled and needs separate authorization.

@@ -377,7 +377,6 @@ main, footer { overflow-x: clip; }
 .team-inner { padding: 28px 0 0; }
 .team-inner .note { color: var(--mute); max-width: 640px; line-height: 1.6; }
 .slots { display: grid; gap: 14px; margin-top: 22px; grid-template-columns: 1fr; }
-@media (min-width: 860px) { .slots { grid-template-columns: repeat(3, 1fr); } }
 .slot figcaption { margin-top: 10px; color: var(--mute); }
 .slot .photo { aspect-ratio: 16/10; width: 100%; }
 .slot .team-image img { object-fit: contain; display: block; }

@@ -4,11 +4,16 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "test": "node scripts/runTests.mjs all",
+    "test:public": "node scripts/runTests.mjs public",
+    "test:private": "node scripts/runTests.mjs private",
+    "test:packaging": "node scripts/runTests.mjs packaging",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "preview:single": "vite build -c vite.single.config.js"
   },
+  "packageManager": "npm@11.19.0",
   "dependencies": {
     "@fontsource/chakra-petch": "^5.3.0",
     "@fontsource/ibm-plex-mono": "^5.3.0",

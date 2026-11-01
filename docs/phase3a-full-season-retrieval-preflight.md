@@ -329,7 +329,7 @@ noncertifying semantics.
 | Git and whitespace | `git diff --check` and new-document trailing whitespace checks passed; index empty; no tracked changes |
 
 The before/after integrity baseline and validation summary are local artifacts at
-`C:/Users/Ayush/.codex/visualizations/2026/10/28/01a1803f-719e-7233-acbc-c9910b9fdc7b/`
+`<external-verification-output>`
 (`phase3a-integrity-before.json`, `phase3a-validation.json`). Fresh replay reports
 are isolated there under `phase3a-offline-replay/`; preserved evidence directories
 received no writes. The helper check exercised only its offline branch, not a

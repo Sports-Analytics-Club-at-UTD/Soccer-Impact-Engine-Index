@@ -1,0 +1,10 @@
+# Optional historical visualization/network research, not needed by the website.
+# Versions below are installed in the accepted environment; no numerical changes.
+-r requirements.txt
+scikit-learn==1.6.1
+NetworkX==3.6.1
+matplotlib==3.10.0
+seaborn==0.13.2
+plotly==6.0.0
+# Historical mplsoccer/Streamlit proposals are not current startup dependencies.
+# Their versions were not validated; review separately before reintroducing them.

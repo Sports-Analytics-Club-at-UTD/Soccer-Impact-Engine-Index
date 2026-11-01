@@ -57,43 +57,36 @@ export const TEAMS_SECTION = {
   eyebrow: "Spatial data",
   title: "Teams",
   intro:
-    "Spatial data only exists at team level, so this is where space is measured. Pick a team to open its visualizations.",
+    "Pick a team to view its off-ball spatial dominance in one team-level heat map.",
 };
 
-/* Add / remove teams freely. Each image: { label, src, caption } — leave src ""
-   to show a placeholder. */
+/* Each team shows one heat map: { label, src, alt, caption }. */
 export const TEAMS = [
   {
     id: "psg",
     short: "PSG",
     name: "Paris Saint-Germain",
-    note: "Placeholder: one or two lines on what stands out about this team's spatial profile.",
+    note: "Team-level zone control while opponents have possession, showing the defender-nearest share of observed space.",
     images: [
-      { label: "Spatial dominance", src: "/team/spatial_Paris_Saint-Germain.png", alt: "Paris Saint-Germain spatial dominance heatmap: defender-nearest share of observed space while opponents have possession.", caption: "Zone control map" },
-      { label: "Pressing zones", src: "", caption: "Where possession is won back" },
-      { label: "Off-ball dominance", src: "", caption: "Team-level only" },
+      { label: "OFF-BALL SPATIAL DOMINANCE", src: "/team/spatial_Paris_Saint-Germain.png", alt: "Paris Saint-Germain team-level off-ball spatial dominance heat map: defender-nearest share of observed space while opponents have possession.", caption: "TEAM-LEVEL HEAT MAP" },
     ],
   },
   {
     id: "barca",
     short: "Barça",
     name: "FC Barcelona",
-    note: "Placeholder: one or two lines on what stands out about this team's spatial profile.",
+    note: "Team-level zone control while opponents have possession, showing the defender-nearest share of observed space.",
     images: [
-      { label: "Spatial dominance", src: "/team/spatial_Barcelona.png", alt: "Barcelona spatial dominance heatmap: defender-nearest share of observed space while opponents have possession.", caption: "Zone control map" },
-      { label: "Pressing zones", src: "", caption: "Where possession is won back" },
-      { label: "Off-ball dominance", src: "", caption: "Team-level only" },
+      { label: "OFF-BALL SPATIAL DOMINANCE", src: "/team/spatial_Barcelona.png", alt: "Barcelona team-level off-ball spatial dominance heat map: defender-nearest share of observed space while opponents have possession.", caption: "TEAM-LEVEL HEAT MAP" },
     ],
   },
   {
     id: "leverkusen",
     short: "Leverkusen",
     name: "Bayer 04 Leverkusen",
-    note: "Placeholder: one or two lines on what stands out about this team's spatial profile.",
+    note: "Team-level zone control while opponents have possession, showing the defender-nearest share of observed space.",
     images: [
-      { label: "Spatial dominance", src: "/team/spatial_Bayer_Leverkusen.png", alt: "Bayer Leverkusen spatial dominance heatmap: defender-nearest share of observed space while opponents have possession.", caption: "Zone control map" },
-      { label: "Pressing zones", src: "", caption: "Where possession is won back" },
-      { label: "Off-ball dominance", src: "", caption: "Team-level only" },
+      { label: "OFF-BALL SPATIAL DOMINANCE", src: "/team/spatial_Bayer_Leverkusen.png", alt: "Bayer Leverkusen team-level off-ball spatial dominance heat map: defender-nearest share of observed space while opponents have possession.", caption: "TEAM-LEVEL HEAT MAP" },
     ],
   },
 ];
@@ -104,10 +97,10 @@ export const ABOUT = {
   intro: "Five members of the UTD Sports Analytics Club, eight weeks, one index.",
   // photo: "/team/name.jpg" — leave "" for a placeholder
   members: [
-    { name: "Vibhor Rajan", role: "Project Manager", does: "Scope, timeline and keeping the five of us shipping.", photo: "" },
-    { name: "Pratyush Malaviya", role: "Lead Developer", does: "Architecture, pipeline and the build you're looking at.", photo: "" },
-    { name: "Arpit Gupta", role: "Engineer", does: "Placeholder: what Arpit worked on.", photo: "" },
-    { name: "Ayush Mendhe", role: "Engineer", does: "Placeholder: what Ayush worked on.", photo: "" },
-    { name: "Joseph Olutayo", role: "Engineer", does: "Placeholder: what Joseph worked on.", photo: "" },
+    { name: "Vibhor Rajan", role: "Project Manager", does: "Scope, timeline, and website frontend development.", photo: "" },
+    { name: "Pratyush Malaviya", role: "Lead Developer", does: "Backend architecture, bringing the metric modules into one consistent codebase, and the press resistance rebuild.", photo: "" },
+    { name: "Arpit Gupta", role: "Engineer", does: "Built the StatsBomb data pipeline and the Defensive Recovery and Observed Spatial Dominance metrics.", photo: "" },
+    { name: "Ayush", role: "Integration Engineer", does: "Combined the team's metrics, matched player data across sources, validated the ratings, and integrated the results into the website.", photo: "" },
+    { name: "Joseph Olutayo", role: "Engineer", does: "Developed the Progressive Line-Breaking Pass metric.", photo: "" },
   ],
 };

@@ -220,64 +220,6 @@ class ProvisionalProfileTests(unittest.TestCase):
         self.assertEqual([p["identity"]["player_id"] for p in build_profiles(checked)["profiles"]], ["1"])
 
 
-class RealD2BProfileTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.paths = {"events": Path('data/validation/drive-raw-review/statsbomb_team_events.parquet'),
-                     "crosswalk": Path('data/processed/player_name_crosswalk.parquet'),
-                     "minutes": Path('data/validation/arpit-2026-10-21/player_minutes.parquet'),
-                     "lineups": Path('data/raw/statsbomb_lineups.parquet'),
-                     "metadata": Path('data/validation/arpit-match-context-review/match_metadata.parquet')}
-        if not all(p.is_file() for p in cls.paths.values()):
-            raise unittest.SkipTest("real D2B local inputs unavailable; no substitutions")
-        # Reuse D2B's exhaustive scan evidence only for the EXACT unchanged file.
-        # The fingerprint and four complete local counts are recorded in D1B/D2B.
-        with cls.paths["events"].open("rb") as handle:
-            digest = hashlib.file_digest(handle, "sha256").hexdigest()
-        assert digest == 'ec12fdd2340fb125671f4996abdac510c3dc6d81555848792520ce5df2519eb8'
-        prefix = next(pq.ParquetFile(cls.paths["events"]).iter_batches(
-            batch_size=65536, columns=EVENT_COLUMNS)).to_pandas()
-        events = prefix.loc[prefix.match_id.isin([3895107,3895292,3895320,3895348])].reset_index(drop=True)
-        assert events.groupby('match_id').size().to_dict() == {3895107:2403,3895292:2211,3895320:2134,3895348:2454}
-        cls.minutes = pq.read_table(cls.paths["minutes"]).to_pandas()
-        cls.audit = match_metrics(events, pq.read_table(cls.paths["crosswalk"]).to_pandas(), cls.minutes,
-            pq.read_table(cls.paths["lineups"]).to_pandas(), pq.read_table(cls.paths["metadata"]).to_pandas(),
-            local_collection_complete=True)
-        cls.output = build_profiles(cls.audit, delivered_minutes=cls.minutes)
-        cls.players = {p['identity']['player_id']: p for p in cls.output['profiles']}
-
-    def test_real_contexts_and_conservation(self):
-        self.assertEqual(len(self.output['profiles']), 82)
-        self.assertEqual(len({tuple(p['identity'][k] for k in PLAYER_KEYS) for p in self.output['profiles']}), 82)
-        self.assertEqual(sum(int(p['scope']['observed_event_count']) for p in self.output['profiles']), 9202)
-        for category, count in [('Tackle',77),('Interception',48),('Ball Recovery',350)]:
-            self.assertEqual(sum(int(p['pooled']['recovery'][category]['count'] or 0) for p in self.output['profiles']),count)
-        self.assertEqual(sum(int(p['pooled']['press']['counts']['pressured_actions'] or 0) for p in self.output['profiles']),737)
-
-    def test_real_xhaka_pooled_counts_and_rate(self):
-        row = self.players['3500']
-        self.assertEqual(row['identity']['player_name'], 'Granit Xhaka')
-        self.assertEqual(row['pooled']['recovery']['Ball Recovery']['count'], '16')
-        self.assertEqual(row['pooled']['press']['counts']['pressured_pass_attempts'], '32')
-        self.assertAlmostEqual(row['pooled']['press']['percentages']['press_resistance_rate']['value'],87.87878787878788)
-
-    def test_real_hlozek_match_rate_retained_but_pool_withheld(self):
-        row = self.players['28239']
-        match = next(m for m in row['matches'] if m['match_id']=='3895292')
-        self.assertAlmostEqual(match['recovery']['Ball Recovery']['per90']['value'],5.630865484880083)
-        self.assertFalse(row['pooled']['recovery']['Ball Recovery']['per90']['available'])
-        self.assertIn('3895348',row['scope']['included_match_ids'])  # Explicit bench record, no fake action row.
-        self.assertNotIn('3895348',row['scope']['observed_match_ids'])
-
-    def test_real_breithaupt_supported_pool_and_zero_minute_actors(self):
-        row = self.players['51825']
-        self.assertAlmostEqual(row['pooled']['recovery']['Ball Recovery']['per90']['value'],4.473902236951118)
-        for player_id in ('8934','32253','316245'):
-            exposure = self.players[player_id]['pooled']['exposure']
-            self.assertEqual(exposure['delivered_minutes'],0)
-            self.assertIsNone(exposure['aligned_minutes'])
-            self.assertIn('observed_activity_with_zero_delivered_minutes',exposure['source_ambiguities'])
-        json.dumps(self.output,allow_nan=False)
 
 
 if __name__ == '__main__':

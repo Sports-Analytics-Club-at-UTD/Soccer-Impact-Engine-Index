@@ -1,0 +1,1136 @@
+{
+  "classification": "synthetic",
+  "notice": "SYNTHETIC TEST FIXTURE / NOT REAL PLAYER RATINGS / NOT PUBLICATION AUTHORIZED",
+  "numeric_real_delivery_enabled": false,
+  "players": [
+    {
+      "attributes": {
+        "interceptions": {
+          "exclusions": [],
+          "label": "Interceptions",
+          "limited_data": false,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "MID",
+            "pool_fingerprint": "11569b3a73b3f66211d8c30c2ff21b0db3a0860f4190f8ebf47da5960920f2c6",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 900,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:mid-transfer:1",
+              "synthetic:fixture:mid-transfer:2",
+              "synthetic:fixture:mid-transfer:3",
+              "synthetic:fixture:mid-transfer:4",
+              "synthetic:fixture:mid-transfer:5",
+              "synthetic:fixture:mid-transfer:6",
+              "synthetic:fixture:mid-transfer:7",
+              "synthetic:fixture:mid-transfer:8",
+              "synthetic:fixture:mid-transfer:9",
+              "synthetic:fixture:mid-transfer:10"
+            ],
+            "numerator": 10,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "per90",
+            "value": 1.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 60.0
+        },
+        "line_breaking_passes": {
+          "exclusions": [],
+          "label": "Line Breaking — Progressive Passing Proxy",
+          "limited_data": false,
+          "measurement_kind": "progressive_passing_proxy",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "MID",
+            "pool_fingerprint": "2f16eae2bf92b40b53c6ce34796135399bbd5632256e1085f467b9d78bd47219",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 900,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:mid-transfer:1",
+              "synthetic:fixture:mid-transfer:2",
+              "synthetic:fixture:mid-transfer:3",
+              "synthetic:fixture:mid-transfer:4",
+              "synthetic:fixture:mid-transfer:5",
+              "synthetic:fixture:mid-transfer:6",
+              "synthetic:fixture:mid-transfer:7",
+              "synthetic:fixture:mid-transfer:8",
+              "synthetic:fixture:mid-transfer:9",
+              "synthetic:fixture:mid-transfer:10"
+            ],
+            "numerator": 30,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "per90",
+            "value": 3.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 70.0
+        },
+        "press_resistance": {
+          "exclusions": [],
+          "label": "Press Resistance",
+          "limited_data": false,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "MID",
+            "pool_fingerprint": "73151adf45d7f20fbc650bff38d8baba1dc203aded746588c2023516b42481c8",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": 40,
+            "denominator": 40,
+            "denominator_unit": "actions",
+            "match_ids": [
+              "synthetic:fixture:mid-transfer:1",
+              "synthetic:fixture:mid-transfer:2",
+              "synthetic:fixture:mid-transfer:3",
+              "synthetic:fixture:mid-transfer:4",
+              "synthetic:fixture:mid-transfer:5",
+              "synthetic:fixture:mid-transfer:6",
+              "synthetic:fixture:mid-transfer:7",
+              "synthetic:fixture:mid-transfer:8",
+              "synthetic:fixture:mid-transfer:9",
+              "synthetic:fixture:mid-transfer:10"
+            ],
+            "numerator": 30,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "percent",
+            "value": 75.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 75.0
+        },
+        "recoveries": {
+          "exclusions": [],
+          "label": "Ball Recovery",
+          "limited_data": false,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "MID",
+            "pool_fingerprint": "b8aef7d164726e084cedabc7094df0cae1383c17588723493b2ae693771f4bd5",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 900,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:mid-transfer:1",
+              "synthetic:fixture:mid-transfer:2",
+              "synthetic:fixture:mid-transfer:3",
+              "synthetic:fixture:mid-transfer:4",
+              "synthetic:fixture:mid-transfer:5",
+              "synthetic:fixture:mid-transfer:6",
+              "synthetic:fixture:mid-transfer:7",
+              "synthetic:fixture:mid-transfer:8",
+              "synthetic:fixture:mid-transfer:9",
+              "synthetic:fixture:mid-transfer:10"
+            ],
+            "numerator": 50,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "per90",
+            "value": 5.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 75.0
+        },
+        "tackles": {
+          "exclusions": [],
+          "label": "Tackling",
+          "limited_data": false,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "MID",
+            "pool_fingerprint": "b4b2af0d7f6596bdf731fd1647c142220c746f6829eec26c9bc16ceca783e8e8",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 900,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:mid-transfer:1",
+              "synthetic:fixture:mid-transfer:2",
+              "synthetic:fixture:mid-transfer:3",
+              "synthetic:fixture:mid-transfer:4",
+              "synthetic:fixture:mid-transfer:5",
+              "synthetic:fixture:mid-transfer:6",
+              "synthetic:fixture:mid-transfer:7",
+              "synthetic:fixture:mid-transfer:8",
+              "synthetic:fixture:mid-transfer:9",
+              "synthetic:fixture:mid-transfer:10"
+            ],
+            "numerator": 20,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "per90",
+            "value": 2.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 65.0
+        }
+      },
+      "clubs": [
+        {
+          "competition_name": "La Liga",
+          "match_ids": [
+            "synthetic:fixture:mid-transfer:1",
+            "synthetic:fixture:mid-transfer:2",
+            "synthetic:fixture:mid-transfer:3",
+            "synthetic:fixture:mid-transfer:4",
+            "synthetic:fixture:mid-transfer:5"
+          ],
+          "name": "SYNTHETIC North Club"
+        },
+        {
+          "competition_name": "Ligue 1",
+          "match_ids": [
+            "synthetic:fixture:mid-transfer:6",
+            "synthetic:fixture:mid-transfer:7",
+            "synthetic:fixture:mid-transfer:8",
+            "synthetic:fixture:mid-transfer:9",
+            "synthetic:fixture:mid-transfer:10"
+          ],
+          "name": "SYNTHETIC South Club"
+        }
+      ],
+      "comparison_position": "MID",
+      "id": "synthetic:mid-transfer:2015/2016",
+      "limited_data": false,
+      "name": "SYNTHETIC Mid Transfer",
+      "partial_season": false,
+      "player_id": "synthetic:mid-transfer",
+      "positions": [
+        "Center Midfield",
+        "Center Defensive Midfield"
+      ],
+      "provenance": [
+        {
+          "fingerprint": "46b8a17dd3dcc5414965062e99a78e1fd0d954499a43dc7b333ffcd9e694b3f9",
+          "id": "synthetic:evidence",
+          "label": "Invented test events and exposure; no real player",
+          "source": "synthetic:fixture-generator"
+        }
+      ],
+      "season_name": "2015/2016"
+    },
+    {
+      "attributes": {
+        "interceptions": {
+          "exclusions": [],
+          "label": "Interceptions",
+          "limited_data": false,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "CB",
+            "pool_fingerprint": "fadc3d0f315b6de82644e46774158abb2cb80925095c56ed592e430537cc9cad",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 900,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:cb:1",
+              "synthetic:fixture:cb:2",
+              "synthetic:fixture:cb:3",
+              "synthetic:fixture:cb:4",
+              "synthetic:fixture:cb:5",
+              "synthetic:fixture:cb:6",
+              "synthetic:fixture:cb:7",
+              "synthetic:fixture:cb:8",
+              "synthetic:fixture:cb:9",
+              "synthetic:fixture:cb:10"
+            ],
+            "numerator": 10,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "per90",
+            "value": 1.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 65.0
+        },
+        "line_breaking_passes": {
+          "exclusions": [],
+          "label": "Line Breaking — Progressive Passing Proxy",
+          "limited_data": false,
+          "measurement_kind": "progressive_passing_proxy",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "CB",
+            "pool_fingerprint": "2f2c04bd7a692e43e25b47a88f64f25813716db9391024afc57f2e75f99dd72d",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 900,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:cb:1",
+              "synthetic:fixture:cb:2",
+              "synthetic:fixture:cb:3",
+              "synthetic:fixture:cb:4",
+              "synthetic:fixture:cb:5",
+              "synthetic:fixture:cb:6",
+              "synthetic:fixture:cb:7",
+              "synthetic:fixture:cb:8",
+              "synthetic:fixture:cb:9",
+              "synthetic:fixture:cb:10"
+            ],
+            "numerator": 30,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "per90",
+            "value": 3.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 75.0
+        },
+        "press_resistance": {
+          "exclusions": [],
+          "label": "Press Resistance",
+          "limited_data": false,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "CB",
+            "pool_fingerprint": "54a7a5ad48b2492c5c2c388e0aab4a099726108f65e6a3d4385fc3574fa9ea8e",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": 40,
+            "denominator": 40,
+            "denominator_unit": "actions",
+            "match_ids": [
+              "synthetic:fixture:cb:1",
+              "synthetic:fixture:cb:2",
+              "synthetic:fixture:cb:3",
+              "synthetic:fixture:cb:4",
+              "synthetic:fixture:cb:5",
+              "synthetic:fixture:cb:6",
+              "synthetic:fixture:cb:7",
+              "synthetic:fixture:cb:8",
+              "synthetic:fixture:cb:9",
+              "synthetic:fixture:cb:10"
+            ],
+            "numerator": 30,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "percent",
+            "value": 75.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 80.0
+        },
+        "recoveries": {
+          "exclusions": [],
+          "label": "Ball Recovery",
+          "limited_data": false,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "CB",
+            "pool_fingerprint": "b46c8b41662ee6f9a0c53c19b43f7d5e4c7119db01706f3c6306e134e65160c9",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 900,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:cb:1",
+              "synthetic:fixture:cb:2",
+              "synthetic:fixture:cb:3",
+              "synthetic:fixture:cb:4",
+              "synthetic:fixture:cb:5",
+              "synthetic:fixture:cb:6",
+              "synthetic:fixture:cb:7",
+              "synthetic:fixture:cb:8",
+              "synthetic:fixture:cb:9",
+              "synthetic:fixture:cb:10"
+            ],
+            "numerator": 50,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "per90",
+            "value": 5.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 85.0
+        },
+        "tackles": {
+          "exclusions": [],
+          "label": "Tackling",
+          "limited_data": false,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "CB",
+            "pool_fingerprint": "a1bb0f7fadc27049e1ad6919048ed520f74d3ccb9b9548e3ff8f04f392413ff5",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 900,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:cb:1",
+              "synthetic:fixture:cb:2",
+              "synthetic:fixture:cb:3",
+              "synthetic:fixture:cb:4",
+              "synthetic:fixture:cb:5",
+              "synthetic:fixture:cb:6",
+              "synthetic:fixture:cb:7",
+              "synthetic:fixture:cb:8",
+              "synthetic:fixture:cb:9",
+              "synthetic:fixture:cb:10"
+            ],
+            "numerator": 20,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "per90",
+            "value": 2.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 75.0
+        }
+      },
+      "clubs": [
+        {
+          "competition_name": "La Liga",
+          "match_ids": [
+            "synthetic:fixture:cb:1",
+            "synthetic:fixture:cb:2",
+            "synthetic:fixture:cb:3",
+            "synthetic:fixture:cb:4",
+            "synthetic:fixture:cb:5",
+            "synthetic:fixture:cb:6",
+            "synthetic:fixture:cb:7",
+            "synthetic:fixture:cb:8",
+            "synthetic:fixture:cb:9",
+            "synthetic:fixture:cb:10"
+          ],
+          "name": "SYNTHETIC North Club"
+        }
+      ],
+      "comparison_position": "CB",
+      "id": "synthetic:cb:2015/2016",
+      "limited_data": false,
+      "name": "SYNTHETIC Cb",
+      "partial_season": false,
+      "player_id": "synthetic:cb",
+      "positions": [
+        "Center Back"
+      ],
+      "provenance": [
+        {
+          "fingerprint": "e3c60f03f7df3fbde70a9d9f5410154d874cb0de39887b27c4ddecfd9aa885d8",
+          "id": "synthetic:evidence",
+          "label": "Invented test events and exposure; no real player",
+          "source": "synthetic:fixture-generator"
+        }
+      ],
+      "season_name": "2015/2016"
+    },
+    {
+      "attributes": {
+        "interceptions": {
+          "exclusions": [],
+          "label": "Interceptions",
+          "limited_data": true,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "CB",
+            "pool_fingerprint": "fadc3d0f315b6de82644e46774158abb2cb80925095c56ed592e430537cc9cad",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 180,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:bundesliga:1",
+              "synthetic:fixture:bundesliga:2"
+            ],
+            "numerator": 2,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 180
+            },
+            "unit": "per90",
+            "value": 1.0
+          },
+          "partial_season": true,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 65.0
+        },
+        "line_breaking_passes": {
+          "exclusions": [],
+          "label": "Line Breaking — Progressive Passing Proxy",
+          "limited_data": true,
+          "measurement_kind": "progressive_passing_proxy",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "CB",
+            "pool_fingerprint": "2f2c04bd7a692e43e25b47a88f64f25813716db9391024afc57f2e75f99dd72d",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 180,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:bundesliga:1",
+              "synthetic:fixture:bundesliga:2"
+            ],
+            "numerator": 6,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 180
+            },
+            "unit": "per90",
+            "value": 3.0
+          },
+          "partial_season": true,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 75.0
+        },
+        "press_resistance": {
+          "exclusions": [],
+          "label": "Press Resistance",
+          "limited_data": true,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "CB",
+            "pool_fingerprint": "54a7a5ad48b2492c5c2c388e0aab4a099726108f65e6a3d4385fc3574fa9ea8e",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": 12,
+            "denominator": 12,
+            "denominator_unit": "actions",
+            "match_ids": [
+              "synthetic:fixture:bundesliga:1",
+              "synthetic:fixture:bundesliga:2"
+            ],
+            "numerator": 5,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 180
+            },
+            "unit": "percent",
+            "value": 41.66666666666667
+          },
+          "partial_season": true,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 46.66666666666667
+        },
+        "recoveries": {
+          "exclusions": [],
+          "label": "Ball Recovery",
+          "limited_data": true,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "CB",
+            "pool_fingerprint": "b46c8b41662ee6f9a0c53c19b43f7d5e4c7119db01706f3c6306e134e65160c9",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 180,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:bundesliga:1",
+              "synthetic:fixture:bundesliga:2"
+            ],
+            "numerator": 10,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 180
+            },
+            "unit": "per90",
+            "value": 5.0
+          },
+          "partial_season": true,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 85.0
+        },
+        "tackles": {
+          "exclusions": [],
+          "label": "Tackling",
+          "limited_data": true,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "CB",
+            "pool_fingerprint": "a1bb0f7fadc27049e1ad6919048ed520f74d3ccb9b9548e3ff8f04f392413ff5",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 180,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:bundesliga:1",
+              "synthetic:fixture:bundesliga:2"
+            ],
+            "numerator": 4,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 180
+            },
+            "unit": "per90",
+            "value": 2.0
+          },
+          "partial_season": true,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 75.0
+        }
+      },
+      "clubs": [
+        {
+          "competition_name": "1. Bundesliga",
+          "match_ids": [
+            "synthetic:fixture:bundesliga:1",
+            "synthetic:fixture:bundesliga:2"
+          ],
+          "name": "SYNTHETIC North Club"
+        }
+      ],
+      "comparison_position": "CB",
+      "id": "synthetic:bundesliga:2015/2016",
+      "limited_data": true,
+      "name": "SYNTHETIC Bundesliga",
+      "partial_season": true,
+      "player_id": "synthetic:bundesliga",
+      "positions": [
+        "Center Back"
+      ],
+      "provenance": [
+        {
+          "fingerprint": "93d042af6407bf860c6e739a79608b21556ce9267aa293cab31038be29ee74a7",
+          "id": "synthetic:evidence",
+          "label": "Invented test events and exposure; no real player",
+          "source": "synthetic:fixture-generator"
+        }
+      ],
+      "season_name": "2015/2016"
+    },
+    {
+      "attributes": {
+        "interceptions": {
+          "exclusions": [],
+          "label": "Interceptions",
+          "limited_data": false,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "MID",
+            "pool_fingerprint": "11569b3a73b3f66211d8c30c2ff21b0db3a0860f4190f8ebf47da5960920f2c6",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 900,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:missing:1",
+              "synthetic:fixture:missing:2",
+              "synthetic:fixture:missing:3",
+              "synthetic:fixture:missing:4",
+              "synthetic:fixture:missing:5",
+              "synthetic:fixture:missing:6",
+              "synthetic:fixture:missing:7",
+              "synthetic:fixture:missing:8",
+              "synthetic:fixture:missing:9",
+              "synthetic:fixture:missing:10"
+            ],
+            "numerator": 10,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "per90",
+            "value": 1.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 60.0
+        },
+        "line_breaking_passes": {
+          "exclusions": [
+            {
+              "match_id": "synthetic:fixture:missing:1",
+              "reasons": [
+                "SYNTHETIC unsupported geometry"
+              ]
+            }
+          ],
+          "label": "Line Breaking — Progressive Passing Proxy",
+          "limited_data": false,
+          "measurement_kind": "progressive_passing_proxy",
+          "missingness": [
+            "SYNTHETIC missing geometry example"
+          ],
+          "normalization": {
+            "comparison_position": "MID",
+            "pool_fingerprint": "2f16eae2bf92b40b53c6ce34796135399bbd5632256e1085f467b9d78bd47219",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": null,
+          "partial_season": false,
+          "percentile": null,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": null
+        },
+        "press_resistance": {
+          "exclusions": [],
+          "label": "Press Resistance",
+          "limited_data": false,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "MID",
+            "pool_fingerprint": "73151adf45d7f20fbc650bff38d8baba1dc203aded746588c2023516b42481c8",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": 40,
+            "denominator": 40,
+            "denominator_unit": "actions",
+            "match_ids": [
+              "synthetic:fixture:missing:1",
+              "synthetic:fixture:missing:2",
+              "synthetic:fixture:missing:3",
+              "synthetic:fixture:missing:4",
+              "synthetic:fixture:missing:5",
+              "synthetic:fixture:missing:6",
+              "synthetic:fixture:missing:7",
+              "synthetic:fixture:missing:8",
+              "synthetic:fixture:missing:9",
+              "synthetic:fixture:missing:10"
+            ],
+            "numerator": 30,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "percent",
+            "value": 75.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 75.0
+        },
+        "recoveries": {
+          "exclusions": [],
+          "label": "Ball Recovery",
+          "limited_data": false,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "MID",
+            "pool_fingerprint": "b8aef7d164726e084cedabc7094df0cae1383c17588723493b2ae693771f4bd5",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 900,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:missing:1",
+              "synthetic:fixture:missing:2",
+              "synthetic:fixture:missing:3",
+              "synthetic:fixture:missing:4",
+              "synthetic:fixture:missing:5",
+              "synthetic:fixture:missing:6",
+              "synthetic:fixture:missing:7",
+              "synthetic:fixture:missing:8",
+              "synthetic:fixture:missing:9",
+              "synthetic:fixture:missing:10"
+            ],
+            "numerator": 50,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "per90",
+            "value": 5.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 75.0
+        },
+        "tackles": {
+          "exclusions": [],
+          "label": "Tackling",
+          "limited_data": false,
+          "measurement_kind": "observed_metric",
+          "missingness": [],
+          "normalization": {
+            "comparison_position": "MID",
+            "pool_fingerprint": "b4b2af0d7f6596bdf731fd1647c142220c746f6829eec26c9bc16ceca783e8e8",
+            "reference_fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+            "reference_version": "synthetic:frozen-five:v1"
+          },
+          "observation": {
+            "action_sample_size": null,
+            "denominator": 900,
+            "denominator_unit": "minutes",
+            "match_ids": [
+              "synthetic:fixture:missing:1",
+              "synthetic:fixture:missing:2",
+              "synthetic:fixture:missing:3",
+              "synthetic:fixture:missing:4",
+              "synthetic:fixture:missing:5",
+              "synthetic:fixture:missing:6",
+              "synthetic:fixture:missing:7",
+              "synthetic:fixture:missing:8",
+              "synthetic:fixture:missing:9",
+              "synthetic:fixture:missing:10"
+            ],
+            "numerator": 20,
+            "supported_minutes": {
+              "denominator": 1,
+              "numerator": 900
+            },
+            "unit": "per90",
+            "value": 2.0
+          },
+          "partial_season": false,
+          "percentile": 75,
+          "provenance_ids": [
+            "synthetic:evidence"
+          ],
+          "rating": 65.0
+        }
+      },
+      "clubs": [
+        {
+          "competition_name": "La Liga",
+          "match_ids": [
+            "synthetic:fixture:missing:1",
+            "synthetic:fixture:missing:2",
+            "synthetic:fixture:missing:3",
+            "synthetic:fixture:missing:4",
+            "synthetic:fixture:missing:5",
+            "synthetic:fixture:missing:6",
+            "synthetic:fixture:missing:7",
+            "synthetic:fixture:missing:8",
+            "synthetic:fixture:missing:9",
+            "synthetic:fixture:missing:10"
+          ],
+          "name": "SYNTHETIC North Club"
+        }
+      ],
+      "comparison_position": "MID",
+      "id": "synthetic:missing:2015/2016",
+      "limited_data": false,
+      "name": "SYNTHETIC Missing",
+      "partial_season": false,
+      "player_id": "synthetic:missing",
+      "positions": [
+        "Center Midfield",
+        "Center Defensive Midfield"
+      ],
+      "provenance": [
+        {
+          "fingerprint": "272fbaa2bdadba37e2cac745e9dfe7ba5d82284377ce8674acc832208859ed55",
+          "id": "synthetic:evidence",
+          "label": "Invented test events and exposure; no real player",
+          "source": "synthetic:fixture-generator"
+        }
+      ],
+      "season_name": "2015/2016"
+    }
+  ],
+  "publication_authorized": false,
+  "reference": {
+    "fingerprint": "4cc608b9dd11fbf57b837fd33a02b142d03fa810ab9a4dd4fa17a152f4aa5129",
+    "positions": {
+      "CB": {
+        "interceptions": {
+          "comparison_position": "CB",
+          "fingerprint": "fadc3d0f315b6de82644e46774158abb2cb80925095c56ed592e430537cc9cad",
+          "mean": 1,
+          "member_ids": [
+            "synthetic:reference:CB:1",
+            "synthetic:reference:CB:2",
+            "synthetic:reference:CB:3",
+            "synthetic:reference:CB:4"
+          ],
+          "metric_id": "interceptions",
+          "n": 4,
+          "population_version": "synthetic:population:v1",
+          "sample_sd": 0.4
+        },
+        "line_breaking_passes": {
+          "comparison_position": "CB",
+          "fingerprint": "2f2c04bd7a692e43e25b47a88f64f25813716db9391024afc57f2e75f99dd72d",
+          "mean": 2,
+          "member_ids": [
+            "synthetic:reference:CB:1",
+            "synthetic:reference:CB:2",
+            "synthetic:reference:CB:3",
+            "synthetic:reference:CB:4"
+          ],
+          "metric_id": "line_breaking_passes",
+          "n": 4,
+          "population_version": "synthetic:population:v1",
+          "sample_sd": 1
+        },
+        "press_resistance": {
+          "comparison_position": "CB",
+          "fingerprint": "54a7a5ad48b2492c5c2c388e0aab4a099726108f65e6a3d4385fc3574fa9ea8e",
+          "mean": 60,
+          "member_ids": [
+            "synthetic:reference:CB:1",
+            "synthetic:reference:CB:2",
+            "synthetic:reference:CB:3",
+            "synthetic:reference:CB:4"
+          ],
+          "metric_id": "press_resistance",
+          "n": 4,
+          "population_version": "synthetic:population:v1",
+          "sample_sd": 10
+        },
+        "recoveries": {
+          "comparison_position": "CB",
+          "fingerprint": "b46c8b41662ee6f9a0c53c19b43f7d5e4c7119db01706f3c6306e134e65160c9",
+          "mean": 3,
+          "member_ids": [
+            "synthetic:reference:CB:1",
+            "synthetic:reference:CB:2",
+            "synthetic:reference:CB:3",
+            "synthetic:reference:CB:4"
+          ],
+          "metric_id": "recoveries",
+          "n": 4,
+          "population_version": "synthetic:population:v1",
+          "sample_sd": 1
+        },
+        "tackles": {
+          "comparison_position": "CB",
+          "fingerprint": "a1bb0f7fadc27049e1ad6919048ed520f74d3ccb9b9548e3ff8f04f392413ff5",
+          "mean": 1.5,
+          "member_ids": [
+            "synthetic:reference:CB:1",
+            "synthetic:reference:CB:2",
+            "synthetic:reference:CB:3",
+            "synthetic:reference:CB:4"
+          ],
+          "metric_id": "tackles",
+          "n": 4,
+          "population_version": "synthetic:population:v1",
+          "sample_sd": 0.5
+        }
+      },
+      "MID": {
+        "interceptions": {
+          "comparison_position": "MID",
+          "fingerprint": "11569b3a73b3f66211d8c30c2ff21b0db3a0860f4190f8ebf47da5960920f2c6",
+          "mean": 1.2,
+          "member_ids": [
+            "synthetic:reference:MID:1",
+            "synthetic:reference:MID:2",
+            "synthetic:reference:MID:3",
+            "synthetic:reference:MID:4"
+          ],
+          "metric_id": "interceptions",
+          "n": 4,
+          "population_version": "synthetic:population:v1",
+          "sample_sd": 0.4
+        },
+        "line_breaking_passes": {
+          "comparison_position": "MID",
+          "fingerprint": "2f16eae2bf92b40b53c6ce34796135399bbd5632256e1085f467b9d78bd47219",
+          "mean": 2.5,
+          "member_ids": [
+            "synthetic:reference:MID:1",
+            "synthetic:reference:MID:2",
+            "synthetic:reference:MID:3",
+            "synthetic:reference:MID:4"
+          ],
+          "metric_id": "line_breaking_passes",
+          "n": 4,
+          "population_version": "synthetic:population:v1",
+          "sample_sd": 1
+        },
+        "press_resistance": {
+          "comparison_position": "MID",
+          "fingerprint": "73151adf45d7f20fbc650bff38d8baba1dc203aded746588c2023516b42481c8",
+          "mean": 65,
+          "member_ids": [
+            "synthetic:reference:MID:1",
+            "synthetic:reference:MID:2",
+            "synthetic:reference:MID:3",
+            "synthetic:reference:MID:4"
+          ],
+          "metric_id": "press_resistance",
+          "n": 4,
+          "population_version": "synthetic:population:v1",
+          "sample_sd": 10
+        },
+        "recoveries": {
+          "comparison_position": "MID",
+          "fingerprint": "b8aef7d164726e084cedabc7094df0cae1383c17588723493b2ae693771f4bd5",
+          "mean": 4,
+          "member_ids": [
+            "synthetic:reference:MID:1",
+            "synthetic:reference:MID:2",
+            "synthetic:reference:MID:3",
+            "synthetic:reference:MID:4"
+          ],
+          "metric_id": "recoveries",
+          "n": 4,
+          "population_version": "synthetic:population:v1",
+          "sample_sd": 1
+        },
+        "tackles": {
+          "comparison_position": "MID",
+          "fingerprint": "b4b2af0d7f6596bdf731fd1647c142220c746f6829eec26c9bc16ceca783e8e8",
+          "mean": 2,
+          "member_ids": [
+            "synthetic:reference:MID:1",
+            "synthetic:reference:MID:2",
+            "synthetic:reference:MID:3",
+            "synthetic:reference:MID:4"
+          ],
+          "metric_id": "tackles",
+          "n": 4,
+          "population_version": "synthetic:population:v1",
+          "sample_sd": 0.5
+        }
+      }
+    },
+    "synthetic": true,
+    "version": "synthetic:frozen-five:v1"
+  },
+  "schema_version": "soccer-five-attribute-presentation/v1"
+}

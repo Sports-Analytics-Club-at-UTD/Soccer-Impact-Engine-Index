@@ -3,8 +3,17 @@ import { MIN_MINUTES } from "../lib/data.js";
 import { useCountUp, useTilt } from "../lib/hooks.js";
 import Radar from "./Radar.jsx";
 import { IconClose, Photo } from "./ui.jsx";
+import ProvisionalPlayerCard from "./ProvisionalPlayerCard.jsx";
+import FiveAttributePlayerCard from "./FiveAttributePlayerCard.jsx";
 
 export default function PlayerCard({ player, onClose, demo = false }) {
+  if (player.fiveAttributePresentation) return <FiveAttributePlayerCard player={player} onClose={onClose} />;
+  return player.provisional
+    ? <ProvisionalPlayerCard player={player} onClose={onClose} />
+    : <StandardPlayerCard player={player} onClose={onClose} demo={demo} />;
+}
+
+function StandardPlayerCard({ player, onClose, demo = false }) {
   const tilt = useTilt({ max: 4, scale: 1.01 });
   const card = ratingCard(player, { demo });
   const animatedOvr = useCountUp(card.ovr ?? 0);

@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "description": "Required test modules and reviewed LF-normalized source hashes. Missing or altered modules fail before execution. Hashes contain no expected private values.",
+  "public_files": [
+    "componentClassification.test.js",
+    "diagnosticIntegration.test.js",
+    "fiveAttributePresentation.test.js",
+    "productionDataAdmission.test.js",
+    "provisionalDelivery.test.js",
+    "ratingCard.test.js",
+    "ratingDelivery.test.js",
+    "rawIntegration.test.js",
+    "scorecardAdapter.test.js",
+    "unifiedLocal.test.js"
+  ],
+  "private_files": [
+    "localExperimentalRatings.test.js",
+    "productionDataAdmission.private.test.js",
+    "provisionalDelivery.private.test.js",
+    "provisionalOvr.test.js"
+  ],
+  "source_sha256": {
+    "componentClassification.test.js": "bebc4a688ebc1bd5e55846bdaf5be1fb3ec793d76677fcb373f6ca7697a6e848",
+    "diagnosticIntegration.test.js": "7b0e0b0f4aa6a693277ae194ffd9d592a9ac6319f0d1eed1b2e847e66da11fda",
+    "fiveAttributePresentation.test.js": "bbafe3140943466202ba329be067779862fa39cc1948ec9704b8515f5a96a35c",
+    "localExperimentalRatings.test.js": "5f299f293a42c6ba5e493736a744e9b2cc6cddad19897960546d005c91bf306c",
+    "productionDataAdmission.private.test.js": "c5b7cc093681b38dd58c5fc34a544cbff5027d8fe0ec138832b562fca192c9bb",
+    "productionDataAdmission.test.js": "0769cefe3e9b2b2ada393d4507e65ec22ca6124cf34d38aec2bcaee8a9897198",
+    "provisionalDelivery.private.test.js": "143fdc79c4ca2e48959fcf5b01607b4b8c7514c90f1a7ee80c3086fc4b52e544",
+    "provisionalDelivery.test.js": "723a6fd0ae8632ba0b4b1ad2372aa100e10bb4c11f0373f674c9e28da277a961",
+    "provisionalOvr.test.js": "d81be8883c07b990734c30eb1c230eb7f03b0bb707489328634f8f4eb8b50b04",
+    "ratingCard.test.js": "22402c9610a0001244326603a19a03f8575aa053a857e2567ca31865c719b0a2",
+    "ratingDelivery.test.js": "fa69c9ffe3257b9ad370c4bd5fcc157ccc9e82b5180bc41ecfa271d94cd4213b",
+    "rawIntegration.test.js": "a31208e8d502162a0b23e7fd34141a4d60a6147671351177bf3fb0483083f13e",
+    "scorecardAdapter.test.js": "50812dd0291dbd031d9d047b1c1b98a3c110e3f2b9b0e96d2d63c36bf3af011e",
+    "unifiedLocal.test.js": "9e4252313a1749b37325b5e53abb6d45a87c6f91963505261eef4a70dbec75b9"
+  },
+  "network_tests": {
+    "public": [
+      "actual production preview serves demo assets but no observation or private score JSON"
+    ],
+    "private": [
+      "local development retains observations, Formula B, identities, provenance and strict ranks"
+    ]
+  }
+}

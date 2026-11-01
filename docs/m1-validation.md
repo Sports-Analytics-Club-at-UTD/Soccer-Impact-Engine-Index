@@ -12,7 +12,7 @@ or unreadable files instead. Run from this integration worktree:
 
 ~~~powershell
 Set-Location '<path-to-repository>'
-$sourceRoot = 'C:\Users\Ayush\Desktop\Projects\Soccer-Impact-Engine-Index'
+$sourceRoot = '<repository-root>'
 $original = Join-Path $sourceRoot 'data\processed'
 $revised = Join-Path $sourceRoot 'data\validation\arpit-2026-10-21'
 

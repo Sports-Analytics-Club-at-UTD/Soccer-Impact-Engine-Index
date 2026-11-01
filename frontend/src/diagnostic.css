@@ -19,4 +19,8 @@
 .diagnostic-zones div { border: 1px solid var(--line); padding: .3rem; }
 .diagnostic-zones b { display: block; font-size: 1rem; }
 .diagnostic-experience :focus-visible { outline: 2px solid var(--a1); outline-offset: 3px; }
+.provisional-card { overflow-wrap: anywhere; }
+.provisional-card details { margin: 1rem 0; }
+.provisional-card summary { cursor: pointer; }
+.diagnostic-controls input[type="checkbox"] { width: auto; margin-right: .5rem; }
 @media(max-width:700px) { .diagnostic-layout { grid-template-columns: 1fr; } .diagnostic-list { max-height: 240px; } .diagnostic-profile { padding: 1rem; } }

@@ -14,6 +14,7 @@ export default function DemoExperience({ theme, onToggle }) {
     <Nav theme={theme} onToggle={onToggle} />
     <main>
       <p className="wrap mono mode-notice" role="note">Demo data — fictional players and illustrative ratings.</p>
+      {import.meta.env.DEV && <p className="wrap"><a href="?view=limited-data">Browse verified 2015/16 Bundesliga observations</a></p>}
       <Hero /><Description /><Archetypes /><Search /><Teams /><About />
     </main>
     <Footer />

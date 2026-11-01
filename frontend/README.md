@@ -1,100 +1,84 @@
-# SAC Midfielder/Defender Index
+# Soccer Impact Index frontend
 
-## Integration status: explicit demo and raw modes
+React/Vite local scouting website: **Home | Players | Leaderboards | Compare |
+Teams | About**. Production serves the fictional demo. The loopback development
+homepage serves the existing authorized real-player experiment.
 
-The default demo UI uses fictional players and illustrative percentiles, OVR and
-archetypes. Raw mode loads the existing M5A contract into a separate search and
-measurement-card experience, without demo scoring or charts. Do not replace demo
-JSON with backend measurements or run the legacy converter for production.
-See [the frontend contract](../docs/m5a-frontend-contract.md) and
-[M5B integration](../docs/m5b-react-metric-integration.md). No production player
-JSON is supplied; structural validation does not certify source coverage.
+## Start
 
-Single-page site for the UTD Sports Analytics Club scouting model.
-Vite + React with static production output. Both modes compile; the Integration
-Lead reports limited manual Brave checks. Populated raw-data, comprehensive
-accessibility and hosting acceptance remain pending (see [M5C verification](../docs/m5c-frontend-build-verification.md)).
-
-## Run it
-
-```bash
-npm ci --no-audit --no-fund # install the locked dependencies when needed
-npm run dev            # local site at http://localhost:5173
-npm run build          # production build into /dist (what Vercel runs)
-npm run preview:single # one self-contained file at preview/index.html
-```
-
-## Static hosting configuration (not deployed)
-
-Configure the hosting project root as `frontend`, its build command as
-`npm run build`, and its output directory as `dist`. Select the intended
-`VITE_PLAYER_DATA_MODE` explicitly; unset mode defaults to the fictional demo.
-For a subpath deployment, configure the Vite base path for that destination.
-
-No deployment or automatic redeploy setup is established by these checks.
-Complete the remaining M5C acceptance checklist before release. Raw mode additionally
-needs verified, appropriately scoped scorecard data; a passing build does not
-prove production data coverage or approved scoring. Do not assume that changes
-to any Git branch trigger deployment.
-
-## Where to edit things
-
-| What | File |
-|---|---|
-| All page text, nav labels, team panels, About Us members | `src/content.js` |
-| Archetype names, descriptions, tier cut-offs (90 / 75) | `src/lib/archetypes.js` |
-| Fictional demo OVR only (mean of historical five percentiles) | `demoOverall()` in `src/lib/archetypes.js` |
-| Minutes warning threshold (1000) | `MIN_MINUTES` in `src/lib/data.js` |
-| Hero title lines | `LINES` at the top of `src/components/Hero.jsx` |
-| Colors for dark and light mode | the top of `src/styles.css` |
-
-### Images and clips
-
-Put files in `/public` and reference them from `src/content.js` with a leading slash.
-
-| What | Folder | Set it in |
-|---|---|---|
-| Hero football clip (MP4) | `public/clips/` | `HERO.videoSrc` |
-| Team spatial visualizations | `public/teams/` | each team's `images[].src` |
-| Team member photos | `public/team/` | `ABOUT.members[].photo` |
-| FIFA 16 player photos | `public/players/` | the `photo` field per player (see below) |
-
-Any slot left as `""` shows a labelled placeholder.
-
-## Loading raw scorecards without replacing the demo
-
-With dependencies already available, choose the mode explicitly in PowerShell
-before starting Vite (restart after configuration changes):
+Use Node 24.21.0 / npm 11.19.0 (tested) and Python 3.13.0 (tested; minimum 3.11).
+Follow the [root setup](../README.md) to install and activate Python first.
+The Vite adapter runs `python` from this shell.
 
 ```powershell
-$env:VITE_PLAYER_DATA_MODE = "raw"
-npm run dev
+cd frontend
+npm ci --no-audit --no-fund
+npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
-Unset mode defaults to `demo`; `VITE_PLAYER_DATA_MODE=demo` explicitly selects
-the original demo. Other values, including a blank configured value, fail.
+Open <http://127.0.0.1:5173/>. Seven separately authorized frozen files are needed
+for real-player data: [provisioning](../docs/private-local-provisioning.md).
+Absent/invalid inputs yield an explicit error, no demo fallback. Use `?view=demo`
+for the fictional development demo. `?view=five-attribute-experimental` retains
+the legacy explicit entry into the same unified interface.
 
-Raw mode requests `data/scorecard.json` relative to Vite's `BASE_URL`, corresponding
-to `public/data/scorecard.json` in a future deployment. Only supply an explicitly
-verified, appropriately scoped `soccer-scorecard/v1` export through the M5A
-adapter. No file is created there by the application. Missing/invalid data shows
-an error or empty state, never fictional players. Keep synthetic fixtures under
-tests, and do not publish them at this asset path.
+Player/comparison selections and leaderboard tabs use shareable hash links and
+browser Back/Forward. Search filters, comparison selections and team choices
+survive session navigation; reload restores URL identities, not all memory-only
+filters. Five attributes, provisional Formula B, individual-attribute Gold/Silver
+badges, strict MID/CB eligibility and Limited Data behavior are described in the
+[root README](../README.md). Teams reuses Arpit's three unchanged heatmaps.
 
-Do not run `parquet_to_json.py` against the project datasets: it expects approved
-percentiles, uses sequential IDs and overwrites the demo. Preserve
-`src/data/players.json`. Raw mode retains all canonical contexts, observed role
-groups and N/A values; it does not fill the legacy T/I/C/P/LB/REC radar axes.
+## Tests and builds
 
-## How archetypes are assigned (demo only)
+```powershell
+npm run test:public    # source-only/synthetic; no private fixture required
+npm run test:packaging # source-only build, negative admission and preview checks
+npm run test:private   # authorized evidence; missing inputs fail
+npm test              # both suites, preserving all assertions
+npm run build         # dist/
+npm run preview:single # preview/index.html plus three team PNGs
+npm run preview -- --host 127.0.0.1
+```
 
-Each player gets **one primary archetype**: whichever of their position's archetypes has the
-highest percentile. Tier by that percentile: **+** ≥ 90, **−** 75–90, **Standard** below 75.
-Ties go to whichever archetype is listed first in `ARCHETYPES`.
-Off-ball dominance is team-level only and appears in the Teams section.
+The test inventory rejects missing or altered required modules. See
+[test source and fixture interface](../docs/test-suite-inventory.md). Where loopback
+is not permitted, `node scripts/runTests.mjs public --offline` reports its HTTP
+exclusion explicitly; it is not full HTTP acceptance.
 
-## Future five-attribute rating cards (D3F)
+The public frontend suite also invokes Python for synthetic contract validation.
+Use the declared backend environment even for source-only frontend tests.
+Private suites require the seven runtime inputs, local observation JSON and frozen
+OVR v1/v2 parity evidence; [full prerequisites](../docs/source-handoff.md).
+Legacy manual scripts `checkExperimentalIsolation.mjs`,
+`checkLocalExperimentalEndpoint.mjs` and `checkProvisionalOvr.mjs` are private
+acceptance utilities, not source-only checks: they need their retained historical
+receipts/local paths and a running loopback server (some assume port 5173).
+The portable test commands above are the contributor entry point.
 
-See [the D3F contract and policy blockers](../docs/d3f-frontend-rating-alignment.md).
-`PlayerCard` defaults to explicit ratings; Search explicitly selects its historical
-fictional percentile demo. No new real-rating mode or production import is enabled.
+Both production configurations disable automatic public-directory copying and
+use the same default-deny admission guard. Only three fingerprint-pinned images
+in `public/team/` are copied; fictional `src/data/players.json` and explicit
+synthetic fixtures are separately pinned. `public/data/` observations, local
+endpoints and real numeric payloads are excluded. No environment flag approves
+publication. Actual build outputs are checked by `test:packaging`.
+
+New files placed in `public/` are not automatically production-admitted. Any new
+asset needs explicit scope/rights and guard review; image paths are
+`public/team/`, not `public/teams/`. Preserve existing admitted bytes. Demo
+archetypes in `src/lib/archetypes.js` are fictional, distinct from real local
+attribute badges. Do not run `parquet_to_json.py` against project evidence.
+
+## Legacy contracts and hosting
+
+Raw, diagnostic, limited-data and synthetic-rating-preview views retain their
+separate historical contracts. Their earlier no-ratings/withheld statements do
+not override later local Formula B/badge approval. `VITE_PLAYER_DATA_MODE` selects
+an existing contract, never publication permission; unset mode is unified in
+development and fictional demo in production. Raw delivery is not provisioned
+or authorized by this handoff. See [M5A](../docs/m5a-frontend-contract.md) and
+[production admission](../docs/production-data-admission-guard.md).
+
+For an eventual approved static host: project root `frontend`, build `npm run
+build`, output `dist`. Configure the intended base path for a subpath host.
+No deployment or real-player production delivery is enabled by these instructions.

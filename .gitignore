@@ -1,6 +1,36 @@
-venv
+# Local environments, secrets and caches (never source dependencies).
 .env
-_pycache_/
-*.pyc
+.env.*
+!.env.example
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 .DS_Store
-data/raw/
+
+# All current data stores are private/nonpublication or generated evidence.
+# Preserve existing tracked placeholders; no payload exception.
+/data/**
+!/data/raw/
+!/data/raw/.gitkeep
+!/data/processed/
+!/data/processed/.gitkeep
+/docs/references/
+/docs/review/
+
+# Local browser runs, validation output and temporary environments.
+/.playwright-mcp/
+/test-results/
+/playwright-report/
+/coverage/
+/tmp/
+/temp/
+/audit-output/
+/validation-output/
+*.log

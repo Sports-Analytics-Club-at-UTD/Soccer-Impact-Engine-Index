@@ -1,9 +1,5 @@
-mplsoccer
-pandas
-numpy
-scikit-learn
-NetworkX
-matplotlib
-seaborn
-plotly
-Streamlit
+# Local read-only adapter and current analytical source. Python >=3.11.
+# Exact direct versions from the accepted Python 3.13.0 environment; no upgrade.
+numpy==2.1.3
+pandas==2.2.3
+pyarrow==26.0.0

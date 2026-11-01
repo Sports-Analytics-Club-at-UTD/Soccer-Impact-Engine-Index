@@ -1,0 +1,44 @@
+[
+  {
+    "path": "data/derived/private-five-attribute-v2/manifest.json",
+    "bytes": 3629,
+    "sha256": "5a8030b4a6ca06aeec81538221b07315c5644a9025915eb31c0bf2dab3cc9bc6",
+    "purpose": "Required existing frozen runtime input; provision separately to authorized local recipients; never include in public source assembly."
+  },
+  {
+    "path": "data/derived/private-five-attribute-v2/PRIVATE-EXPERIMENTAL-scores.jsonl",
+    "bytes": 17027759,
+    "sha256": "d03650c267ed5cd5fac12f627638dc5384b735b21d450479753bfa42e2ff207d",
+    "purpose": "Required existing frozen runtime input; provision separately to authorized local recipients; never include in public source assembly."
+  },
+  {
+    "path": "data/derived/private-five-attribute-v2/player-measurements.jsonl",
+    "bytes": 14149827,
+    "sha256": "c925e3ad7467fa8a744ae607b2a9de1c23ee106729b90a4b3b2c6faa25417e3b",
+    "purpose": "Required existing frozen runtime input; provision separately to authorized local recipients; never include in public source assembly."
+  },
+  {
+    "path": "data/derived/private-five-attribute-v2/frozen-reference.json",
+    "bytes": 1351605,
+    "sha256": "2d012d7e33a33cd6257d3fccd7167dda18265418c1556fe359f0cffcfa5e825c",
+    "purpose": "Required existing frozen runtime input; provision separately to authorized local recipients; never include in public source assembly."
+  },
+  {
+    "path": "data/derived/private-five-attribute-v2/measurement-facts.jsonl",
+    "bytes": 96083984,
+    "sha256": "1a6768d36bf240cfa2559ffbc67aff6613a51bd38a604d84c92293e1109bf9f4",
+    "purpose": "Required existing frozen runtime input; provision separately to authorized local recipients; never include in public source assembly."
+  },
+  {
+    "path": "data/derived/private-five-attribute-v2/validation.json",
+    "bytes": 733,
+    "sha256": "c5e0bbf572b256139306a786742f1b394bb3bb230d10f630593811c144a5de7f",
+    "purpose": "Required existing frozen runtime input; provision separately to authorized local recipients; never include in public source assembly."
+  },
+  {
+    "path": "data/derived/private-five-attribute-v2/summary.json",
+    "bytes": 7496,
+    "sha256": "e7a4ac3d5e274c6e50f55d5a9fa4d15d83c1bc0ac8a0d5404b847b95e5a4441b",
+    "purpose": "Required existing frozen runtime input; provision separately to authorized local recipients; never include in public source assembly."
+  }
+]
