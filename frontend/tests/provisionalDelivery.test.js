@@ -67,7 +67,7 @@ test("loader handles success, bad response and duplicate JSON without demo fallb
   assert.equal(players.length, 1);
   await assert.rejects(loadProvisionalPlayers({ fetchImpl: async () => ({ ok: false, status: 404 }) }), /unavailable/);
   await assert.rejects(loadProvisionalPlayers({ fetchImpl: async () => ({ ok: true, text: async () => '{"schema_version":1,"schema_version":2}' }) }), /duplicate JSON key/);
-  assert.match(renderToStaticMarkup(React.createElement(Experience)), /Loading verified observations/);
+  assert.match(renderToStaticMarkup(React.createElement(Experience)), /Loading match observations/);
 });
 
 test("new mode is opt-in; existing defaults remain stable", async () => {

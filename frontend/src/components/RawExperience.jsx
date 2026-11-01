@@ -33,8 +33,7 @@ export default function RawExperience({ theme, onToggle }) {
         <h2 className="display">Player profiles</h2>
         {state.status === "loading" && <p role="status">Loading raw scorecard…</p>}
         {state.status === "error" && <div role="alert" className="warn mono angular-sm">
-          <p>{state.error.message}</p>
-          <p>No player profiles are available. Supply a verified, versioned scorecard at the configured asset location; this screen does not fall back to demo data.</p>
+          <p>We couldn’t load the player profiles. Please try again later.</p>
           <button className="raw-retry angular-sm" type="button" onClick={() => setAttempt((n) => n + 1)}>Retry raw scorecard</button>
         </div>}
         {state.model && <div role="note" className="raw-note">

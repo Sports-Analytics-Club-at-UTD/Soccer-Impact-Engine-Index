@@ -26,8 +26,6 @@ export default function DemoExperience({ theme, onToggle }) {
   return <>
     <Nav theme={theme} onToggle={onToggle} />
     <main>
-      <p className="wrap mono mode-notice" role="note">Approved 2015/16 real-player ratings · Partial-season observations.</p>
-      {import.meta.env.DEV && <p className="wrap"><a href="?view=limited-data">Browse verified 2015/16 Bundesliga observations</a></p>}
       <Hero /><Description /><Archetypes /><Search players={players} loaded={loaded} error={error} onRetry={() => setRetry((n) => n + 1)} /><Teams /><About />
     </main>
     <Footer />

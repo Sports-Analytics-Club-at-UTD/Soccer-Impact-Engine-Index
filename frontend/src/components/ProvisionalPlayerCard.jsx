@@ -12,7 +12,7 @@ export default function ProvisionalPlayerCard({ player, onClose }) {
     <p>{p.contexts.map((c) => c.team).join(" · ")} · {p.season_name}</p>
     <p className="warn mono" role="note"><strong>LIMITED DATA</strong> · <strong>PARTIAL SEASON</strong></p>
     <p>Observed measurements. Ratings, percentiles and overall score: N/A.</p>
-    <p>Scoring group: <b>{p.comparison_group ?? "N/A — no supported MID/CB assignment"}</b>.
+    <p>Scoring group: <b>{p.comparison_group ?? "N/A: no supported MID/CB assignment"}</b>.
       {p.comparison_group === null && " MID/CB ratings are withheld."}</p>
     <p>Supported positions: {Object.entries(p.position_minutes).map(([g, v]) => `${g} (${format(minutes(v))} minutes)`).join("; ") || "N/A"}.</p>
     <details><summary>All supported position labels</summary><p>{p.observed_positions.join("; ") || "N/A"}</p></details>
@@ -28,7 +28,7 @@ export default function ProvisionalPlayerCard({ player, onClose }) {
         {o && (o.unit === "percent" ? <>
           <p>{o.successes} successful / {o.attempts} pressured actions · {o.match_ids.length} observed matches</p>
           <p>Passes: {o.pass_successes}/{o.pass_attempts}; dribbles: {o.dribble_successes}/{o.dribble_attempts}</p>
-          <p className={o.at_least_40 ? "" : "warn"}>{o.at_least_40 ? "At least 40 actions observed" : "LIMITED DATA — fewer than 40 actions; measured value retained"}</p>
+          <p className={o.at_least_40 ? "" : "warn"}>{o.at_least_40 ? "At least 40 actions observed" : "LIMITED DATA: fewer than 40 actions; measured value retained"}</p>
         </> : <p>{o.count} events / {format(minutes(o.minutes))} supported minutes · {o.match_ids.length} matched matches</p>)}
         <p>{a.reason}</p>
         {o && <details><summary>Measurement fixture scope</summary><p>{o.match_ids.join(", ")}</p></details>}

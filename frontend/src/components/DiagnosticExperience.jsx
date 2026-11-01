@@ -22,10 +22,10 @@ function Profile({ player, match }) {
       {RECOVERY_TYPES.map((k) => { const r = window.recovery[k]; return <section key={k}>
         <h4>{LABELS[k]}</h4><strong>{value(r.count)}</strong><p>events · {r.status === "missing" ? "No measurement available" : "Observed"}</p>
         <p>Per90: {value(r.per90.value)}</p><Reasons items={r.per90.reasons} />
-        <h5>Recovery zones · 3 × 3</h5>{r.zone_counts === null ? <p>N/A — no zone measurement</p> : <>
+        <h5>Recovery zones · 3 × 3</h5>{r.zone_counts === null ? <p>N/A: no zone measurement</p> : <>
           <div className="diagnostic-zones" aria-label={`${LABELS[k]} zone counts`}>{Array.from({ length: 9 }, (_, i) =>
-            <div key={i}>Zone {i + 1}<b>{r.zone_counts.find((z) => z.zone === i + 1)?.count ?? "—"}</b></div>)}</div>
-          <p>Unknown zone: {r.unknown_zone_count}. — = no recorded zone entry.</p></>}
+            <div key={i}>Zone {i + 1}<b>{r.zone_counts.find((z) => z.zone === i + 1)?.count ?? "N/A"}</b></div>)}</div>
+          <p>Unknown zone: {r.unknown_zone_count}. N/A means no recorded zone entry.</p></>}
       </section>; })}</div>
     <h3>Playing under pressure</h3><div className="diagnostic-metrics">
       {PRESS_COUNTS.map((k) => <section key={k}><h4>{reasonText(k)}</h4><strong>{value(window.press.counts[k])}</strong><p>{window.press.status === "missing" ? "No measurement available" : "events"}</p></section>)}
@@ -33,7 +33,7 @@ function Profile({ player, match }) {
     <h3>Progression / line-breaking</h3><p>Not yet assessed</p>
     <h3>Exposure and limitations</h3><p>Aligned minutes: {value(window.exposure.aligned_minutes)} · {window.exposure.status}</p>
     <Reasons items={window.exposure.reasons} />
-    <p>Wider-scope delivered minutes: {value(player.pooled.exposure.delivered_minutes)} — never used as the match-window denominator.</p>
+    <p>Wider-scope delivered minutes: {value(player.pooled.exposure.delivered_minutes)}: never used as the match-window denominator.</p>
     <p>NOT YET PRODUCTION-VERIFIED. Identity lineage is contributor-reported; match context is event-derived, not an independent fixture manifest.</p>
   </article>;
 }
@@ -59,7 +59,7 @@ export default function DiagnosticExperience({ theme, onToggle }) {
       <button type="button" className="raw-retry angular-sm" onClick={() => { generation.current++; setState({ status: "idle" }); setSelected(""); if (input.current) input.current.value = ""; }}>Clear imported data</button>
       {state.status === "idle" && <p role="status">No diagnostic data imported. No demo players are substituted.</p>}
       {state.status === "loading" && <p role="status">Validating local file…</p>}
-      {state.status === "error" && <p role="alert" className="warn">{state.error.message}</p>}
+      {state.status === "error" && <p role="alert" className="warn">We couldn’t open this match file. Please check the file and try again.</p>}
     </div></section><section id="search" className="section"><div className="wrap">
       <h2 className="display">Player profiles</h2>{state.model && <>
         <p>{state.model.profiles.length} player contexts · {state.model.scope.observed_match_count} matches · {state.model.scope.observed_event_count} observed events</p>

@@ -24,7 +24,7 @@ export default function RatingExperience({ theme, onToggle }) {
       <p>Candidate calculations for invented actors. Diagnostic real-player imports retain withheld ratings. Files stay in this browser.</p>
       <label>Choose rating delivery JSON<input ref={input} type="file" accept=".json,application/json" onChange={importFile} /></label>
       <button type="button" onClick={() => { generation.current++; setPlayers([]); setSelected(null); setError(""); setQuery(""); if (input.current) input.current.value = ""; }}>Clear import</button>
-      {error && <p role="alert">{error}. No demo fallback was used.</p>}
+      {error && <p role="alert">We couldn’t open this ratings file. Please check the file and try again.</p>}
       {!players.length && !error && <p role="status">No rating delivery imported.</p>}
       {!!players.length && <><label>Search name, canonical ID, team or league<input value={query} onChange={(e) => setQuery(e.target.value)} /></label>
         <p role="status">{matches.length} matching contexts</p>

@@ -20,9 +20,16 @@ class ExperienceBoundary extends Component {
   static getDerivedStateFromError(error) { return { error }; }
   render() {
     return this.state.error
-      ? <main className="wrap mode-notice" role="alert">Unable to load the selected interface: {String(this.state.error.message)}. No demo fallback was used.</main>
+      ? <PageUnavailable />
       : this.props.children;
   }
+}
+
+function PageUnavailable() {
+  return <main className="wrap section" role="alert"><h1 className="display">This page is unavailable</h1>
+    <p>Please refresh the page or try again later.</p>
+    <button type="button" className="btn btn-ghost" onClick={() => window.location.reload()}>Refresh page</button>
+  </main>;
 }
 
 export default function App() {
@@ -33,8 +40,8 @@ export default function App() {
     try { localStorage.setItem("sac-theme", theme); } catch (e) { /* private mode: fine */ }
   }, [theme]);
 
-  if (configurationError) return <main className="wrap mode-notice" role="alert">{configurationError.message}</main>;
-  return <ExperienceBoundary><Suspense fallback={<main className="wrap mode-notice" role="status">Loading selected interface…</main>}>
+  if (configurationError) return <PageUnavailable />;
+  return <ExperienceBoundary><Suspense fallback={<main className="wrap mode-notice" role="status">Loading the index…</main>}>
     <Experience theme={theme} onToggle={() => setTheme(theme === "dark" ? "light" : "dark")} />
   </Suspense></ExperienceBoundary>;
 }

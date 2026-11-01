@@ -1,6 +1,6 @@
 import { displayMetric } from "./scorecardAdapter.js";
 
-export const RAW_MODE_NOTICE = "Raw player metrics — source completeness and scoring eligibility not yet verified.";
+export const RAW_MODE_NOTICE = "Raw player metrics: source completeness and scoring eligibility not yet verified.";
 export const RAW_METRIC_NOTICE = "Statistics are raw measurements. No overall score is available; no percentile ranking has been approved. Source coverage may be incomplete. Missing measurements show N/A.";
 export const BROWSE_LABEL = "Available player profiles";
 export const playerLabel = (p) => p.player_name?.trim() ? p.player_name : `Player ID ${p.player_id}`;
@@ -55,7 +55,7 @@ export const PASSING_METRICS = [
 ];
 
 export function componentAvailability(player, prefix) {
-  if (!player[`${prefix}_present`]) return "Not available — no source component row.";
+  if (!player[`${prefix}_present`]) return "Not available: no source component row.";
   const status = player[`${prefix}_rate_status`];
   if (status === "missing_minutes") return "Source row present; per90 rates unavailable because source minutes are missing.";
   if (status === "zero_minutes") return "Source row present; per90 rates unavailable because source minutes are zero.";
@@ -74,13 +74,13 @@ export function rawCardModel(player, metadata) {
       metrics: metrics([[`${prefix}_count`, "Observed count"], [`${prefix}_per90`, "Per90 rate"]]) })),
     press: { availability: componentAvailability(player, "press"), metrics: metrics(PRESS_METRICS),
       exposure: displayMetric(player, "press_minutes").text },
-    passing: { title: "Progressive passing — Level A", availability: componentAvailability(player, "passing"),
+    passing: { title: "Progressive passing: Level A", availability: componentAvailability(player, "passing"),
       status: player.passing_rate_status ?? "N/A", metrics: metrics(PASSING_METRICS),
       exposure: displayMetric(player, "passing_minutes").text,
       scope: player.passing_difficulty_scope ?? "N/A",
       declaration: player.passing_present
         ? "Caller-attested complete: Yes. Independently verified: No."
-        : "Calibration: N/A — no passing source row.",
+        : "Calibration: N/A: no passing source row.",
     },
     coverage: metadata.coverage_status, limitations: [...metadata.limitations],
   };

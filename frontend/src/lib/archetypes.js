@@ -32,14 +32,14 @@ export const ARCHETYPES = {
     { id: "sweeper", name: "Sweeper", group: "Defensive Recovery", metric: "REC", blurb: "Leads in ball recoveries." },
     { id: "reader", name: "Tactician / Reader", group: "Defensive Recovery", metric: "I", blurb: "Leads in interceptions." },
     { id: "libero", name: "Libero", group: "Press Resistance", metric: "P", blurb: "Stays composed with the ball under pressure." },
-    { id: "ballplaying", name: "Ball-Playing CB", group: "Line-breaking passes", metric: "LB", blurb: "Breaks lines with passes from the back." },
+    { id: "ballplaying", name: "Ball-Playing CB", group: "Line-breaking passes", metric: "LB", blurb: "Moves the ball forward with passes from the back." },
   ],
   DM: [
     { id: "destroyer", name: "Destroyer", group: "Defensive Recovery", metric: "T", blurb: "Specializes in tackles." },
     { id: "anchor", name: "Anchor", group: "Defensive Recovery", metric: "I", blurb: "Leads in interceptions." },
     { id: "bwm", name: "Ball-Winning Midfielder", group: "Defensive Recovery", metric: "REC", blurb: "Leads in recoveries." },
     { id: "volante", name: "Volante", group: "Press Resistance", metric: "P", blurb: "Stays composed with the ball under pressure." },
-    { id: "dlp", name: "Deep-Lying Playmaker", group: "Line-breaking passes", metric: "LB", blurb: "Breaks lines with passes from deep." },
+    { id: "dlp", name: "Deep-Lying Playmaker", group: "Line-breaking passes", metric: "LB", blurb: "Moves play towards goal with passes from deep." },
   ],
 };
 

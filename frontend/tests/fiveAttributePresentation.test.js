@@ -27,7 +27,8 @@ test("Python fixture -> fingerprint validation -> existing PlayerCard dispatch",
 
 test("five correct labels, measured units, positions and no invented overall", async () => {
   const html = render((await models())[0]);
-  for (const m of FIVE_METRICS) assert.ok(html.includes(m.label));
+  for (const m of FIVE_METRICS) assert.ok(html.includes(m.label.replaceAll("\u2014", ":")));
+  assert.doesNotMatch(html, /\u2014/);
   assert.match(html, /per 90/); assert.match(html, /75%/); assert.match(html, /30 successful pressured actions \/ 40 pressured attempts/);
   assert.match(html, /Comparison: MID/); assert.match(html, /synthetic:mid-transfer:2015\/2016/);
   assert.doesNotMatch(html, /Archetype|OVR|Overall|Gold|Silver|ghost-ovr/);
@@ -69,7 +70,8 @@ test("comparison retains each position and missing/limited labels; no aggregate 
   const ps = await models();
   const html = renderToStaticMarkup(React.createElement(Comparison, { players: [ps[0], ps[2]] }));
   assert.match(html, /MID/); assert.match(html, /CB/); assert.match(html, /PARTIAL SEASON/);
-  for (const m of FIVE_METRICS) assert.ok(html.includes(m.label));
+  for (const m of FIVE_METRICS) assert.ok(html.includes(m.label.replaceAll("\u2014", ":")));
+  assert.doesNotMatch(html, /\u2014/);
   assert.doesNotMatch(html, /OVR|Archetype|Gold|Silver/);
   assert.match(renderToStaticMarkup(React.createElement(Comparison, { players: [ps[0], ps[3]] })), /N\/A/);
   assert.match(renderToStaticMarkup(React.createElement(Comparison, { players: [ps[0], ps[0]] })), /two different player-seasons/);

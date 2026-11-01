@@ -1,4 +1,4 @@
-export const DIAGNOSTIC_NOTICE = "DIAGNOSTIC — PROVISIONAL REAL DATA";
+export const DIAGNOSTIC_NOTICE = "DIAGNOSTIC: PROVISIONAL REAL DATA";
 export const profileName = (p) => p.identity.player_name ?? (p.identity.observed_name_variants.join(" / ") || "Unnamed event actor");
 export const profileContext = (p) => [p.identity.team, p.identity.competition_name, p.identity.season_name].join(" · ");
 const fold = (s) => s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
