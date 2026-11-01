@@ -86,6 +86,9 @@ def appearance_rows(report, fixture, lineups):
                 or roster.get((tid,pid))!=p['player_name'] or c['team_key']!=teams.get(tid)):
             raise ValueError('duplicate or inconsistent source appearance identity')
         seen.add((tid,pid))
+        # Off-field disciplinary provenance is not an appearance assertion.
+        # Only independently classified records are separated by the adapter;
+        # unresolved source checks still quarantine an asserted appearance.
         active=bool(p['observations'] or p.get('source_checks'))
         status=v['status'] if active else 'BENCH_NO_ASSERTED_APPEARANCE'
         if active and status not in (VALID,CONFLICT,INCOMPLETE):raise ValueError('unsupported participation status')
@@ -107,6 +110,7 @@ def appearance_rows(report, fixture, lineups):
                 status='SOURCE_SUPPORTED' if status==VALID else 'UNRESOLVED_CANDIDATE') for o in p['observations']],
             period_boundaries=report['boundaries'],failure_reasons=sorted({i['code'] for i in v['issues']}),
             source_checks=p.get('source_checks',[]),source_verification_key=report['verification_key'],
+            off_field_discipline=p.get('off_field_discipline',[]),
             scope_policy='PENDING_TEAM_APPROVAL_MISSING_DELIVERED_FIXTURE' if mid==3879594 else 'NO_PRODUCTION_SCOPE_AUTHORIZED',
             source_independently_verified=False,production_certified=False))
     if seen!=set(roster):raise ValueError('report omitted source roster actors')
