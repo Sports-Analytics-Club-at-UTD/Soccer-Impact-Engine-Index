@@ -317,7 +317,9 @@ def _adapt_match(match_id, matches, lineups, events, *, clock_document_reference
         mapping = {"Starting XI": ("Starting XI", "starter"),
                    "Tactical Shift": ("Tactical Shift", "position_change"),
                    "Player On": ("Player On", "return"),
+                   "Player On (Off Camera)": ("Player On", "return"),
                    "Player Off": ("Player Off", "temporary_exit"),
+                   "Player Off (Off Camera)": ("Player Off", "temporary_exit"),
                    "Foul Committed (Red Card)": ("Foul Committed", "dismissal"),
                    "Foul Committed (Second Yellow)": ("Foul Committed", "dismissal")}
         if isinstance(reason, str) and reason.startswith("Substitution - " + ("On" if side == "from" else "Off") + " ("):
