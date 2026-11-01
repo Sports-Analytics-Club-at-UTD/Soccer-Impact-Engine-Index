@@ -78,6 +78,13 @@ class SourceCheck:
 
 
 @dataclass(frozen=True)
+class OffFieldDiscipline:
+    event_ref: str
+    state: str
+    evidence_refs: tuple
+
+
+@dataclass(frozen=True)
 class AdaptedPlayer:
     context: Context
     player_name: str
@@ -85,6 +92,7 @@ class AdaptedPlayer:
     observations: tuple
     raw_positions: tuple
     source_checks: tuple = ()
+    off_field_discipline: tuple = ()
 
 
 @dataclass(frozen=True)
@@ -374,10 +382,148 @@ def _adapt_match(match_id, matches, lineups, events, *, clock_document_reference
                                          start, end, entry, exit_kind, (raw_ref,), provenance))
                 raw_positions.append(json.dumps(stint, sort_keys=True, ensure_ascii=True))
             checks = _check_original_transitions(tid, pid, observations, es, ref)
-            players.append(AdaptedPlayer(context, player["player_name"], tid, tuple(observations), tuple(raw_positions), checks))
+            discipline = _off_field_discipline(tid, pid, observations, checks, es, ref,
+                policy, tuple(boundaries), f"{lineups.reference}#/team/{tid}/player/{pid}")
+            off_refs = {d.event_ref for d in discipline}
+            # Nonblocking discipline is retained separately from participation
+            # assertions. No other transition or consistency issue is removed.
+            checks = tuple(c for c in checks if not (c.code == "original_transition_not_represented"
+                           and set(c.evidence_refs) <= off_refs))
+            players.append(AdaptedPlayer(context, player["player_name"], tid, tuple(observations), tuple(raw_positions), checks, discipline))
     return AdaptedMatch(match_id, competition, season, tuple(players), policy,
                         tuple(boundaries), tuple(sorted(warnings)), provenance,
                         tuple(normalizations[k] for k in sorted(normalizations)))
+
+
+def _off_field_discipline(tid, pid, observations, checks, events, reference,
+                          policy, boundaries, roster_ref):
+    """Prove unused-roster or post-substitution Bad Behaviour, otherwise abstain.
+
+    This never constructs or repairs a stint. Existing original-source checks
+    run first; only a proved off-field card's endpoint assertion can be removed.
+    Foul Committed remains playing evidence, even when it contains a card.
+    """
+    def point(e):
+        return e["period"], _timestamp(e["timestamp"])
+
+    def dismisses(e):
+        return e.get("bad_behaviour", {}).get("card", {}).get("name") in ("Red Card", "Second Yellow")
+
+    team = [e for e in events if e["team"]["id"] == tid]
+    cards = [e for e in team if e.get("player", {}).get("id") == pid
+             and e["type"]["name"] == "Bad Behaviour" and dismisses(e)]
+    if not cards:
+        return ()
+    bounds = {b.period: (b.start_seconds, b.end_seconds) for b in boundaries}
+    if set(bounds) != {1, 2} or any(lo != 0 or hi is None or hi <= 0 for lo, hi in bounds.values()):
+        return ()
+    if any(not bounds[e["period"]][0] <= point(e)[1] <= bounds[e["period"]][1] for e in cards):
+        return ()
+    xi = [e for e in team if e["type"]["name"] == "Starting XI"]
+    if (len(xi) != 1 or point(xi[0]) != (1, 0)
+            or len(xi[0].get("tactics", {}).get("lineup", [])) != 11
+            or len({p["player"]["id"] for p in xi[0].get("tactics", {}).get("lineup", [])}) != 11):
+        return ()
+    card_refs = {reference(e) for e in cards}
+    if any(c.code != "original_transition_not_represented" or not set(c.evidence_refs) <= card_refs for c in checks):
+        return ()
+    snapshots = [e for e in team if e["type"]["name"] in ("Starting XI", "Tactical Shift")
+                 and any(p["player"]["id"] == pid for p in e.get("tactics", {}).get("lineup", []))]
+    actors = [e for e in team if e.get("player", {}).get("id") == pid
+              or e.get("pass", {}).get("recipient", {}).get("id") == pid]
+    incoming = [e for e in team if e["type"]["name"] == "Substitution"
+                and e["substitution"]["replacement"]["id"] == pid]
+    chronology = {e["id"]: e for e in xi + snapshots + actors + incoming
+                  + [e for e in team if e["type"]["name"] in ("Half Start", "Half End")]}
+    if all("index" in e for e in chronology.values()):
+        clocks = [point(e) for e in sorted(chronology.values(), key=lambda e: e["index"])]
+        if clocks != sorted(clocks):
+            return ()
+    proof = (roster_ref, reference(xi[0]), *(r for b in boundaries for r in b.evidence_refs))
+    if not observations:
+        if snapshots or incoming or any(e["type"]["name"] != "Bad Behaviour" for e in actors):
+            return ()
+        # An explicit active-position assertion on an otherwise unused actor
+        # conflicts with the no-entry evidence; absence is not a timing guess.
+        if any(e.get("position") and e["position"] != {"id": 0, "name": "Substitute"} for e in actors):
+            return ()
+        return tuple(OffFieldDiscipline(reference(e), "UNUSED_ROSTER", proof + (reference(e),)) for e in cards)
+
+    core = validate_participation(observations[0].context, observations,
+                                 clock_policy=policy, period_boundaries=boundaries)
+    if core.elapsed_seconds is None or core.elapsed_seconds <= 0:
+        return ()
+    entries = {"Starting XI", "Substitution", "Player On", "Player Off"}
+    transitions = [e for e in team if e in snapshots and e["type"]["name"] == "Starting XI"
+                   or e in incoming or e.get("player", {}).get("id") == pid
+                   and (e["type"]["name"] in entries or reference(e) in card_refs
+                        or e.get("foul_committed", {}).get("card", {}).get("name") in ("Red Card", "Second Yellow"))]
+    groups = {}
+    for e in transitions:
+        groups.setdefault(point(e), []).append(e)
+    if any(len(g) > 1 and any("index" not in e for e in g) for g in groups.values()):
+        return ()
+    if all("index" in e for e in transitions):
+        source_order = [point(e) for e in sorted(transitions, key=lambda e: e["index"])]
+        if source_order != sorted(source_order):
+            return ()
+    ordered = sorted(transitions, key=lambda e: (*point(e), e.get("index", 0)))
+    state = "NOT_ENTERED"; opened = None; intervals = []; refs = []; terminal = None; accepted = []
+    for e in ordered:
+        typ = e["type"]["name"]; eref = reference(e); t = point(e)
+        if eref in card_refs:
+            if state != "SUBSTITUTED":
+                return ()  # active, pre-entry and temporary absence are not off-field proofs
+            accepted.append(e)
+            continue
+        refs.append(eref)
+        if e in incoming or typ == "Starting XI":
+            if state != "NOT_ENTERED": return ()
+            state = "ACTIVE"; opened = t
+        elif typ == "Player On":
+            if state != "TEMPORARILY_OFF": return ()
+            state = "ACTIVE"; opened = t
+        elif typ == "Player Off" and not e.get("player_off", {}).get("permanent"):
+            if state != "ACTIVE": return ()
+            intervals.append((opened, t)); state = "TEMPORARILY_OFF"; opened = None
+        elif typ == "Substitution":
+            if state != "ACTIVE": return ()
+            intervals.append((opened, t)); state = "SUBSTITUTED"; opened = None; terminal = e
+        else:
+            return ()  # permanent exit/dismissal support policy is unchanged
+    if state != "SUBSTITUTED" or terminal is None or len(accepted) != len(cards):
+        return ()
+
+    def geometry(rows):
+        pieces = []
+        for a, b in rows:
+            for period in range(a[0], b[0] + 1):
+                lo = a[1] if period == a[0] else bounds[period][0]
+                hi = b[1] if period == b[0] else bounds[period][1]
+                if lo < hi: pieces.append((period, lo, hi))
+        merged = []
+        for p, lo, hi in sorted(pieces):
+            if merged and merged[-1][0] == p and merged[-1][2] == lo:
+                merged[-1] = (p, merged[-1][1], hi)
+            else: merged.append((p, lo, hi))
+        return merged
+
+    supplied = [((s.start.period, s.start.seconds), (s.end.period, s.end.seconds)) for s in observations]
+    if geometry(intervals) != geometry(supplied):
+        return ()
+    end = point(terminal)
+    if any(point(e) >= end for e in snapshots):
+        return ()
+    for e in actors:
+        if e["type"]["name"] in ("Bad Behaviour", "Substitution", "Player Off", "Player On"):
+            continue
+        t = point(e)
+        if (not bounds[t[0]][0] <= t[1] <= bounds[t[0]][1]
+                or not any(a <= t <= b for a, b in intervals)
+                or t == end and ("index" not in e or "index" not in terminal or e["index"] > terminal["index"])):
+            return ()
+    return tuple(OffFieldDiscipline(reference(e), "AFTER_SUBSTITUTION",
+                 proof + tuple(refs) + (reference(e),)) for e in accepted)
 
 
 def _check_original_transitions(tid, pid, observations, events, reference):

@@ -131,7 +131,7 @@ def reconstruct(pid, tid, player, events, bounds, boundary_issues):
         if 2 in bounds: intervals.append((opened, (2, bounds[2][1])))
         else: issues.append('NO_FINAL_BOUNDARY')
     if not ever and player.get('positions'): issues.append('LINEUP_WITHOUT_EVENT_ENTRY')
-    raw_intervals = []
+    raw_intervals = []; lineup_event_ids = []; position_intervals = []
     for pos in player.get('positions', []):
         endpoints = []
         for side in ('from', 'to'):
@@ -158,9 +158,12 @@ def reconstruct(pid, tid, player, events, bounds, boundary_issues):
                 clocks = {clock(e) for e in candidates}
                 point = next(iter(clocks)) if len(clocks) == 1 else None
                 used += [e['id'] for e in candidates]
+                lineup_event_ids += [e['id'] for e in candidates]
             if point is None: issues.append('UNRESOLVED_LINEUP_ENDPOINT:'+reason)
             endpoints.append(point)
-        if all(x is not None for x in endpoints): raw_intervals.append(tuple(endpoints))
+        if all(x is not None for x in endpoints):
+            raw_intervals.append(tuple(endpoints))
+            position_intervals.append((*endpoints, pos.get('position')))
     raw_intervals.sort()
     for i, (a, b) in enumerate(raw_intervals):
         if elapsed(a, b, bounds) is None: issues.append('INVALID_LINEUP_DURATION')
@@ -173,7 +176,9 @@ def reconstruct(pid, tid, player, events, bounds, boundary_issues):
         issues.append('EVENT_LINEUP_DURATION_CONFLICT')
     if total is not None and total <= 0: issues.append('NONPOSITIVE_DURATION')
     return dict(seconds=total, lineup_seconds=lineup_total, intervals=intervals,
-        issues=sorted(set(issues)), event_ids=sorted(set(used)), active=ever)
+        issues=sorted(set(issues)), event_ids=sorted(set(used)), active=ever,
+        lineup_intervals=raw_intervals, lineup_event_ids=sorted(set(lineup_event_ids)),
+        lineup_position_intervals=position_intervals)
 
 
 def score(value, minutes, known_minutes, limited, pool):
