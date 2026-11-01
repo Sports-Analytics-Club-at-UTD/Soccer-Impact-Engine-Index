@@ -55,8 +55,9 @@ def endpoint(stint,side,pid,tid,events,bounds):
     if period not in (1,2) or raw is None:return None
     minute,second=map(int,raw.split(':'))
     types={'Starting XI':'Starting XI','Tactical Shift':'Tactical Shift','Player On':'Player On','Player Off':'Player Off',
+           'Player On (Off Camera)':'Player On','Player Off (Off Camera)':'Player Off',
            'Foul Committed (Red Card)':'Foul Committed','Foul Committed (Second Yellow)':'Foul Committed'}
-    allowed={'from':{'Starting XI','Tactical Shift','Player On'},'to':{'Tactical Shift','Player Off','Foul Committed (Red Card)','Foul Committed (Second Yellow)'}}
+    allowed={'from':{'Starting XI','Tactical Shift','Player On','Player On (Off Camera)'},'to':{'Tactical Shift','Player Off','Player Off (Off Camera)','Foul Committed (Red Card)','Foul Committed (Second Yellow)'}}
     substitution=isinstance(reason,str) and reason.startswith('Substitution - '+('On' if side=='from' else 'Off')+' (')
     typ='Substitution' if substitution else types.get(reason) if reason in allowed[side] else None
     values=set()
