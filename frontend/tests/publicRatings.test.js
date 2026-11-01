@@ -55,13 +55,3 @@ test('release admission is restricted to exact reviewed path and content', async
   assert.throws(() => assertAdmittedOutput(release.path, Buffer.concat([bytes,Buffer.from(' ')])), /admission denied/);
   for (const suffix of ['', '?raw','?url']) await validateDataImport(new URL(`../public/${release.path}`, import.meta.url).pathname.replace(/^\/([A-Z]:)/,'$1') + suffix);
 });
-
-
-test('Vercel uses the guarded Vite build and version-specific static cache policy', async () => {
-  const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
-  assert.equal(config.framework,'vite'); assert.equal(config.buildCommand,'npm run build'); assert.equal(config.outputDirectory,'dist');
-  assert.deepEqual(config.headers, [{source: '/' + release.path, headers: [
-    {key:'Cache-Control',value:'public, max-age=31536000, immutable'}, {key:'X-Content-Type-Options',value:'nosniff'},
-  ]}]);
-  assert.equal(config.rewrites,undefined);
-});

@@ -1,5 +1,5 @@
 import { ratingCard } from "../lib/ratingCard.js";
-import { MIN_MINUTES } from "../lib/data.js";
+import { publicRatingCard, displayOverall } from "../lib/foundationPlayers.js";
 import { useCountUp, useTilt } from "../lib/hooks.js";
 import Radar from "./Radar.jsx";
 import { IconClose, Photo } from "./ui.jsx";
@@ -15,21 +15,21 @@ export default function PlayerCard({ player, onClose, demo = false }) {
 
 function StandardPlayerCard({ player, onClose, demo = false }) {
   const tilt = useTilt({ max: 4, scale: 1.01 });
-  const card = ratingCard(player, { demo });
+  const card = player.publicRating ? publicRatingCard(player) : ratingCard(player, { demo });
   const animatedOvr = useCountUp(card.ovr ?? 0);
-  const ovr = card.ovr === null ? "N/A" : animatedOvr;
+  const ovr = player.publicRating ? displayOverall(card.ovr) : card.ovr === null ? "N/A" : animatedOvr;
   const a = card.archetype;
-  const low = demo && player.minutes < MIN_MINUTES;
+  const low = demo && player.minutes < 1000;
 
   return (
     <article {...tilt} className="tilt sheen card-surface on angular pcard" key={player.id} aria-label={`${player.name} player card`}>
-      <span className="ghost-ovr display" aria-hidden="true">{card.ovr ?? ""}</span>
+      <span className="ghost-ovr display" aria-hidden="true">{player.publicRating ? displayOverall(card.ovr) : card.ovr ?? ""}</span>
       <button type="button" className="close" onClick={onClose} aria-label="Close player card"><IconClose size={16} /></button>
 
       <div className="pcard-top">
-        <Photo src={player.photo} label="FIFA 16 photo" className="lg" />
+        <Photo src={player.photo} label={player.publicRating ? "Player photo" : "FIFA 16 photo"} className="lg" />
         <div>
-          <div className="mono t10 up c2">{player.position === "CB" ? "Centre-back" : player.position === "DM" ? "Defensive midfielder" : "Role unavailable"}</div>
+          <div className="mono t10 up c2">{player.publicRating ? `${player.primaryPosition} · ${player.season}` : player.position === "CB" ? "Centre-back" : player.position === "DM" ? "Defensive midfielder" : "Role unavailable"}</div>
           <h3 className="display" style={{ marginTop: 10 }}>{player.name}</h3>
           <div className="team">{player.team}</div>
 
@@ -62,6 +62,7 @@ function StandardPlayerCard({ player, onClose, demo = false }) {
               <div className="bar">{m.value !== null && <i style={{ width: `${m.value}%` }} />}</div>
               {player.ratingNotice && <p className="mono t10">Percentile: {m.percentile === null ? "N/A" : String(Math.round(m.percentile))}
                 {player.attributes[m.id]?.reasons?.length ? ` · ${player.attributes[m.id].reasons.join("; ")}` : ""}</p>}
+              {player.publicRating && [...player.attributes[m.id].missingness, ...player.attributes[m.id].warnings].length > 0 && <p className="mono t10">{[...player.attributes[m.id].missingness, ...player.attributes[m.id].warnings].join(" · ")}</p>}
             </div>
           ))}
         </div>
@@ -72,7 +73,7 @@ function StandardPlayerCard({ player, onClose, demo = false }) {
       </div>
       {low && (
         <div className="warn mono angular-sm" role="note">
-          (Warning: Under {MIN_MINUTES} mins, data might not be representative)
+          (Warning: Under 1000 mins, data might not be representative)
         </div>
       )}
     </article>
