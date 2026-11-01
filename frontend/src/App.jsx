@@ -6,7 +6,7 @@ try {
   const configuredMode = playerDataMode(import.meta.env.VITE_PLAYER_DATA_MODE);
   const requestedView = new URLSearchParams(window.location.search).get("view");
   const mode = ["limited-data", "five-attribute-synthetic"].includes(requestedView) ? requestedView : configuredMode;
-  if (import.meta.env.DEV && (requestedView === "five-attribute-experimental" || (!requestedView && configuredMode === "demo"))) {
+  if (import.meta.env.DEV && requestedView === "five-attribute-experimental") {
     Experience = lazy(() => import("./dev/FiveAttributeExperimentalExperience.jsx"));
   } else {
     Experience = lazy(() => loadPlayerExperience(mode));

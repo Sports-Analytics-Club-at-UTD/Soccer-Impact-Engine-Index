@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PLAYERS } from "../lib/data.js";
+import { displayOverall } from "../lib/foundationPlayers.js";
 import { useMediaQuery, useTilt } from "../lib/hooks.js";
 import { search } from "../lib/search.js";
 import PlayerCard from "./PlayerCard.jsx";
@@ -20,20 +20,20 @@ function TopCard({ p, rank, onPick, on }) {
             className={`tilt sheen card-surface angular-sm top-card ${on ? "on" : ""}`}>
       <span className="rank display" aria-hidden="true">{rank}</span>
       <div className="row">
-        <Photo src={p.photo} label="FIFA 16" className="sm" />
+        <Photo src={p.photo} label="Player photo" className="sm" />
         <div className="mono t10 up c2">#{rank} · {p.position}</div>
       </div>
       <div className="name display">{p.name}</div>
       <div className="meta">{p.team} · {p.archetype.name}{p.archetype.tier ? ` ${p.archetype.tier}` : ""}</div>
       <div className="ovr">
-        <div className="ovr-num display">{p.ovr}</div>
-        <div className="mono t9 up dim">Demo OVR</div>
+        <div className="ovr-num display">{displayOverall(p.ovr)}</div>
+        <div className="mono t9 up dim">Formula B OVR</div>
       </div>
     </button>
   );
 }
 
-export default function Search() {
+export default function Search({ players = [], loaded = false, error = "", onRetry }) {
   const [pos, setPos] = useState("CB");
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -43,11 +43,11 @@ export default function Search() {
   const inputRef = useRef(null);
 
   const ranked = useMemo(
-    () => PLAYERS.filter((p) => p.position === pos).sort((a, b) => b.ovr - a.ovr),
-    [pos]
+    () => players.filter((p) => p.position === pos).sort((a, b) => (b.ovr ?? -1) - (a.ovr ?? -1)),
+    [pos, players]
   );
-  const top3 = ranked.slice(0, 3);
-  const { matches, didYouMean } = useMemo(() => search(q, PLAYERS), [q]);
+  const top3 = ranked.filter((p) => p.ranked).slice(0, 3);
+  const { matches, didYouMean } = useMemo(() => search(q, players), [q, players]);
 
   const pick = (p) => {
     setSelected(p);
@@ -87,13 +87,15 @@ export default function Search() {
           intro="Browse the three highest-rated players per position, or search anyone in the index. Every player has a card."
         />
 
+        {error && <p role="alert">Player data unavailable: {error} <button type="button" onClick={onRetry}>Retry player data</button></p>}
+        {!loaded && !error && <p role="status">Loading approved player ratings…</p>}
         <div className="tabs mono reveal" role="tablist" aria-label="Position">
           {POSITIONS.map((p) => (
-            <button key={p} type="button" role="tab" aria-selected={pos === p} onClick={() => setPos(p)}>{p}</button>
+            <button key={p} type="button" role="tab" aria-selected={pos === p} onClick={() => setPos(p)}>{p === "DM" ? "MID" : p}</button>
           ))}
         </div>
 
-        <div className="sub-label mono t10 up reveal">Top 3 overall · {pos === "CB" ? "Centre-backs" : "Defensive midfielders"}</div>
+        <div className="sub-label mono t10 up reveal">Top 3 eligible overall · {pos === "CB" ? "Centre-backs" : "Midfielders"}</div>
         <div className="top3">
           {top3.map((p, i) => (
             <TopCard key={p.id} p={p} rank={i + 1} onPick={pick} on={selected?.id === p.id} />
@@ -142,26 +144,26 @@ export default function Search() {
             </div>
 
             <div className="browse">
-              <div className="mono t10 up dim" style={{ marginBottom: 6 }}>All {pos} in the index</div>
+              <div className="mono t10 up dim" style={{ marginBottom: 6 }}>All {pos === "DM" ? "MID" : pos} in the index</div>
               {ranked.map((p, i) => (
                 <button key={p.id} type="button" className={`browse-row ${selected?.id === p.id ? "on" : ""}`} onClick={() => pick(p)}>
                   <span className="n mono t11">{i + 1}</span>
                   <span className="nm">{p.name}</span>
                   <span className="tm mono">{p.team}</span>
-                  <span className="ov mono t11">{p.ovr}</span>
+                  <span className="ov mono t11">{displayOverall(p.ovr)}</span>
                 </button>
               ))}
             </div>
 
             <div className="placeholder-banner mono angular-sm">
-              Demo data: fictional players, percentile profiles and illustrative demo OVR. Raw scorecards use a separate mode (see README).
+              Approved 2015/16 real-player ratings. Top 3 uses strictly eligible players; all supported profiles remain searchable. MID includes central and defensive midfielders. Limited data stays labelled and missing scores stay N/A.
             </div>
           </div>
 
           {isMobile && cardOpen && <div className="backdrop" onClick={() => setSelected(null)} />}
           <aside className={`card-col ${cardOpen ? "open" : ""}`} aria-live="polite">
             {selected ? (
-              <PlayerCard demo player={selected} onClose={() => setSelected(null)} />
+              <PlayerCard player={selected} onClose={() => setSelected(null)} />
             ) : (
               <div className="empty-card angular">
                 <Photo label="FIFA 16 photo" />

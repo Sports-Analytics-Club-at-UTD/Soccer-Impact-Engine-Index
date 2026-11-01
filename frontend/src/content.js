@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    EVERYTHING YOU'LL WANT TO EDIT LIVES HERE (plus src/lib/archetypes.js for
-   archetype wording, and src/data/players.json for player data).
+   archetype wording; approved player data is pinned in lib/publicRatingsRelease.js).
    Images: put files in /public and point to them like "/teams/psg-1.png".
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -33,7 +33,7 @@ export const DESCRIPTION = {
   eyebrow: "(Project)",
   title: "Description",
   intro:
-    "The SAC Midfielder/Defender Index scores centre-backs and defensive midfielders on five measures — tackles, interceptions, clearances, playing under pressure and line-breaking passes — as percentiles against their positional peers. Each player is then assigned one primary archetype.",
+    "The SAC Midfielder/Defender Index scores centre-backs and midfielders on five measures — tackles, interceptions, ball recoveries, press resistance and progressive passing as a line-breaking proxy. Player cards show approved ratings and percentiles against positional peers. Eligible profiles receive one primary archetype.",
   points: [
     {
       label: "One season of data",

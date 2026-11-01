@@ -1,6 +1,7 @@
 // Build-time admission only. This module is never imported by browser code.
-// No real-player publication authority is configured. Environment flags and
-// self-declared payload booleans cannot grant it.
+// Only the explicitly reviewed public final-ratings release is admitted.
+// Environment flags and self-declared payload booleans cannot add authority.
+import { PUBLIC_RATINGS_RELEASE } from '../src/lib/publicRatingsRelease.js';
 import { createHash } from 'node:crypto';
 import { lstat, readFile, readdir, realpath } from 'node:fs/promises';
 import { basename, dirname, extname, isAbsolute, relative, resolve } from 'node:path';
@@ -15,6 +16,7 @@ const denied = (reason) => { throw Error(`Production data admission denied: ${re
 // inventory, not certification of their statistical provenance. New static/demo
 // assets require explicit path/content review here. Never add private data here.
 export const PUBLIC_ASSETS = Object.freeze([
+  PUBLIC_RATINGS_RELEASE,
   { path: 'team/spatial_Barcelona.png', sha256: '0421ca9ceb2bef7f8b360813a5f36c0c725b34e15bd1da5400fe08e67a6f217b' },
   { path: 'team/spatial_Bayer_Leverkusen.png', sha256: '30bff5b12ab5cd763c651909bf28d7fb5d21b123fb5a9cc9dbe8aa408abeb602' },
   { path: 'team/spatial_Paris_Saint-Germain.png', sha256: '10914ca2b386cc3071af6668f3424577ed10649595ba0c05d73a3538d1bc480e' },
@@ -38,7 +40,7 @@ const within = (parent, path) => {
 async function checkedBytes(path, expected) {
   if ((await lstat(path)).isSymbolicLink() || await realpath(path) !== resolve(path)) denied(`symlink asset: ${path}`);
   const bytes = await readFile(path);
-  if (digest(bytes) !== expected) denied(`reviewed demo/static asset fingerprint changed: ${path}`);
+  if (digest(bytes) !== expected) denied(`reviewed public asset fingerprint changed: ${path}`);
   return bytes;
 }
 
@@ -122,7 +124,7 @@ export default function productionDataAdmission() {
     configResolved(value) {
       config = value;
       if (config.publicDir || config.build.copyPublicDir !== false) denied('automatic public copying must remain disabled');
-      config.logger.info('Production data admission: automatic public copying disabled; only 3 pinned static assets and 2 pinned demo/synthetic data imports admitted. Real-player publication is disabled.');
+      config.logger.info('Production data admission: automatic public copying disabled; only the approved pinned final-ratings release, 3 pinned heatmaps and 2 pinned demo/synthetic imports admitted. All other data remains denied.');
     },
     async load(id) { await validateDataImport(id); return null; },
     generateBundle: {
