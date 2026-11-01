@@ -1,5 +1,10 @@
 # Default-deny production data admission
 
+Current update: final 2015/16 ratings publication was explicitly approved in the
+2026-10-31 implementation request. The guard now admits one exact public release
+in addition to the unchanged heatmaps. See [current delivery and verification](public-ratings-production-delivery.md).
+The report below records the preceding demo-only boundary and remains historical evidence.
+
 Both Vite configurations disable automatic public-directory copying and use
 `frontend/build/productionDataAdmission.js`. Existing admitted inputs are pinned
 by path and SHA256: three original `public/team/` PNGs, fictional demo JSON and

@@ -23,6 +23,7 @@ export function FiveAttributeCardView({ presentation: p, reference, onClose, ovr
         <p className="mono five-identity">Player-season: {p.id}</p></div>
       <button type="button" onClick={onClose} aria-label="Close player card">Close</button>
     </header>
+    {p.coverage && <p>{format(p.coverage.supported_minutes)} known supported minutes · {p.coverage.observed_fixtures} observed fixtures · Partial season</p>}
     {!compactCoverage && (p.limited_data || p.partial_season) && <p className="warn mono" role="note">
       {p.limited_data && <strong>LIMITED DATA </strong>}{p.partial_season && <strong>PARTIAL SEASON</strong>}
     </p>}
@@ -35,7 +36,7 @@ export function FiveAttributeCardView({ presentation: p, reference, onClose, ovr
     </div>
     <p>Progressive passing is a proxy. It does not verify defensive line-breaking events.</p>
     {axes.some((a) => a.value === null) && <p role="note">Incomplete profile: missing attributes stay N/A; the visualization has no filled polygon.</p>}
-    <div className="five-metric-grid">{FIVE_METRICS.map(({ id, label }) => {
+    {!p.coverage && <div className="five-metric-grid">{FIVE_METRICS.map(({ id, label }) => {
       const m = p.attributes[id], o = m.observation;
       const pool = p.comparison_position ? reference.positions[p.comparison_position][id] : null;
       const warnings = compactCoverage ? m.warnings?.filter((w) => !['LIMITED DATA', 'PARTIAL SEASON', 'BELOW_40_PRESS_ACTIONS / LIMITED DATA'].includes(w)) : m.warnings;
@@ -69,8 +70,15 @@ export function FiveAttributeCardView({ presentation: p, reference, onClose, ovr
           <p>Position/metric pool fingerprint: <code>{m.normalization.pool_fingerprint ?? "N/A"}</code></p>
         </details>
       </section>;
-    })}</div>
-    <details><summary>{compactCoverage ? 'Coverage & sources' : 'Clubs and evidence provenance'}</summary>
+    })}</div>}
+    {p.coverage ? <details><summary>Coverage &amp; sources</summary>
+      <p>Final 2015/16 project ratings, approved for publication. Available observations do not establish complete seasons. Missing matches are not zero-action performances.</p>
+      <p>MID and CB use separate unchanged frozen references; Bundesliga observations do not contribute to the baseline. Bundesliga coverage is uneven.</p>
+      <p>Raw observations, private research and reference memberships are not included in the public release.</p>
+      <p>{componentClassification?.explanation}</p>
+      {!!ovr?.exclusion_reasons.length && <p>Ranking exclusions: {ovr.exclusion_reasons.join("; ")}</p>}
+      {FIVE_METRICS.map(({id,label}) => <p key={id}>{label}: {[...p.attributes[id].warnings, ...p.attributes[id].missingness].join(" · ") || "Available"}</p>)}
+    </details> : <details><summary>{compactCoverage ? 'Coverage & sources' : 'Clubs and evidence provenance'}</summary>
       {componentClassification && <p>{componentClassification.explanation}</p>}
       {compactCoverage && <>
         <p>{p.partial_season ? 'Partial-season observation. This frozen dataset marks all profiles as partial season, including leaderboard-eligible players; eligibility does not establish full-season coverage.' : 'Available observed fixtures do not establish full-season coverage.'}</p>
@@ -85,6 +93,6 @@ export function FiveAttributeCardView({ presentation: p, reference, onClose, ovr
       </>}
       {p.clubs.map((c) => <p key={`${c.name}:${c.competition_name}`}>{c.name} · {c.competition_name} · {c.match_ids.join(", ")}</p>)}
       {p.provenance.map((s) => <p key={s.id}>{s.label} · {s.source}<br /><code>{s.fingerprint}</code></p>)}
-    </details>
+    </details>}
   </article>;
 }

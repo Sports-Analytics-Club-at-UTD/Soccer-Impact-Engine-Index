@@ -1,6 +1,6 @@
 # Soccer Impact Index
 
-Local experimental scouting website for supported midfielder (MID) and centre-back
+Experimental scouting website for supported midfielder (MID) and centre-back
 (CB) player-seasons. The React/Vite website integrates **Home, Players,
 Leaderboards, Compare, Teams and About**. Goalkeeper ratings and individual
 spatial-control ratings are research ambitions, not current supported features.
@@ -32,8 +32,8 @@ Python dependencies are resolved by pip, so these files are not a universal
 platform lock. The existing npm lockfile is authoritative; use `npm ci`.
 
 **Repository access does not authorize private data access.** A source-only
-checkout builds the fictional production demo and runs the public/synthetic
-checks. The development homepage needs seven separately authorized frozen
+checkout builds the team-approved public 2015/16 real-player experience and runs
+the public/synthetic checks. Production builds need no private research files. The development homepage needs seven separately authorized frozen
 inputs; without them it shows an explicit data error and never substitutes demo
 players. See [private provisioning](docs/private-local-provisioning.md).
 Use <http://127.0.0.1:5173/?view=demo> for the fictional development demo.
@@ -77,10 +77,11 @@ npm run build
 npm run preview:single
 ```
 
-Outputs are `frontend/dist/` and `frontend/preview/` (HTML plus the three team
-PNGs for the standalone build). Production remains the fictional demonstration.
-Both configurations enforce default-deny packaging; environment variables cannot
-approve real-player publication. Do not put real payloads in distributable assets.
+Outputs are `frontend/dist/` and `frontend/preview/` (HTML plus the versioned
+ratings JSON and three team PNGs for the standalone build). Both configurations
+enforce default-deny packaging. Only the explicitly approved final-ratings
+package is admitted by exact path and SHA256; environment variables cannot
+authorize additional data. See [production delivery and verification](docs/public-ratings-production-delivery.md).
 
 After separate private provisioning, run `python -B -m scripts.verify_local_inputs`
 from the root, `python -B -m scripts.run_backend_tests private -q`, and, from
@@ -99,6 +100,6 @@ Never use a blanket staging operation. Do not regenerate frozen data to repair
 setup or checksum errors. The historical `streamlit run app/main.py` instruction
 is obsolete: that entry point does not exist; Vite is the current website.
 
-No project-wide redistribution license has been selected. Existing demo build
-admission does not confer data or contributor-asset publication rights. Public
-real-player delivery remains disabled and needs separate authorization.
+No project-wide redistribution license has been selected. The team explicitly
+approved publication of the final 2015/16 ratings for this release. That approval
+does not authorize publication of raw datasets or private research packages.

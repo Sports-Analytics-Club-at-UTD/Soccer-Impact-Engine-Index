@@ -5,6 +5,8 @@ import { mkdtemp, mkdir, readFile, writeFile, realpath, rm } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { basename, join, resolve, relative, isAbsolute } from 'node:path';
 import { build, createServer, preview } from 'vite';
+import { PUBLIC_RATINGS_RELEASE as release } from '../src/lib/publicRatingsRelease.js';
+import { parsePublicRatings, publicModels } from '../src/lib/publicRatingsDelivery.js';
 import admission, { FRONTEND_ROOT, PUBLIC_ASSETS, verifyProductionDirectory, assertAdmittedOutput } from '../build/productionDataAdmission.js';
 import { parseExperimentalDelivery, experimentalModels } from '../src/dev/experimentalDelivery.js';
 import { ovrLeaderboard } from '../src/dev/provisionalOvr.js';
@@ -33,32 +35,28 @@ const single = join(temporary, 'single');
 
 // Explicit invented nonpublication-shaped bytes; no real observations.
 const original = Buffer.from('{"schema_version":"soccer-local-experimental-synthetic-denial/v0","players":[{"id":"synthetic:denied"}],"publication_authorized":false}');
-test('normal production build admits demo/static assets and no nonpublication data', async () => {
+test('normal production build admits the approved release and excludes demo and private delivery', async () => {
   await build({ root: FRONTEND_ROOT, configFile: resolve(FRONTEND_ROOT, 'vite.config.js'), logLevel: 'silent', build: { outDir: normal, emptyOutDir: false } });
   const files = await verifyProductionDirectory(normal);
   assert.ok(files.includes('index.html'));
-  assert.ok(!files.some((p) => /bundesliga|\.jsonl?$|\.parquet$|\.gitkeep$/.test(p)));
+  assert.deepEqual(files.filter((p) => /\.json$/.test(p)), [release.path]);
   const javascript = (await Promise.all(files.filter((p) => p.endsWith('.js')).map((p) => readFile(join(normal, p), 'utf8')))).join('\n');
-  assert.match(javascript, /Marcus Delacroix/); // Real demo contents, not merely an empty build.
-  assert.doesNotMatch(javascript, /Browse verified 2015\/16 Bundesliga observations/);
-  assert.doesNotMatch(javascript, /five-attribute-experimental|\/__local_experimental\/five-attributes|soccer-ovr-formula-b\/v1/);
-  assert.doesNotMatch(javascript, /classification scope pending|Component classifications are withheld pending team|Badges are shown only for strictly eligible real-player profiles/);
-  assert.doesNotMatch(javascript, /unified-destinations|First player-season|Player data unavailable/);
+  assert.doesNotMatch(javascript, /Marcus Delacroix|\/__local_experimental\/five-attributes|403c1d9ab93def/);
+  assert.match(javascript, /unified-destinations/);
   for (const p of PUBLIC_ASSETS) assert.equal(sha(await readFile(join(normal, p.path))), p.sha256);
 });
 
-test('single-file sharing build has the same admission boundary', async () => {
+test('single-file sharing build has the same approved release and admission boundary', async () => {
   await build({ root: FRONTEND_ROOT, configFile: resolve(FRONTEND_ROOT, 'vite.single.config.js'), logLevel: 'silent', build: { outDir: single, emptyOutDir: false } });
   const files = await verifyProductionDirectory(single);
-  assert.ok(!files.some((p) => p.endsWith('.json')));
+  assert.deepEqual(files.filter((p) => p.endsWith('.json')), [release.path]);
   const html = await readFile(join(single, 'index.html'), 'utf8');
-  assert.match(html, /Marcus Delacroix/);
-  assert.doesNotMatch(html, /soccer-ovr-formula-b\/v1|\/__local_experimental\/five-attributes/);
-  assert.doesNotMatch(html, /classification scope pending|Component classifications are withheld pending team|Badges are shown only for strictly eligible real-player profiles/);
-  assert.doesNotMatch(html, /unified-destinations|First player-season|Player data unavailable/);
+  assert.doesNotMatch(html, /Marcus Delacroix|\/__local_experimental\/five-attributes|403c1d9ab93def/);
+  assert.match(html, /unified-destinations/);
+  assert.equal(sha(await readFile(join(single, release.path))), release.sha256);
 });
 
-test('actual production preview serves demo assets but no observation or private score JSON', async () => {
+test('actual production preview serves real ratings but no observation or private score JSON', async () => {
   const server = await preview({ root: FRONTEND_ROOT, configFile: resolve(FRONTEND_ROOT, 'vite.config.js'), build: { outDir: normal },
     logLevel: 'silent', preview: { host: '127.0.0.1', port: 0, strictPort: true, open: false } });
   try {
@@ -69,6 +67,11 @@ test('actual production preview serves demo assets but no observation or private
       assert.notEqual(sha(text), sourceHash);
       assert.doesNotMatch(text, /"players"|"ovr_integration"|soccer-provisional-observations/);
     }
+    const ratings = await fetch(base + '/' + release.path);
+    assert.equal(ratings.status, 200); assert.match(ratings.headers.get('content-type'), /application\/json/);
+    const body = Buffer.from(await ratings.arrayBuffer()); assert.equal(sha(body), release.sha256);
+    const models = publicModels(parsePublicRatings(body.toString()));
+    assert.equal(models.length,691); assert.equal(ovrLeaderboard(models,'MID').length,124); assert.equal(ovrLeaderboard(models,'CB').length,107);
     assert.equal((await fetch(base + '/')).status, 200);
     for (const p of PUBLIC_ASSETS) {
       const response = await fetch(base + '/' + p.path);
@@ -87,7 +90,7 @@ test('future public data is excluded even with self-declared approval and enviro
   try { await build(f.options); } finally {
     if (old === undefined) delete process.env.VITE_ALLOW_REAL_PLAYER_DATA; else process.env.VITE_ALLOW_REAL_PLAYER_DATA = old;
   }
-  assert.ok(!(await verifyProductionDirectory(f.outDir)).some((p) => p.endsWith('.json')));
+  assert.deepEqual((await verifyProductionDirectory(f.outDir)).filter((p) => p.endsWith('.json')), [release.path]);
 });
 
 test('synthetic unreviewed imports, including raw/url imports, fail before packaging', async () => {
