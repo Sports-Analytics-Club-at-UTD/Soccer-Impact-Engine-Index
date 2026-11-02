@@ -20,6 +20,20 @@ text labels and methodology disclosures. Qualifying ties can each receive a
 badge. Component classifications do not create an OVR tier, positional archetype
 or inferred DM/CM specialization. MID and CB references remain separate.
 
+The rendered metric labels use colon typography. The frozen label
+`Line Breaking \u2014 Progressive Passing Proxy` is displayed as
+`Line Breaking : Progressive Passing Proxy`; its badge accessible name is
+`Line Breaking : Progressive Passing Proxy: Gold attribute badge` (or Silver).
+The frozen label is not changed. Public rendering tests already require this
+colon substitution. The authorized private assertion formerly used the raw
+frozen em-dash label at `provisionalOvr.test.js:61`; that expectation was stale.
+The minimal correction is supplied in
+`frontend/tests/corrections/provisionalOvr-label.patch`, with a corresponding
+reviewed private-source fingerprint in `frontend/tests/suiteInventory.json`.
+Apply it with `git apply --unidiff-zero` after the authorized private test source
+is provisioned. All badge counts, tiers, eligibility checks and numeric tests
+remain intact. The retained historical private harness is not edited.
+
 Missing attributes stay unavailable and retain incomplete radar behavior.
 [Limited Data](limited-data-status-consistency.md) and ranking exclusions remain
 visible; a high observed score cannot override admission. This local permission

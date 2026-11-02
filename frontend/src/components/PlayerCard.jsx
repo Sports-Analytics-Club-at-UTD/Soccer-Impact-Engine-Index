@@ -75,6 +75,7 @@ function StandardPlayerCard({ player, onClose, demo = false }) {
         <summary>Rating details</summary>
         {player.canonicalName !== player.name && <p>Full name: {player.canonicalName}</p>}
         {player.ranked && <p>Included in the position rankings.</p>}
+        {player.ratingDetails.seasonCoverage && <p>{player.ratingDetails.seasonCoverage}</p>}
         {extraExplanations.length > 0 && <ul>{extraExplanations.map((reason) => <li key={reason}>{reason}</li>)}</ul>}
         {card.attributes.map((m) => <div key={m.id}>
           <b>{m.label}</b> · Percentile: {m.percentile === null ? "N/A" : String(Math.round(m.percentile))}

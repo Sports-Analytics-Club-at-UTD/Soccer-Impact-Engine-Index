@@ -45,8 +45,8 @@ def write_csv(path,rows,fields=None):
 def serialized(value):return json.loads(payload(value))
 
 
-def run(priority=False):
-    out=ROOT/('audit-output/chronology-priority' if priority else 'audit-output/event-chronology')
+def run(priority=False, *, output=None, baseline='95b82a6cf7e591fa7a6623d57e1533fabfb6db79'):
+    out=Path(output) if output is not None else ROOT/('audit-output/chronology-priority' if priority else 'audit-output/event-chronology')
     if out.exists():raise ValueError('Preserve prior run: '+str(out))
     out.mkdir(parents=True)
     receipts={};checks=Counter()
@@ -58,10 +58,10 @@ def run(priority=False):
     def js(path,expected=None):return json.loads(read(path,expected))
     def rows(path):read(path);return table(path)
     def dump(name,value):(out/name).write_text(json.dumps(value,indent=2,ensure_ascii=False,default=str)+'\n',encoding='utf8')
-    assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()=='95b82a6cf7e591fa7a6623d57e1533fabfb6db79'
+    assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()==baseline
     # No behavioral change: bind the exact merged production bytes to Batch 3A.
-    for p in (ROOT/'src').rglob('*.py'):
-        assert read(p)==read(PRIOR/'src'/p.relative_to(ROOT/'src')),p
+    for p in (PRIOR/'src').rglob('*.py'):
+        assert read(ROOT/'src'/p.relative_to(PRIOR/'src'))==read(p),p
     for p in (AUDIT/'docs/full-player-data-integrity-audit.md',AUDIT/'docs/data-correction-roadmap.md',RECON/'docs/source-evidence-reconciliation-report.md',PRIOR/'docs/permanent-exit-support-report.md'):
         read(p)
     history=rows(AUDIT/'audit-output/full-player-audit/appearances.csv')

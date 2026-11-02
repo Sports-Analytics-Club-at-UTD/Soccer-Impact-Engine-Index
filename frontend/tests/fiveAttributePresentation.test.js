@@ -10,14 +10,28 @@ import { playerDataMode, loadPlayerExperience } from "../src/lib/playerDataMode.
 const require = createRequire(import.meta.url), { buildSync } = require("esbuild");
 const React = require("react"), { renderToStaticMarkup } = require("react-dom/server");
 const fixture = () => JSON.parse(readFileSync(new URL("../src/fixtures/syntheticFiveAttributes.json", import.meta.url), "utf8"));
-function component(name) {
+function component(name, exportName = 'default') {
   const filename = fileURLToPath(new URL(`../src/components/${name}.jsx`, import.meta.url));
   const r = buildSync({ entryPoints: [filename], bundle: true, write: false, platform: "node", format: "cjs", jsx: "automatic", loader: { ".css": "empty" }, logLevel: "silent", external: ["react", "react-dom", "react/jsx-runtime"] });
-  const mod = new Module(filename); mod.paths = Module._nodeModulePaths(fileURLToPath(new URL("..", import.meta.url))); mod._compile(r.outputFiles[0].text, filename); return mod.exports.default;
+  const mod = new Module(filename); mod.paths = Module._nodeModulePaths(fileURLToPath(new URL("..", import.meta.url))); mod._compile(r.outputFiles[0].text, filename); return mod.exports[exportName];
 }
 const Card = component("PlayerCard"), Comparison = component("FiveAttributeComparison"), Experience = component("FiveAttributeExperience");
 const models = async () => fiveAttributePlayers(await parseFiveAttributeDelivery(fixture()));
 const render = (p) => renderToStaticMarkup(React.createElement(Card, { player: p }));
+
+test('coverage disclosure is independent of badge label typography and eligibility', async () => {
+  const p = (await models())[0], before = structuredClone(p.presentation);
+  const View = component('FiveAttributePlayerCard', 'FiveAttributeCardView');
+  const html = renderToStaticMarkup(React.createElement(View, {
+    presentation: { ...p.presentation, partial_season: true }, reference: p.reference,
+    compactCoverage: true, componentClassification: { tiers: { line_breaking_passes: 'Gold' } },
+  }));
+  assert.match(html, /Historical season coverage is unverified, including leaderboard-eligible players/);
+  assert.match(html, /aria-label="Line Breaking : Progressive Passing Proxy: Gold attribute badge"/);
+  assert.doesNotMatch(html, /aria-label="Line Breaking \u2014 Progressive Passing Proxy: Gold attribute badge"/);
+  assert.equal((html.match(/class="attribute-badge /g) || []).length, 1);
+  assert.deepEqual(p.presentation, before);
+});
 
 test("Python fixture -> fingerprint validation -> existing PlayerCard dispatch", async () => {
   const data = execFileSync("python", ["-B", "-c", "import json; from scripts.make_synthetic_five_attribute_fixture import fixture; print(json.dumps(fixture()))"], { cwd: fileURLToPath(new URL("../..", import.meta.url)), encoding: "utf8" });
