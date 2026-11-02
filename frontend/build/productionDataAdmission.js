@@ -17,6 +17,12 @@ const denied = (reason) => { throw Error(`Production data admission denied: ${re
 // assets require explicit path/content review here. Never add private data here.
 export const PUBLIC_ASSETS = Object.freeze([
   PUBLIC_RATINGS_RELEASE,
+  // About Us portraits supplied for public display.
+  { path: 'team/vibhor-rajan.webp', sha256: '332f351b2fbec6b8ef4abfdde62df0efde17e61d4c66e1bd0e18f9b6b7e6e08a' },
+  { path: 'team/pratyush-malaviya.webp', sha256: '9e1c95d5b3627f899f22391c0cb3dc02a13d4aee1d2ffd203993011e0095b195' },
+  { path: 'team/arpit-gupta.webp', sha256: '4a0c8cfa0dd51589cc728794047cb71d91eaf94749cac62ed3741ff3e1cc5e8c' },
+  { path: 'team/ayush-mendhe.webp', sha256: 'c1bfa7c5f2c1661500691c2d35ae1db1357a2f1fa99528a213e835021ba07dfc' },
+  { path: 'team/joseph-olutayo.webp', sha256: '628624e750f9c4e916d130235339f8378945f516ed543876fe21864868035fd2' },
   { path: 'team/spatial_Barcelona.png', sha256: '0421ca9ceb2bef7f8b360813a5f36c0c725b34e15bd1da5400fe08e67a6f217b' },
   { path: 'team/spatial_Bayer_Leverkusen.png', sha256: '30bff5b12ab5cd763c651909bf28d7fb5d21b123fb5a9cc9dbe8aa408abeb602' },
   { path: 'team/spatial_Paris_Saint-Germain.png', sha256: '10914ca2b386cc3071af6668f3424577ed10649595ba0c05d73a3538d1bc480e' },
@@ -124,7 +130,7 @@ export default function productionDataAdmission() {
     configResolved(value) {
       config = value;
       if (config.publicDir || config.build.copyPublicDir !== false) denied('automatic public copying must remain disabled');
-      config.logger.info('Production data admission: automatic public copying disabled; only the approved pinned final-ratings release, 3 pinned heatmaps and 2 pinned demo/synthetic imports admitted. All other data remains denied.');
+      config.logger.info('Production data admission: automatic public copying disabled; only the approved pinned final-ratings release, 3 pinned heatmaps, 5 pinned About Us portraits and 2 pinned demo/synthetic imports admitted. All other data remains denied.');
     },
     async load(id) { await validateDataImport(id); return null; },
     generateBundle: {

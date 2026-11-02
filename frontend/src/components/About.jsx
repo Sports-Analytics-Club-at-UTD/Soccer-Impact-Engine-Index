@@ -7,7 +7,7 @@ function Member({ m, i }) {
   return (
     <div className="reveal" style={{ transitionDelay: `${i * 70}ms` }}>
       <div {...tilt} className="tilt sheen card-surface angular member">
-        <Photo src={m.photo} label="Team photo" />
+        <Photo src={m.photo} label={`Portrait of ${m.name}`} />
         <h3 className="display">{m.name}</h3>
         <div className="role mono t10 up">{m.role}</div>
         <p>{m.does}</p>
