@@ -97,10 +97,10 @@ export const ABOUT = {
   intro: "Five members of the UTD Sports Analytics Club, eight weeks, one index.",
   // photo: "/team/name.jpg" — leave "" for a placeholder
   members: [
-    { name: "Vibhor Rajan", role: "Project Manager", does: "Led the project and shaped the website experience.", photo: "" },
-    { name: "Pratyush Malaviya", role: "Lead Developer", does: "Brought the five skills together and developed the press resistance analysis.", photo: "" },
-    { name: "Arpit Gupta", role: "Engineer", does: "Developed the ball-winning analysis and team defensive maps using StatsBomb match data.", photo: "" },
-    { name: "Ayush Mendhe", role: "Integration Engineer", does: "Connected the match evidence, checked the ratings and brought the player profiles to the website.", photo: "" },
-    { name: "Joseph Olutayo", role: "Engineer", does: "Developed the progressive passing analysis to explore how players move the ball forward.", photo: "" },
+    { name: "Vibhor Rajan", role: "Project Manager", does: "Led the project and shaped the website experience.", photo: "/team/vibhor-rajan.webp" },
+    { name: "Pratyush Malaviya", role: "Lead Developer", does: "Brought the five skills together and developed the press resistance analysis.", photo: "/team/pratyush-malaviya.webp" },
+    { name: "Arpit Gupta", role: "Engineer", does: "Developed the ball-winning analysis and team defensive maps using StatsBomb match data.", photo: "/team/arpit-gupta.webp" },
+    { name: "Ayush Mendhe", role: "Integration Lead", does: "Connected the match evidence, checked the ratings and brought the player profiles to the website.", photo: "/team/ayush-mendhe.webp" },
+    { name: "Joseph Olutayo", role: "Engineer", does: "Developed the progressive passing analysis to explore how players move the ball forward.", photo: "/team/joseph-olutayo.webp" },
   ],
 };
