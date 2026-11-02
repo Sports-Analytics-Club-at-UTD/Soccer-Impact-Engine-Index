@@ -13,7 +13,8 @@
     "scorecardAdapter.test.js",
     "unifiedLocal.test.js",
     "publicRatings.test.js",
-    "foundationPlayers.test.js"
+    "foundationPlayers.test.js",
+    "positionToggle.test.js"
   ],
   "private_files": [
     "localExperimentalRatings.test.js",
@@ -37,7 +38,8 @@
     "scorecardAdapter.test.js": "50812dd0291dbd031d9d047b1c1b98a3c110e3f2b9b0e96d2d63c36bf3af011e",
     "unifiedLocal.test.js": "9e4252313a1749b37325b5e53abb6d45a87c6f91963505261eef4a70dbec75b9",
     "publicRatings.test.js": "9daf7de9762a50803628d74c6103f4463e16fee668ceaae0bfcf12a4613679a7",
-    "foundationPlayers.test.js": "f0ab1b326bec0510e8350cff1d95bbd1d43a5fc7239aa3cd408dc402ab40e79d"
+    "foundationPlayers.test.js": "f0ab1b326bec0510e8350cff1d95bbd1d43a5fc7239aa3cd408dc402ab40e79d",
+    "positionToggle.test.js": "746b40598b7faad3cd0be5c325bd3c91593a36b0d63cf2bfa66fcadb6916aef6"
   },
   "network_tests": {
     "public": [
