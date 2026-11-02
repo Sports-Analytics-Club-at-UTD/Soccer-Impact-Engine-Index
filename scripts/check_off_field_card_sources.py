@@ -88,11 +88,23 @@ class OriginalSourceRegressions(unittest.TestCase):
     def test_batch1_wague(self):self.rejected(3577,3879863)
     def test_batch1_saunier(self):self.rejected(13730,3901259)
 
-    def test_all_ten_batch2b_entry_proposals_stay_withheld(self):
+    def test_all_ten_batch2b_entry_proposals_are_source_backed(self):
         with (RECON/'recoverable-appearances.csv').open(encoding='utf-8-sig') as f:rows=[r for r in csv.DictReader(f) if r['classification']=='B']
         self.assertEqual(len(rows),10)
         for a in rows:
-            with self.subTest(player_id=a['player_id'],match_id=a['match_id']):self.rejected(int(a['player_id']),int(a['match_id']))
+            with self.subTest(player_id=a['player_id'],match_id=a['match_id']):
+                _,_,_,es,_,p,v,o,bounds=load(int(a['player_id']),int(a['match_id']))
+                self.assertEqual(o['issues'],[])
+                self.assertIsNotNone(v.elapsed_seconds)
+                self.assertEqual(v.elapsed_seconds,o['seconds'])
+                self.assertEqual(independent.union(o['intervals'],bounds),independent.union(o['lineup_intervals'],bounds))
+                self.assertEqual(len(p.reconstructed_entries),1)
+                proof=p.reconstructed_entries[0];ei={e['id']:e for e in es}
+                entry=ei[proof.entry_ref.rsplit('/',1)[-1]];shift=ei[proof.shift_ref.rsplit('/',1)[-1]]
+                self.assertEqual(raw.clock(entry),raw.clock(shift))
+                self.assertEqual(shift['type']['name'],'Tactical Shift')
+
+    def test_pajot_snapshot_conflict(self):self.rejected(3414,3829490)
 
     def test_permanent_exit_support_policy_is_unchanged(self):
         with (RECON/'disputed-appearances.csv').open(encoding='utf-8-sig') as f:rows=[r for r in csv.DictReader(f) if r['classification']=='E']
@@ -104,5 +116,6 @@ class OriginalSourceRegressions(unittest.TestCase):
 if __name__=='__main__':
     result=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(OriginalSourceRegressions))
     output=ROOT/'audit-output/off-field-source-test-input-hashes.json'
+    output.parent.mkdir(parents=True,exist_ok=True)
     output.write_text(json.dumps(RECEIPTS,indent=2)+'\n',encoding='utf8')
     raise SystemExit(0 if result.wasSuccessful() else 1)

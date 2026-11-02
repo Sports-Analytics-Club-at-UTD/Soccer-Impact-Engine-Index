@@ -111,6 +111,7 @@ def appearance_rows(report, fixture, lineups):
             period_boundaries=report['boundaries'],failure_reasons=sorted({i['code'] for i in v['issues']}),
             source_checks=p.get('source_checks',[]),source_verification_key=report['verification_key'],
             off_field_discipline=p.get('off_field_discipline',[]),
+            reconstructed_entries=p.get('reconstructed_entries',[]),
             scope_policy='PENDING_TEAM_APPROVAL_MISSING_DELIVERED_FIXTURE' if mid==3879594 else 'NO_PRODUCTION_SCOPE_AUTHORIZED',
             source_independently_verified=False,production_certified=False))
     if seen!=set(roster):raise ValueError('report omitted source roster actors')
