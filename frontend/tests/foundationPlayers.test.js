@@ -89,6 +89,8 @@ test('original card presents exact approved OVR, missing scores and coverage wit
   assert.match(html, /83\.08/); assert.match(html, /Overall rating/);
   assert.match(html, /Confirmed minutes/);
   assert.match(html, /Included in the position rankings/);
+  assert.match(html, /Historical season coverage is unverified/);
+  assert.match(html, /ranking eligibility does not certify full-season coverage/);
   const partial = players.find((p) => p.ovr === null);
   const missing = renderToStaticMarkup(React.createElement(PlayerCard, { player: partial }));
   assert.match(missing, /N\/A/); assert.match(missing, /Not included in rankings/);
@@ -100,6 +102,9 @@ test('all 691 cards explain ranking and missingness without leaking internal cod
   const technical = /[A-Z]{2,}_[A-Z_]+|Formula B|SHA256|fingerprint|normalization|reference candidate|experimental|production|publication|fixture scope/i;
   for (const p of players) {
     const html = renderToStaticMarkup(React.createElement(PlayerCard, { player: p }));
+    assert.equal(data.players.find((source) => source.id === p.id).partial_season, true);
+    assert.match(html, /Historical season coverage is unverified/, p.name);
+    assert.match(html, /Confirmed minutes describe supported observed matches/, p.name);
     assert.doesNotMatch(html, technical, p.name);
     assert.doesNotMatch(html, /\u2014/, p.name);
     assert.match(html, /Rating details/);

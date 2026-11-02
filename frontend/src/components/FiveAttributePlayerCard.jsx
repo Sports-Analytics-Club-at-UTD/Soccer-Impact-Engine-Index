@@ -27,6 +27,7 @@ export function FiveAttributeCardView({ presentation: p, reference, onClose, ovr
     </header>
     {!compactCoverage && (p.limited_data || p.partial_season) && <p className="warn mono" role="note">
       {p.limited_data && <strong>LIMITED DATA </strong>}{p.partial_season && <strong>PARTIAL SEASON</strong>}
+      {p.partial_season && <span> Historical season coverage is unverified; observed-match support and ranking eligibility are assessed separately.</span>}
     </p>}
     <ProvisionalOvrSummary ovr={ovr} presentation={p} />
     <div className="five-card-viz"><Radar attributes={axes} label={radarLabel} />
@@ -75,7 +76,7 @@ export function FiveAttributeCardView({ presentation: p, reference, onClose, ovr
     <details><summary>{compactCoverage ? 'Coverage & sources' : 'Clubs and evidence provenance'}</summary>
       {componentClassification && <p>{componentClassification.explanation}</p>}
       {compactCoverage && <>
-        <p>{p.partial_season ? 'Partial-season observation. This frozen dataset marks all profiles as partial season, including leaderboard-eligible players; eligibility does not establish full-season coverage.' : 'Available observed fixtures do not establish full-season coverage.'}</p>
+        <p>{p.partial_season ? 'Historical season coverage is unverified, including leaderboard-eligible players. Confirmed minutes describe supported observed matches; eligibility does not establish full-season coverage.' : 'Available observed fixtures do not establish full-season coverage.'}</p>
         {p.limited_data && <p>Bundesliga coverage is uneven and incomplete. Supported observations are retained; missing matches are not zero-action performances or proof of low season playing time.</p>}
         <p>MID and CB use separate frozen references. Bundesliga observations do not contribute to the reference baseline.</p>
         <p>Source evidence is frozen and loaded unchanged. Real-player data is served only in the local development preview; production delivery remains disabled. This preview grants no publication authority.</p>

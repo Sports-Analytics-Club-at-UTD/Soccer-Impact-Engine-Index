@@ -1,0 +1,5 @@
+--- a/frontend/tests/provisionalOvr.test.js
++++ b/frontend/tests/provisionalOvr.test.js
+@@ -61 +61 @@
+-      if (tier === 'Gold' || tier === 'Silver') assert.ok(html.includes(`${a.label}: ${tier} attribute badge`));
++      if (tier === 'Gold' || tier === 'Silver') assert.ok(html.includes(`${a.label.replaceAll('\u2014', ':')}: ${tier} attribute badge`));

@@ -38,5 +38,8 @@ export function publicPlayerCopy(player) {
     else if (a.warnings.includes('BELOW_40_PRESS_ACTIONS / LIMITED DATA')) note = 'Based on fewer than 40 actions under pressure.';
     return [key, note];
   }));
-  return { notice, explanations, attributeNotes };
+  const seasonCoverage = player.partial_season
+    ? 'Historical season coverage is unverified. Confirmed minutes describe supported observed matches; ranking eligibility does not certify full-season coverage.'
+    : null;
+  return { notice, explanations, attributeNotes, seasonCoverage };
 }
