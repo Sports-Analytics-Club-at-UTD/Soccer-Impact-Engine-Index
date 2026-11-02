@@ -55,9 +55,9 @@ def endpoint(stint,side,pid,tid,events,bounds):
     if period not in (1,2) or raw is None:return None
     minute,second=map(int,raw.split(':'))
     types={'Starting XI':'Starting XI','Tactical Shift':'Tactical Shift','Player On':'Player On','Player Off':'Player Off',
-           'Player On (Off Camera)':'Player On','Player Off (Off Camera)':'Player Off',
+           'Player On (Off Camera)':'Player On','Player Off (Off Camera)':'Player Off','Player Off (Permanent)':'Player Off',
            'Foul Committed (Red Card)':'Foul Committed','Foul Committed (Second Yellow)':'Foul Committed'}
-    allowed={'from':{'Starting XI','Tactical Shift','Player On','Player On (Off Camera)'},'to':{'Tactical Shift','Player Off','Player Off (Off Camera)','Foul Committed (Red Card)','Foul Committed (Second Yellow)'}}
+    allowed={'from':{'Starting XI','Tactical Shift','Player On','Player On (Off Camera)'},'to':{'Tactical Shift','Player Off','Player Off (Off Camera)','Player Off (Permanent)','Foul Committed (Red Card)','Foul Committed (Second Yellow)'}}
     substitution=isinstance(reason,str) and reason.startswith('Substitution - '+('On' if side=='from' else 'Off')+' (')
     typ='Substitution' if substitution else types.get(reason) if reason in allowed[side] else None
     values=set()
@@ -67,7 +67,12 @@ def endpoint(stint,side,pid,tid,events,bounds):
         if typ in ('Starting XI','Tactical Shift'):
             actor=pid if any(p['player']['id']==pid and (side=='to' or (p['position']['id'],p['position']['name'])==(stint.get('position_id'),stint.get('position'))) for p in e.get('tactics',{}).get('lineup',[])) else None
         if typ=='Foul Committed' and e.get('foul_committed',{}).get('card',{}).get('name') not in ('Red Card','Second Yellow'):continue
-        if typ=='Player Off' and e.get('player_off',{}).get('permanent'):continue
+        # This resolves raw geometry only; check_match compares it with a valid
+        # ledger. Permanent evidence must never resolve a temporary endpoint.
+        if typ=='Player Off':
+            permanent=e.get('player_off',{}).get('permanent')
+            if reason=='Player Off (Permanent)' and permanent is not True:continue
+            if reason!='Player Off (Permanent)' and permanent:continue
         if actor==pid:values.add(clock(e['timestamp']))
     return (period,next(iter(values))) if len(values)==1 else None
 
