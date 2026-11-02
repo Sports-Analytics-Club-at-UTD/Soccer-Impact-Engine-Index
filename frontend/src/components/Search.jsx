@@ -53,6 +53,15 @@ export default function Search({ players = [], loaded = false, error = "", onRet
   useEffect(() => { setPage(1); }, [pos, players]);
   const { matches, didYouMean } = useMemo(() => search(q, players), [q, players]);
 
+  const switchPosition = (position) => {
+    setPos(position);
+    setPage(1);
+    setQ("");
+    setSelected(null);
+    setOpen(false);
+    setHi(-1);
+  };
+
   const pick = (p) => {
     setSelected(p);
     setPos(p.position);
@@ -101,12 +110,6 @@ export default function Search({ players = [], loaded = false, error = "", onRet
         {error && <div role="alert"><p>We couldn’t load the player ratings.</p><button type="button" className="btn btn-ghost" style={{ marginTop: 12 }} onClick={onRetry}>Try again</button></div>}
         {!loaded && !error && <p role="status">Loading player ratings…</p>}
         {loaded && !error && <>
-        <div className="tabs mono reveal" role="tablist" aria-label="Position">
-          {POSITIONS.map((p) => (
-            <button key={p} type="button" role="tab" aria-selected={pos === p} onClick={() => setPos(p)}>{p === "DM" ? "MID" : p}</button>
-          ))}
-        </div>
-
         <div className="sub-label mono t10 up reveal">Top 3 · {pos === "CB" ? "Centre-backs" : "Midfielders"}</div>
         <div className="top3">
           {top3.map((p, i) => (
@@ -156,7 +159,18 @@ export default function Search({ players = [], loaded = false, error = "", onRet
             </div>
 
             <div className="browse">
-              <div className="mono t10 up dim" style={{ marginBottom: 6 }}>All {pos === "DM" ? "MID" : pos} in the index</div>
+              <div className="directory-heading">
+                <div>
+                  <h3 className="mono t11 up">All Players</h3>
+                  <p className="mono t10 mute">{pos === "CB" ? "Centre-backs" : "Defensive midfielders"}</p>
+                </div>
+                <div className="position-toggle mono" role="group" aria-label="Player directory position">
+                  {POSITIONS.map((position) => (
+                    <button key={position} type="button" aria-pressed={pos === position}
+                            onClick={() => switchPosition(position)}>{position}</button>
+                  ))}
+                </div>
+              </div>
               {directory.map((p, i) => (
                 <button key={p.id} type="button" className={`browse-row ${selected?.id === p.id ? "on" : ""}`} onClick={() => pick(p)}>
                   <span className="n mono t11" aria-label={`Browse position ${pageStart + i + 1}`}>{pageStart + i + 1}</span>
