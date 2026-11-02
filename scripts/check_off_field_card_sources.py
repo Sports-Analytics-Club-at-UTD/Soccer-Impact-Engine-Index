@@ -12,7 +12,8 @@ from scripts import decoder_fix_independent as raw
 from scripts import off_field_card_independent as independent
 from scripts.source_verification_batch import payload
 from src import statsbomb_participation as production
-from src.source_reconstruction import appearance_rows
+from src.source_reconstruction import appearance_rows, flatten_events, measurements
+from src.independent_source_checks import check_match
 
 ROOT=Path(__file__).resolve().parents[1]
 PRIOR=ROOT.parent/'Soccer-Impact-Engine-Index-participation-decoder-fix/audit-output/decoder-fix'
@@ -106,11 +107,23 @@ class OriginalSourceRegressions(unittest.TestCase):
 
     def test_pajot_snapshot_conflict(self):self.rejected(3414,3829490)
 
-    def test_permanent_exit_support_policy_is_unchanged(self):
+    def test_permanent_exit_support_is_independently_corroborated(self):
         with (RECON/'disputed-appearances.csv').open(encoding='utf-8-sig') as f:rows=[r for r in csv.DictReader(f) if r['classification']=='E']
         self.assertEqual(len(rows),3)
         for a in rows:
-            with self.subTest(player_id=a['player_id'],match_id=a['match_id']):self.rejected(int(a['player_id']),int(a['match_id']))
+            with self.subTest(player_id=a['player_id'],match_id=a['match_id']):
+                report,fixture,ls,es,adapted,p,v,o,bounds=load(int(a['player_id']),int(a['match_id']))
+                self.assertEqual(v.elapsed_seconds,o['seconds'])
+                self.assertIsNotNone(v.elapsed_seconds)
+                self.assertEqual(o['issues'],[])
+                self.assertEqual(len(p.reconstructed_exits),1)
+                self.assertEqual(independent.union(o['intervals'],bounds),independent.union(o['lineup_intervals'],bounds))
+                serialize=lambda value:json.loads(payload(asdict(value) if hasattr(value,'__dataclass_fields__') else [asdict(x) for x in value]))
+                rebuilt=dict(report);rebuilt['players']=[dict(player=serialize(p),validation=serialize(v)) for p,v in zip(adapted.players,adapted.validate())];rebuilt['boundaries']=serialize(adapted.boundaries)
+                rows=appearance_rows(rebuilt,fixture,ls);frame=flatten_events(es,fixture,rows);metrics,_,_=measurements(frame,rows)
+                checked=check_match(fixture,ls,es,[row for row in rows if row['active_appearance']],metrics)
+                corroborated=next(r for r in checked['rows'] if r['player_id']==p.context.player_id)
+                self.assertEqual(corroborated['independent_seconds'],dict(numerator=v.elapsed_seconds.numerator,denominator=v.elapsed_seconds.denominator))
 
 
 if __name__=='__main__':

@@ -94,6 +94,14 @@ class ReconstructedEntry:
 
 
 @dataclass(frozen=True)
+class ReconstructedExit:
+    observation_id: str
+    exit_kind: str
+    event_ref: str
+    evidence_refs: tuple
+
+
+@dataclass(frozen=True)
 class AdaptedPlayer:
     context: Context
     player_name: str
@@ -103,6 +111,7 @@ class AdaptedPlayer:
     source_checks: tuple = ()
     off_field_discipline: tuple = ()
     reconstructed_entries: tuple = ()
+    reconstructed_exits: tuple = ()
 
 
 @dataclass(frozen=True)
@@ -393,6 +402,8 @@ def _adapt_match(match_id, matches, lineups, events, *, clock_document_reference
                 raw_positions.append(json.dumps(stint, sort_keys=True, ensure_ascii=True))
             observations, reconstructed = _source_backed_entry(
                 tid, pid, observations, player['positions'], es, ref, policy, tuple(boundaries))
+            observations, exits = _source_backed_terminal_exit(
+                tid, pid, observations, player['positions'], es, ref, policy, tuple(boundaries))
             checks = _check_original_transitions(tid, pid, observations, es, ref)
             discipline = _off_field_discipline(tid, pid, observations, checks, es, ref,
                 policy, tuple(boundaries), f"{lineups.reference}#/team/{tid}/player/{pid}")
@@ -401,10 +412,117 @@ def _adapt_match(match_id, matches, lineups, events, *, clock_document_reference
             # assertions. No other transition or consistency issue is removed.
             checks = tuple(c for c in checks if not (c.code == "original_transition_not_represented"
                            and set(c.evidence_refs) <= off_refs))
-            players.append(AdaptedPlayer(context, player["player_name"], tid, tuple(observations), tuple(raw_positions), checks, discipline, reconstructed))
+            players.append(AdaptedPlayer(context, player["player_name"], tid, tuple(observations), tuple(raw_positions), checks, discipline, reconstructed, exits))
     return AdaptedMatch(match_id, competition, season, tuple(players), policy,
                         tuple(boundaries), tuple(sorted(warnings)), provenance,
                         tuple(normalizations[k] for k in sorted(normalizations)))
+
+
+def _source_backed_terminal_exit(tid, pid, observations, positions, events, reference, policy, boundaries):
+    """Corroborate a terminal Player Off without repairing contradictory stints.
+
+    The lineup label alone never establishes an exit or an appearance. Walk
+    original transitions independently of lineup endpoints and require exact
+    interval-union, position, activity, boundary and source-order agreement.
+    A failed proof returns the original unsupported observations unchanged.
+    """
+    unchanged = observations, ()
+    if not observations or positions[-1].get('end_reason') != 'Player Off (Permanent)':
+        return unchanged
+    last = observations[-1]
+    if last.exit_kind != 'unknown':
+        return unchanged
+    point = lambda e: (e['period'], _timestamp(e['timestamp']))
+    team = [e for e in events if e['team']['id'] == tid]
+    actor = [e for e in team if e.get('player', {}).get('id') == pid]
+    terminals = [e for e in actor if e['type']['name'] == 'Player Off'
+                 and e.get('player_off', {}).get('permanent') is True]
+    if len(terminals) != 1:
+        return unchanged
+    terminal = terminals[0]; end = point(terminal)
+    pos = positions[-1]
+    if (pos.get('to_period') != end[0]
+            or _lineup_clock(pos.get('to')) != (terminal['minute'], terminal['second'])):
+        return unchanged
+    bounds = {b.period: (b.start_seconds, b.end_seconds) for b in boundaries}
+    if set(bounds) != {1, 2} or any(lo != 0 or hi is None or hi <= 0 for lo, hi in bounds.values()):
+        return unchanged
+    candidate = [*observations[:-1], replace(last, exit_kind='terminal_exit',
+                 end=Clock(end[0], end[1], (reference(terminal),)))]
+    if _check_original_transitions(tid, pid, candidate, events, reference):
+        return unchanged
+    core = validate_participation(last.context, candidate, clock_policy=policy, period_boundaries=boundaries)
+    if core.elapsed_seconds is None or core.elapsed_seconds <= 0:
+        return unchanged
+    members = lambda e: [x for x in e.get('tactics', {}).get('lineup', []) if x['player']['id'] == pid]
+    snapshots = [e for e in team if e['type']['name'] in ('Starting XI', 'Tactical Shift') and members(e)]
+    entries = [e for e in team if e['type']['name'] == 'Starting XI' and members(e)
+               or e['type']['name'] == 'Substitution' and e['substitution']['replacement']['id'] == pid]
+    if len(entries) != 1 or point(entries[0]) >= end:
+        return unchanged
+    transitions = [e for e in team if e in entries or e in actor
+                   and (e['type']['name'] in ('Player Off', 'Player On', 'Substitution')
+                        or e.get('foul_committed', {}).get('card', {}).get('name') in ('Red Card', 'Second Yellow')
+                        or e.get('bad_behaviour', {}).get('card', {}).get('name') in ('Red Card', 'Second Yellow'))]
+    # Distinct source indices do not resolve two incompatible terminal assertions.
+    if len({point(e) for e in transitions}) != len(transitions):
+        return unchanged
+    chronology = {e['id']: e for e in transitions + snapshots
+                  + [e for e in team if e['type']['name'] in ('Half Start', 'Half End')]}
+    if all('index' in e for e in chronology.values()):
+        clocks = [point(e) for e in sorted(chronology.values(), key=lambda e: e['index'])]
+        if clocks != sorted(clocks):
+            return unchanged
+    state = 'UNUSED'; opened = None; intervals = []
+    for e in sorted(transitions, key=point):
+        t = point(e); typ = e['type']['name']
+        if not bounds[t[0]][0] <= t[1] <= bounds[t[0]][1]:
+            return unchanged
+        if e in entries or typ == 'Player On':
+            if state != ('UNUSED' if e in entries else 'TEMPORARILY_OFF'):
+                return unchanged
+            state = 'ACTIVE'; opened = t
+        else:
+            if state != 'ACTIVE':
+                return unchanged
+            intervals.append((opened, t)); opened = None
+            state = 'TEMPORARILY_OFF' if typ == 'Player Off' and not e.get('player_off', {}).get('permanent') else 'TERMINAL'
+    if state != 'TERMINAL' or not intervals or intervals[-1][1] != end:
+        return unchanged
+    def union(rows):
+        pieces = []
+        for a, b in rows:
+            for period in range(a[0], b[0] + 1):
+                lo = a[1] if period == a[0] else bounds[period][0]
+                hi = b[1] if period == b[0] else bounds[period][1]
+                if lo < hi: pieces.append((period, lo, hi))
+        compact = []
+        for period, lo, hi in sorted(pieces):
+            if compact and compact[-1][0] == period and compact[-1][2] == lo:
+                compact[-1] = (period, compact[-1][1], hi)
+            else: compact.append((period, lo, hi))
+        return compact
+    observed = [((s.start.period, s.start.seconds), (s.end.period, s.end.seconds)) for s in candidate]
+    if union(intervals) != union(observed):
+        return unchanged
+    for e in snapshots:
+        found = members(e)
+        active = [i for i, (lo, hi) in enumerate(observed) if lo <= point(e) < hi]
+        if (len(found) != 1 or len(active) != 1
+                or found[0]['position'] != {'id': positions[active[0]].get('position_id'), 'name': candidate[active[0]].position}):
+            return unchanged
+    activity = [e for e in team if e in actor or e.get('pass', {}).get('recipient', {}).get('id') == pid]
+    for e in activity:
+        if e in transitions: continue
+        t = point(e)
+        if (not bounds[t[0]][0] <= t[1] <= bounds[t[0]][1]
+                or not any(lo <= t <= hi for lo, hi in intervals)
+                or t == end and ('index' not in e or 'index' not in terminal or e['index'] >= terminal['index'])):
+            return unchanged
+    proof = tuple(sorted({reference(e) for e in transitions + snapshots}
+                  | {r for b in boundaries for r in b.evidence_refs}
+                  | {r for s in candidate for r in s.evidence_refs}))
+    return candidate, (ReconstructedExit(last.observation_id, 'terminal_exit', reference(terminal), proof),)
 
 
 def _source_backed_entry(tid, pid, observations, positions, events, reference, policy, boundaries):

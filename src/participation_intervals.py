@@ -17,7 +17,7 @@ INCOMPLETE = "INCOMPLETE_EVIDENCE"
 CONFLICT = "CONFLICTING_EVIDENCE"
 CONVENTIONS = ("period_local", "period_offset")
 ENTRIES = ("starter", "substitution", "return", "position_change", "unknown")
-EXITS = ("substitution", "dismissal", "temporary_exit", "match_end", "position_change", "unknown")
+EXITS = ("substitution", "dismissal", "terminal_exit", "temporary_exit", "match_end", "position_change", "unknown")
 
 
 class ParticipationError(ValueError):
@@ -385,6 +385,8 @@ def validate_participation(context, observations, *, clock_policy=None, period_b
             continue
         previous = checked[index - 1][2] if index else None
         following = checked[index + 1][2] if index + 1 < len(checked) else None
+        if previous is not None and previous.exit_kind == "terminal_exit":
+            issue(CONFLICT, "participation_after_terminal_exit", previous.observation_id, obs.observation_id)
         if obs.entry_kind in ("return", "position_change"):
             required = "temporary_exit" if obs.entry_kind == "return" else "position_change"
             if previous is None or previous.exit_kind != required:
