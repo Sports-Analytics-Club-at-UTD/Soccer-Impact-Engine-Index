@@ -1,0 +1,36 @@
+.spatial-figure { margin: 24px 0 0; width: 100%; }
+.team-panel.open > div { overflow: visible; }
+.spatial-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px 24px; margin-bottom: 16px; }
+.spatial-heading h4 { margin: 0; color: var(--a1); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; font-weight: 500; }
+.spatial-heading > span { color: var(--mute); font-size: 12px; }
+.spatial-pitch { position: relative; aspect-ratio: 2 / 1; isolation: isolate; }
+.spatial-zones { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 2px; background: var(--bg); }
+.spatial-zone { position: relative; display: grid; place-items: center; min-width: 0; min-height: 0; transition: box-shadow .18s ease; touch-action: manipulation; }
+.spatial-zone span { font-family: 'Chakra Petch', sans-serif; font-size: clamp(19px, 3.5vw, 38px); font-weight: 700; line-height: 1; z-index: 2; }
+.spatial-zone.is-active { box-shadow: inset 0 0 0 3px #f5f7f4; }
+.spatial-zone:focus-visible { outline: 3px solid #fff; outline-offset: -6px; border-radius: 0; z-index: 3; }
+.spatial-markings { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: #effff5; stroke-width: .3; opacity: .4; pointer-events: none; }
+.spatial-tooltip { position: absolute; z-index: 4; width: min(275px, calc(100% - 16px)); padding: 12px 14px; border: 1px solid var(--a1); background: var(--bg-2); color: var(--text); box-shadow: 0 8px 28px var(--shadow); font-size: 12px; line-height: 1.5; border-radius: 3px; }
+.spatial-tooltip strong { display: block; margin-bottom: 5px; font-size: 13px; }
+.spatial-tooltip small { display: block; margin-top: 6px; color: var(--mute); font-size: 10px; }
+.spatial-tooltip-col-0 { left: 8px; }
+.spatial-tooltip-col-1 { left: 50%; transform: translateX(-50%); }
+.spatial-tooltip-col-2 { right: 8px; }
+.spatial-tooltip-row-0 { bottom: 8px; }
+.spatial-tooltip-row-1, .spatial-tooltip-row-2 { top: 8px; }
+.spatial-direction { display: flex; align-items: center; justify-content: flex-end; gap: 14px; margin: 12px 0 22px; color: var(--mute); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+.spatial-direction svg { width: 100px; height: 8px; fill: none; stroke: currentColor; stroke-width: 1; }
+.spatial-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 11px; color: var(--mute); }
+.spatial-ramp { width: clamp(90px, 20vw, 180px); height: 6px; background: linear-gradient(90deg, rgb(16,35,29), rgb(57,255,136)); border-radius: 3px; }
+.spatial-legend > span:last-child { margin-left: 8px; }
+.spatial-methodology { margin-top: 12px; max-width: 800px; color: var(--mute); font-size: 12px; line-height: 1.7; }
+@media (max-width: 600px) {
+  .spatial-tooltip { top: auto; bottom: calc(100% + 8px); }
+}
+@media (max-width: 420px) {
+  .spatial-heading { margin-bottom: 12px; }
+  .spatial-tooltip { padding: 8px 10px; font-size: 11px; line-height: 1.35; }
+  .spatial-tooltip strong { font-size: 12px; }
+  .spatial-tooltip small { margin-top: 4px; }
+  .spatial-legend > span:last-child { flex-basis: 100%; margin-left: 0; }
+}
