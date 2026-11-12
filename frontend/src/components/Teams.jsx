@@ -1,24 +1,15 @@
 import { useState } from "react";
 import { TEAMS, TEAMS_SECTION } from "../content.js";
 import { useTilt } from "../lib/hooks.js";
-import { IconDown, Photo, SectionHead } from "./ui.jsx";
-
-function TeamImage({ image, teamName }) {
-  const [failed, setFailed] = useState(false);
-  if (!image.src || failed) return <Photo label={`${image.label} · image`} />;
-
-  const src = `${import.meta.env.BASE_URL}${image.src.replace(/^\//, "")}`;
-  return <div className="photo team-image">
-    <img src={src} alt={image.alt ?? `${teamName}: ${image.label}`} loading="lazy" onError={() => setFailed(true)} />
-  </div>;
-}
+import { IconDown, SectionHead } from "./ui.jsx";
+import SpatialDominancePitch from "./SpatialDominancePitch.jsx";
 
 function Badge({ t, open, onToggle }) {
   const tilt = useTilt({ max: 7, scale: 1.03 });
   return (
     <div className="reveal">
       <button
-        type="button" {...tilt} onClick={onToggle} aria-expanded={open} aria-controls={`team-${t.id}`}
+        type="button" {...tilt} onClick={onToggle} aria-expanded={open} aria-controls="team-spatial-panel"
         className="tilt sheen card-surface angular-sm badge"
       >
         <span className="mk display">{t.short.slice(0, 3).toUpperCase()}</span>
@@ -48,22 +39,12 @@ export default function Teams() {
         </div>
 
         {/* one panel, content swaps with the selected team */}
-        <div id={team ? `team-${team.id}` : undefined} className={`team-panel ${team ? "open" : ""}`} aria-live="polite">
+        <div id="team-spatial-panel" className={`team-panel ${team ? "open" : ""}`}>
           <div>
             {team && (
               <div className="team-inner">
                 <h3 className="display" style={{ fontSize: "1.6rem" }}>{team.name}</h3>
-                <p className="note" style={{ marginTop: 12 }}>{team.note}</p>
-                <div className="slots">
-                  {team.images.map((im) => (
-                    <figure key={im.label} className="slot" style={{ margin: 0 }}>
-                      <TeamImage key={`${team.id}:${im.label}:${im.src}`} image={im} teamName={team.name} />
-                      <figcaption className="mono t10 up">
-                        <b>{im.label}</b>{im.caption}
-                      </figcaption>
-                    </figure>
-                  ))}
-                </div>
+                <SpatialDominancePitch key={team.id} team={team} />
               </div>
             )}
           </div>
