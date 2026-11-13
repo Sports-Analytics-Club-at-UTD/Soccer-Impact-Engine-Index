@@ -23,7 +23,7 @@ export default function Archetypes() {
         <SectionHead
           eyebrow="Player styles"
           title="Archetypes"
-          intro="A player’s strongest skill can reveal a distinctive playing style. Players included in the rankings can earn a Gold or Silver archetype. Within that group, players below the 75th percentile remain Standard."
+          intro="Players included in the rankings can earn up to five archetypes, one for each skill at or above the 75th percentile. Each archetype is Gold or Silver, with the strongest shown first. Eligible players with no qualifying skills remain Standard."
         />
 
         <div className="legend reveal">

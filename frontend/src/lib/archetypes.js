@@ -1,6 +1,7 @@
 /* Archetype definitions + classification. Edit wording here.
-   Rule: a player gets ONE primary archetype — the one whose metric is their
-   highest percentile for their position. Tier by that percentile:
+   Players can earn an archetype for each qualifying skill, strongest first.
+   The primary archetype remains their highest position-specific percentile.
+   Tier by that percentile:
      ≥ 90  → "+"      75–90 → "−"      < 75 → "Standard"                      */
 
 export const TIER = { plus: 90, minus: 75 };
@@ -71,6 +72,24 @@ function selectArchetype(position, percentile) {
 export function classify(player) {
   return selectArchetype(player.position, (key) =>
     player.attributes?.[METRICS.find((m) => m.key === key).id]?.percentile);
+}
+
+function selectArchetypes(position, percentile) {
+  return (ARCHETYPES[position] || []).flatMap((archetype) => {
+    const value = percentileValue(percentile(archetype.metric));
+    if (value === null || value < TIER.minus) return [];
+    return [{ name: archetype.name, tier: value >= TIER.plus ? '+' : '−', metric: archetype.metric, value }];
+  }).sort((a, b) => b.value - a.value); // stable ties retain the position-specific order
+}
+
+// Component strengths only. Callers retain responsibility for badge eligibility.
+export function classifyAll(player) {
+  return selectArchetypes(player.position, (key) =>
+    player.attributes?.[METRICS.find((metric) => metric.key === key).id]?.percentile);
+}
+
+export function classifyAllDemo(player) {
+  return selectArchetypes(player.position, (key) => player.pct?.[key]);
 }
 
 export function classifyDemo(player) {

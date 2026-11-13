@@ -269,7 +269,7 @@ main, footer { overflow-x: clip; }
 .top-card .rank { position: absolute; right: -4px; top: -6px; font-size: 6.2rem; line-height: 1; opacity: 0.07; color: var(--text); pointer-events: none; }
 .top-card .row { display: flex; gap: 14px; align-items: center; }
 .top-card .name { margin-top: 18px; font-size: 1.1rem; line-height: 1.05; }
-.top-card .meta { margin-top: 6px; color: var(--mute); font-size: 12px; }
+.top-card .meta { margin-top: 6px; padding-right: 90px; color: var(--mute); font-size: 12px; line-height: 1.5; }
 .top-card .ovr { position: absolute; right: 18px; bottom: 16px; text-align: right; }
 .ovr-num { font-size: 2.1rem; line-height: 1; color: var(--a1); }
 
@@ -355,6 +355,18 @@ main, footer { overflow-x: clip; }
 .arch-badge .tier { color: var(--a1); font-weight: 700; font-size: 1.05rem; line-height: 1; }
 .arch-badge.std { box-shadow: inset 0 0 0 1px var(--line); }
 .arch-badge.std .tier { color: var(--dim); }
+.archetype-label { margin-top: 14px; }
+.archetype-badges { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 8px 0 0; padding: 0; }
+.archetype-badges .arch-badge { margin-top: 0; max-width: 100%; min-width: 0; }
+.archetype-badges .tier { flex-shrink: 0; font-size: 12px; }
+.archetype-name { min-width: 0; font-size: 1rem; line-height: 1.2; overflow-wrap: anywhere; }
+@media (max-width: 639px) {
+  .pcard-top { grid-template-columns: 88px minmax(0, 1fr); }
+  .pcard-top > div { min-width: 0; }
+  .pcard h3 { overflow-wrap: anywhere; }
+  .ovr-block { flex-wrap: wrap; gap: 6px; }
+  .ovr-block .ovr-num { font-size: 2.5rem; }
+}
 
 .viz { display: grid; gap: 14px; margin-top: 22px; grid-template-columns: 1fr; align-items: center; }
 @media (min-width: 640px) { .viz { grid-template-columns: 1.15fr 1fr; } }
