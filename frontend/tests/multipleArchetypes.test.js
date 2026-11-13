@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire, Module } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { METRICS, classify, classifyAll, classifyAllDemo } from '../src/lib/archetypes.js';
+import { ARCHETYPES, METRICS, classify, classifyAll, classifyAllDemo, archetypeLeaders } from '../src/lib/archetypes.js';
 import { foundationPlayers, publicRatingCard } from '../src/lib/foundationPlayers.js';
 import { parsePublicRatings } from '../src/lib/publicRatingsDelivery.js';
 import { ratingCard } from '../src/lib/ratingCard.js';
@@ -24,6 +24,72 @@ const fixture = (position, values) => ({ id: 'fixture', name: 'Test player', tea
   attributes: Object.fromEntries(METRICS.map((metric, i) => [metric.id, { rating: 60, percentile: values[i] }])) });
 const data = parsePublicRatings(readFileSync(new URL('../public/data/player-ratings-2015-16-v1.json', import.meta.url), 'utf8'));
 const players = foundationPlayers(data);
+
+test('archetype leaders use earned secondary badges, position and eligibility, rather than overall', () => {
+  const make = (id, value, extras = {}) => ({ id, position: 'CB', ranked: true, ovr: 100 - value,
+    archetypes: [{ metric: 'LB', value: 100, tier: '+' }, { metric: 'T', value, tier: value >= 90 ? '+' : '−' }], ...extras });
+  const sample = [make('silver', 80), make('gold', 99), make('tie', 99),
+    make('unranked', 100, { ranked: false }), make('midfielder', 100, { position: 'DM' }),
+    make('missing', 100, { archetypes: [] })];
+  const before = structuredClone(sample);
+  assert.deepEqual(archetypeLeaders(sample, 'CB', ARCHETYPES.CB[0]).map((p) => p.id), ['gold', 'tie', 'silver']);
+  assert.deepEqual(sample, before);
+  assert.deepEqual(archetypeLeaders([], 'CB', ARCHETYPES.CB[0]), []);
+});
+
+test('all ten live archetype lists contain the correct top five without altering the release', () => {
+  const live = foundationPlayers(parsePublicRatings(readFileSync(new URL('../public/data/player-ratings-2015-16-v3.json', import.meta.url), 'utf8')));
+  const before = structuredClone(live);
+  for (const position of ['CB', 'DM']) for (const a of ARCHETYPES[position]) {
+    const metric = METRICS.find((m) => m.key === a.metric).id;
+    const expected = live.filter((p) => p.ranked && p.position === position && p.attributes[metric].percentile >= 75)
+      .sort((p, q) => q.attributes[metric].percentile - p.attributes[metric].percentile).slice(0, 5);
+    const actual = archetypeLeaders(live, position, a);
+    assert.equal(actual.length, 5);
+    assert.deepEqual(actual.map((p) => p.id), expected.map((p) => p.id));
+  }
+  assert.deepEqual(live, before);
+});
+
+test('archetype dropdown expands inline, switches lists, collapses and handles loading or errors', async () => {
+  const { JSDOM } = await import('jsdom');
+  const dom = new JSDOM('<div id="root"></div>');
+  globalThis.window = dom.window; globalThis.document = dom.window.document;
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true; globalThis.cancelAnimationFrame = () => {};
+  const { createRoot } = require('react-dom/client');
+  const root = createRoot(document.getElementById('root')), Archetypes = component('Archetypes');
+  const { act } = React;
+  const render = (props) => act(() => root.render(React.createElement(Archetypes, props)));
+  const trigger = (name) => document.querySelector(`[aria-label="View ${name} top 5 · CB"]`);
+  try {
+    render({ players, loaded: true });
+    act(() => trigger('Stopper').click());
+    assert.equal(trigger('Stopper').getAttribute('aria-expanded'), 'true');
+    assert.equal(document.querySelector('dialog[open]'), null);
+    assert.equal(document.querySelectorAll('.archetype-leaders li').length, 5);
+    assert.doesNotMatch(document.querySelector('[role=region]').textContent, /percentile/i);
+    assert.equal(document.querySelector('.archetype-leaders .ov'), null);
+    act(() => trigger('Libero').click());
+    assert.equal(trigger('Stopper').getAttribute('aria-expanded'), 'false');
+    assert.equal(document.querySelectorAll('[role=region]').length, 1);
+    assert.match(document.querySelector('[role=region]').textContent, /Libero/);
+    act(() => trigger('Libero').click());
+    assert.equal(document.querySelector('[role=region]'), null);
+    act(() => trigger('Stopper').click());
+    render({ loaded: false });
+    assert.match(document.querySelector('[role=status]').textContent, /Loading/);
+    let retries = 0;
+    render({ error: 'internal detail', onRetry: () => retries++ });
+    assert.doesNotMatch(document.querySelector('[role=alert]').textContent, /internal detail/);
+    act(() => document.querySelector('[role=alert] button').click());
+    assert.equal(retries, 1);
+    render({ players: [], loaded: true });
+    assert.match(document.querySelector('[role=status]').textContent, /No ranked players/);
+  } finally {
+    act(() => root.unmount()); dom.window.close();
+    delete globalThis.window; delete globalThis.document; delete globalThis.IS_REACT_ACT_ENVIRONMENT; delete globalThis.cancelAnimationFrame;
+  }
+});
 
 test('all qualifying skills earn their own tier, ordered by exact percentile', () => {
   const p = fixture('CB', [90, 89.999, 75, 74.999, 100]);

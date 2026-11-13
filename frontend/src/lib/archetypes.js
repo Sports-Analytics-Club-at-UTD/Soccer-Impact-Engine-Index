@@ -88,6 +88,14 @@ export function classifyAll(player) {
     player.attributes?.[METRICS.find((metric) => metric.key === key).id]?.percentile);
 }
 
+export function archetypeLeaders(players, position, archetype) {
+  return players.filter((p) => p.ranked && p.position === position
+    && p.archetypes?.some((a) => a.metric === archetype.metric))
+    .sort((a, b) => b.archetypes.find((badge) => badge.metric === archetype.metric).value
+      - a.archetypes.find((badge) => badge.metric === archetype.metric).value)
+    .slice(0, 5);
+}
+
 export function classifyAllDemo(player) {
   return selectArchetypes(player.position, (key) => player.pct?.[key]);
 }
