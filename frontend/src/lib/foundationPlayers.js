@@ -2,6 +2,7 @@ import { classify, classifyAll, METRICS } from './archetypes.js';
 import { publicPlayerCopy } from './publicPlayerCopy.js';
 import { playerName } from './playerNames.js';
 import { CLUB_CRESTS } from './clubCrests.js';
+import { PLAYER_PHOTOS } from './playerPhotos.js';
 
 // Adapt the approved release to the foundation's existing search and card UI.
 // Ratings, eligibility and coverage are supplied by the validated release.
@@ -12,6 +13,7 @@ export function foundationPlayers(data) {
     return {
       id: p.id, ...playerName(p), team: [...new Set(p.clubs.map((c) => c.name === 'Marseille' ? 'Olympique de Marseille' : c.name))].join(' / '),
       crests: [...new Set(p.clubs.flatMap((c) => Object.hasOwn(CLUB_CRESTS, c.name) ? [CLUB_CRESTS[c.name]] : []))],
+      photo: PLAYER_PHOTOS[p.player_id],
       position, primaryPosition: p.primary_position, season: p.season_name,
       minutes: p.coverage.supported_minutes, attributes: p.attributes,
       coverage: p.coverage, eligibilityReasons: p.ovr.exclusion_reasons,

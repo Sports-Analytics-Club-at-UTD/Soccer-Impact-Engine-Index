@@ -92,6 +92,48 @@ test('all live player clubs have local crests, with aliases collapsed and genuin
   assert.deepEqual(foundationPlayers({ players: [alias] })[0].crests, ['/team/crests/caen.png']);
 });
 
+test('player photos cover all 691 verified identities, including documented alternate-edition fallbacks', () => {
+  const live = parsePublicRatings(readFileSync(new URL('../public/data/player-ratings-2015-16-v3.json', import.meta.url), 'utf8'));
+  const adapted = foundationPlayers(live);
+  const PlayerCard = component('../src/components/PlayerCard.jsx');
+  const expected = new Map([
+    ['Sergio Ramos García', '/players/sergio-ramos.png'],
+    ['Sergio Busquets i Burgos', '/players/sergio-busquets.png'],
+    ['Paul Pogba', '/players/paul-pogba.png'],
+  ]);
+  assert.equal(adapted.filter((p) => p.photo).length, 691);
+  assert.equal(adapted.filter((p) => !p.photo).length, 0);
+  for (const p of adapted.filter((p) => p.photo)) {
+    const bytes = readFileSync(new URL(`../public${p.photo}`, import.meta.url));
+    assert.equal(bytes.subarray(1, 4).toString(), 'PNG');
+    assert.equal(bytes.readUInt32BE(16), 240);
+    assert.equal(bytes.readUInt32BE(20), 240);
+  }
+  for (const [name, photo] of expected) {
+    const p = adapted.find((p) => p.canonicalName === name);
+    assert.equal(p.photo, photo);
+    const bytes = readFileSync(new URL(`../public${photo}`, import.meta.url));
+    assert.equal(bytes.subarray(1, 4).toString(), 'PNG');
+    assert.equal(bytes.readUInt32BE(16), 240); assert.equal(bytes.readUInt32BE(20), 240);
+    const html = renderToStaticMarkup(React.createElement(PlayerCard, { player: p }));
+    assert.ok(html.includes(`src="${photo}" alt="${p.name} portrait"`));
+  }
+  for (const [name, photo] of [
+    ['Florentin Pogba', '/players/198688.png'],
+    ['James Collins', '/players/019292.png'],
+    ['Mousa Dembélé', '/players/162240.png'],
+    ['Jorginho', '/players/205498.png'],
+    ['Pape Diop', '/players/178250.png'],
+    ['Mohamed Fofana', '/players/173033.png'],
+    ['Frédéric Guilbert', '/players/227222.png'],
+    ['Hotaru Yamaguchi', '/players/222987.png'],
+  ]) assert.equal(adapted.find((p) => p.name === name).photo, photo, name);
+  const missing = { ...adapted[0], photo: undefined };
+  const missingHtml = renderToStaticMarkup(React.createElement(PlayerCard, { player: missing }));
+  assert.match(missingHtml, /Player photo<\/span>/);
+  assert.ok(!missingHtml.includes(`alt="${missing.name} portrait"`));
+});
+
 test('existing search finds real names with accents and retains excluded and incomplete profiles', () => {
   assert.ok(search('kante', players).matches.some((p) => p.name.includes('Kanté')));
   assert.equal(search('Marcus Delacroix', players).matches.length, 0);
