@@ -289,6 +289,10 @@ main, footer { overflow-x: clip; }
 
 .photo { position: relative; overflow: hidden; background: linear-gradient(150deg, var(--card-a), var(--card-b)); box-shadow: inset 0 0 0 1px var(--line); display: flex; align-items: center; justify-content: center; text-align: center; color: var(--dim); }
 .photo img { width: 100%; height: 100%; object-fit: cover; }
+.top-card .photo img { object-fit: contain; object-position: center bottom; }
+.pcard .photo:has(img) { background: none; box-shadow: none; }
+.pcard .photo img { object-fit: cover; object-position: center top; }
+.photo:has(img)::before { display: none; }
 .photo::before {
   content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
   background-image: repeating-linear-gradient(45deg, color-mix(in srgb, var(--a1) 22%, transparent) 0 1px, transparent 1px 14px), repeating-linear-gradient(-45deg, color-mix(in srgb, var(--a1) 22%, transparent) 0 1px, transparent 1px 14px);
@@ -348,7 +352,8 @@ main, footer { overflow-x: clip; }
 .backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px); }
 @media (min-width: 960px) { .backdrop { display: none; } }
 
-.pcard { position: relative; max-height: 90dvh; overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; padding: 22px 20px 20px; animation: cardIn 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+.pcard { position: relative; max-height: 90dvh; overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; border: 1px solid var(--a1); padding: 22px 20px 20px; animation: cardIn 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+.pcard.card-surface { box-shadow: 0 0 38px -12px var(--glow), 0 26px 60px -30px var(--shadow); }
 @media (min-width: 960px) { .pcard { max-height: calc(100dvh - 100px); } }
 .archetype-dialog .pcard { max-height: none; }
 @media (max-width: 419px) {

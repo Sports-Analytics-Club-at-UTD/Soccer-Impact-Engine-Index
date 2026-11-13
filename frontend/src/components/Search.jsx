@@ -21,7 +21,7 @@ function TopCard({ p, rank, onPick, on }) {
             className={`tilt sheen card-surface angular-sm top-card ${on ? "on" : ""}`}>
       <span className="rank display" aria-hidden="true">{rank}</span>
       <div className="row">
-        <Photo src={p.photo} label="Player photo" className="sm" />
+        <Photo src={p.photo} label={p.photo ? `${p.name} portrait` : "Player photo"} className="sm" />
         <div className="mono t10 up c2">#{rank} · {p.position === 'DM' ? 'MID' : p.position}</div>
       </div>
       <div className="name display">{p.name}</div>

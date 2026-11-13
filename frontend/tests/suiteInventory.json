@@ -42,7 +42,7 @@
     "scorecardAdapter.test.js": "50812dd0291dbd031d9d047b1c1b98a3c110e3f2b9b0e96d2d63c36bf3af011e",
     "unifiedLocal.test.js": "9e4252313a1749b37325b5e53abb6d45a87c6f91963505261eef4a70dbec75b9",
     "publicRatings.test.js": "360118d538979cd79104d3fca00bf314a33d9d27e5cbe15f2681cac7ce222b47",
-    "foundationPlayers.test.js": "cef3028b959e5a9bca6c9e3b7e05d8f8af5703033a717dbaf06bdac84ae999b0",
+    "foundationPlayers.test.js": "bb2601748144e69e2a27ef9ceafe80a03e53107bb15a7ea8992cc6d434c54bad",
     "positionToggle.test.js": "eecd74661d2bb3e2f2d9163f0e10acbb0dbd8caaaed52651954c450c21efa207",
     "spatialDominance.test.js": "8e31c23c330f01149e2abb291de0cfc8a03384ded75a3e497a4479c1b6252b5a",
     "supportedSampleRatings.test.js": "8066a3c88d0093ef86d0e5c68948c3b09bca6d33f079f7551c05e7c3eb1ac4fd",

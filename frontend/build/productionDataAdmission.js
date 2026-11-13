@@ -2,6 +2,7 @@
 // Only the explicitly reviewed public final-ratings release is admitted.
 // Environment flags and self-declared payload booleans cannot add authority.
 import { PUBLIC_RATINGS_RELEASE } from '../src/lib/publicRatingsRelease.js';
+import { PLAYER_PORTRAIT_ASSETS } from './playerPortraitAssets.js';
 import { createHash } from 'node:crypto';
 import { lstat, readFile, readdir, realpath } from 'node:fs/promises';
 import { basename, dirname, extname, isAbsolute, relative, resolve } from 'node:path';
@@ -17,6 +18,8 @@ const denied = (reason) => { throw Error(`Production data admission denied: ${re
 // assets require explicit path/content review here. Never add private data here.
 export const PUBLIC_ASSETS = Object.freeze([
   PUBLIC_RATINGS_RELEASE,
+  // Reviewed portrait identities; sources accompany the PNGs.
+  ...PLAYER_PORTRAIT_ASSETS,
   // Club crests retrieved from the official sites; sources accompany the SVGs.
   { path: 'team/crests/psg.svg', sha256: '75681805ff4dd4f84e4e489c1c4c6a459834cf9e4c2d1689b5b2638a952a1324' },
   { path: 'team/crests/barca.svg', sha256: 'dc8dda5ee534f1da22370228d9bc5881459c1054b4755426d7410df1d9db3e22' },
@@ -229,7 +232,7 @@ export default function productionDataAdmission() {
     configResolved(value) {
       config = value;
       if (config.publicDir || config.build.copyPublicDir !== false) denied('automatic public copying must remain disabled');
-      config.logger.info('Production data admission: automatic public copying disabled; only the approved pinned final-ratings release, 98 pinned crests, 3 pinned heatmaps, 5 pinned About Us portraits and 2 pinned demo/synthetic imports admitted. All other data remains denied.');
+      config.logger.info('Production data admission: automatic public copying disabled; only the approved pinned final-ratings release, 98 pinned crests, 3 pinned heatmaps, 5 pinned About Us portraits, 691 pinned player portraits and 2 pinned demo/synthetic imports admitted. All other data remains denied.');
     },
     async load(id) { await validateDataImport(id); return null; },
     generateBundle: {

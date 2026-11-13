@@ -30,7 +30,7 @@ function StandardPlayerCard({ player, onClose, demo = false }) {
       <div className="card-close-rail"><button type="button" className="close" onClick={onClose} aria-label="Close player card"><IconClose size={16} /></button></div>
 
       <div className="pcard-top">
-        <Photo src={player.photo} label={player.publicRating ? "Player photo" : "FIFA 16 photo"} className="lg" />
+        <Photo src={player.photo} label={player.publicRating ? (player.photo ? `${player.name} portrait` : "Player photo") : "FIFA 16 photo"} className="lg" />
         <div>
           <div className="mono t10 up c2">{player.publicRating ? `${player.primaryPosition} · ${player.season}` : player.position === "CB" ? "Centre-back" : player.position === "DM" ? "Defensive midfielder" : "Role unavailable"}</div>
           <h3 className="display" style={{ marginTop: 10 }}>{player.name}</h3>
