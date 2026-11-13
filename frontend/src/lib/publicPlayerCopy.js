@@ -44,7 +44,8 @@ export function publicPlayerCopy(player) {
       const denominator = key === 'press_resistance' ? `${c.pressure_attempts} supported actions under pressure`
         : `${c.supported_minutes.toLocaleString(undefined, { maximumFractionDigits: 1 })} confirmed minutes`;
       const exclusions = c.excluded_fixtures ? ` ${c.excluded_fixtures} ${c.excluded_fixtures === 1 ? 'match excluded' : 'matches excluded'} because the evidence could not be confirmed for this skill.` : '';
-      note = `${note ? `${note} ` : ''}${sample}; ${denominator}.${exclusions}`;
+      const partials = c.partial_fixtures ? ` Includes only verified portions of ${c.partial_fixtures} ${c.partial_fixtures === 1 ? 'match' : 'matches'}; actions outside those portions are excluded.` : '';
+      note = `${note ? `${note} ` : ''}${sample}; ${denominator}.${exclusions}${partials}`;
     }
     return [key, note];
   }));

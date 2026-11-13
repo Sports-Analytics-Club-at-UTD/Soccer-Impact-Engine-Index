@@ -22,6 +22,9 @@ def run(directory):
         'Reference cohorts were rebuilt; score changes include normalization effects. A source limitation does not mean that the player performed badly. Historical full-season coverage is not certified. No merge or deployment has been performed.','',
         '| Player | Previously ranked | Now ranked | Supported / recorded matches | Confirmed minutes | Previous → new overall |',
         '| --- | --- | --- | --- | ---: | ---: |']
+    if summary.get('partial_supported_appearances'):
+        lines[6:6]=[f"Additional appearance recovery: {summary['fully_recovered_appearances']} fully recovered; {summary['partial_supported_appearances']} retain verified portions only. Unknown remainders are excluded. The remaining entirely unsupported appearance is Bundesliga and was left unchanged.",'']
+        lines=[line.replace('Unresolved appearances retained as exclusions:','Appearances with unresolved portions:') for line in lines]
     for p in sorted(players,key=lambda p:p['name']):
         pid=p['player_id'];change=changes[pid];rows=sorted(appearances[pid],key=lambda r:r['match_id'])
         def fmt(value):return 'N/A' if value is None else f'{value:.2f}'
@@ -40,6 +43,11 @@ def run(directory):
         issues=0
         for r in rows:
             notes=[]
+            recovery=r.get('exposure_recovery')
+            if recovery and recovery['seconds'] is not None:
+                minutes=recovery['seconds']['numerator']/recovery['seconds']['denominator']/60
+                notes.append(('Full physical-transition recovery' if recovery['complete'] else 'Partial physical-transition recovery')+f': {minutes:.6f} verified minutes; retained source issues: '+', '.join(r['original_issues']))
+                if not recovery['complete']:notes.append('Unverified remainder excluded: '+', '.join(recovery['reasons']))
             if r['dismissal'] and r['dismissal']['accepted']:notes.append('Accepted verified dismissal cutoff; original issues retained: '+', '.join(r['original_issues']))
             if r['seconds'] is None:notes.append('Elapsed minutes remain unresolved: '+', '.join(r['original_issues']))
             for a,m in r['metrics'].items():
@@ -50,6 +58,17 @@ def run(directory):
         detail+=['','All counts are supported available samples. Pressure uses actions, not elapsed minutes. Ratings use the rebuilt position cohort and cannot be directly compared with the previous reference version.','']
         (folder/f'{pid}.md').write_text('\n'.join(detail),encoding='utf8')
     (directory/'REPORT.md').write_text('\n'.join(lines)+'\n',encoding='utf8')
+    recovery_rows=[r for rows in appearances.values() for r in rows if 'exposure_recovery' in r]
+    if recovery_rows:
+        names={p['player_id']:p['name'] for p in players}
+        recovery_lines=['# Review of all 238 non-Bundesliga appearances','',
+            'Full recovery establishes the whole appearance. Partial recovery establishes only the listed source-backed intervals; the remainder stays excluded.','',
+            '| Player | Match | League | Outcome | Verified minutes recovered | Remaining limitation |',
+            '| --- | --- | --- | --- | ---: | --- |']
+        for row in sorted(recovery_rows,key=lambda r:(names[r['player_id']],r['match_id'])):
+            r=row['exposure_recovery'];minutes=0 if r['seconds'] is None else r['seconds']['numerator']/r['seconds']['denominator']/60
+            recovery_lines.append(f"| {names[row['player_id']]} | {row['match_id']} | {row['competition']} | {'Full' if r['complete'] else 'Partial' if r['seconds'] else 'Withheld'} | {minutes:.6f} | {', '.join(r['reasons']) or 'None for elapsed exposure; metric-specific exclusions still apply.'} |")
+        (directory/'RECOVERY-238.md').write_text('\n'.join(recovery_lines)+'\n',encoding='utf8')
     print(str((directory/'REPORT.md').resolve()))
 
 

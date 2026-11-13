@@ -5,7 +5,9 @@ import { createHash } from 'node:crypto';
 import { createRequire, Module } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { parsePublicRatings, publicModels, loadPublicRatings } from '../src/lib/publicRatingsDelivery.js';
-import { PUBLIC_RATINGS_RELEASE as release } from '../src/lib/publicRatingsRelease.js';
+// Historical v2 sample regressions remain fixed when the current release advances.
+const release = {path:'data/player-ratings-2015-16-v2.json',bytes:1448401,
+  sha256:'e9fe1b6f3ca825eb8c961fea484ba08eed95d87c2cf8958f23303683d627e39d'};
 import { foundationPlayers } from '../src/lib/foundationPlayers.js';
 import { ovrLeaderboard } from '../src/lib/provisionalOvr.js';
 

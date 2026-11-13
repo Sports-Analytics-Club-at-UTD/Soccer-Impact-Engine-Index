@@ -63,6 +63,11 @@ def verify(directory):
                         if row['chronology_reasons']:check(not m['included'],'chronology conflict retained')
                     elif m['included']:check(row['seconds'] is not None,'per90 included without minutes')
     players=read('players.json');public=read('public-ratings.json');public_by_id={int(p['player_id']):p for p in public['players']}
+    recovery_release=public['schema_version']=='soccer-public-ratings/v3'
+    recovery_counts=None
+    if recovery_release:
+        from scripts.verify_appearance_recovery import verify_recoveries
+        recovery_counts=verify_recoveries(directory,check)
     check(len(players)==len(public_by_id)==691,'player population')
     expected_eligible={g:[] for g in ('MID','CB')}
     for p in players:
@@ -73,6 +78,8 @@ def verify(directory):
         near(float(minutes),pub['coverage']['supported_minutes'],'public minutes')
         check(pub['coverage']['supported_fixtures']==sum(r['seconds'] is not None for r in rows),'supported match display')
         check(pub['coverage']['unresolved_fixtures']+pub['coverage']['supported_fixtures']==pub['coverage']['observed_fixtures']==len(rows),'coverage totals')
+        if recovery_release:
+            check(pub['coverage']['partial_fixtures']==sum(bool(r.get('exposure_recovery',{}).get('seconds')) and not r['exposure_recovery']['complete'] for r in rows),'partial-match disclosure')
         reasons=[];competitions={r['competition'] for r in rows}
         if p['comparison_group'] not in ('MID','CB'):reasons.append('UNSUPPORTED_POSITION')
         if not competitions or not competitions<=FOUR:reasons.append('BUNDESLIGA_CONTRIBUTION' if '1. Bundesliga' in competitions else 'NOT_FOUR_LEAGUE_ONLY')
@@ -92,6 +99,8 @@ def verify(directory):
             c=pub['attributes']['line_breaking_passes' if a=='progressive_passing' else a]['coverage']
             check(c['supported_fixtures']==len(good) and c['excluded_fixtures']==len(rows)-len(good) and c['pressure_attempts']==attempts,'public metric coverage')
             near(c['supported_minutes'],float(duration),'public metric minutes')
+            if recovery_release:
+                check(c['partial_fixtures']==(sum(bool(r.get('exposure_recovery',{}).get('seconds')) and not r['exposure_recovery']['complete'] for r in good) if a!='press_resistance' else 0),'partial metric scope')
         check(reasons==p['exclusion_reasons']==pub['ovr']['exclusion_reasons'],'independent eligibility reasons')
         check(p['eligible']==pub['ovr']['eligible']==pub['badge_eligible']==(not reasons),'eligibility/badge decision')
         if not reasons:expected_eligible[p['comparison_group']].append(pid)
@@ -122,7 +131,9 @@ def verify(directory):
     # Explicit regression receipts for the originally investigated cases.
     busquets=public_by_id[5203];ramos=public_by_id[5201]
     check(busquets['ovr']['eligible'] and ramos['ovr']['eligible'],'Busquets/Ramos not accepted')
-    check(busquets['coverage']['supported_fixtures']==34 and busquets['coverage']['observed_fixtures']==35,'Busquets scope changed unexpectedly')
+    check(busquets['coverage']['supported_fixtures']==(35 if recovery_release else 34) and busquets['coverage']['observed_fixtures']==35,'Busquets scope changed unexpectedly')
+    if recovery_release:
+        check(busquets['coverage']['partial_fixtures']==1 and busquets['attributes']['press_resistance']['coverage']['pressure_attempts']==357,'Busquets partial half or pressure changed')
     check(ramos['coverage']['supported_fixtures']==23,'Ramos dismissal coverage')
     weber=next(r for r in by_player[7435] if r['match_id']==3900512)
     check(not weber['metrics']['press_resistance']['included'] and len(weber['metrics']['press_resistance']['denominator_ids'])==4,'Weber fixture ratio not wholly excluded')
@@ -131,7 +142,7 @@ def verify(directory):
     result=dict(status='PASS',checks=checks,players=len(players),fixtures=len(matches),input_files=len(receipts),
         manifest_sha256=sha(directory/'manifest.json'),public_sha256=sha(directory/'public-ratings.json'),
         verifier_sha256=sha(Path(__file__)),
-        eligible=sum(p['eligible'] for p in players),reference_sha256=reference['sha256'],
+        eligible=sum(p['eligible'] for p in players),reference_sha256=reference['sha256'],recovery_counts=recovery_counts,
         assertions=['byte integrity','source UUID conservation','exact metric denominators','common eligible reference cohorts',
             'independent reference statistics','normalization and percentiles','Formula B','public coverage and eligibility','named-player regressions'])
     with (directory/'verification.json').open('x',encoding='utf8') as handle:json.dump(result,handle,indent=2)
