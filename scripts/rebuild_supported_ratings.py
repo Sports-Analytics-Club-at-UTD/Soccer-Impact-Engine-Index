@@ -39,6 +39,9 @@ def write(path, value):
 
 def project(old, players, appearances, nonappearances, reference):
     originals = {int(p['player_id']):p for p in old['players']}
+    recovery_release = any('exposure_recovery' in r for r in appearances)
+    partial_by_player = Counter(r['player_id'] for r in appearances if r.get('exposure_recovery',{}).get('seconds') is not None and not r['exposure_recovery']['complete'])
+    partial_by_metric = {a:Counter(r['player_id'] for r in appearances if r.get('exposure_recovery',{}).get('seconds') is not None and not r['exposure_recovery']['complete'] and r['metrics'][a]['included']) for a in ATTRIBUTES}
     contexts = {}
     for row in appearances:
         contexts.setdefault(row['player_id'], set()).add((row['team'], row['competition']))
@@ -48,6 +51,7 @@ def project(old, players, appearances, nonappearances, reference):
         coverage = dict(supported_minutes=float(unpack(p['known_supported_minutes'])),
             observed_fixtures=len(p['observed_match_ids']), supported_fixtures=len(p['supported_match_ids']),
             unresolved_fixtures=len(p['observed_match_ids'])-len(p['supported_match_ids']))
+        if recovery_release: coverage['partial_fixtures'] = partial_by_player[p['player_id']]
         attributes = {}
         bundes = '1. Bundesliga' in p['competitions']
         for a,m in p['attributes'].items():
@@ -60,6 +64,8 @@ def project(old, players, appearances, nonappearances, reference):
                 limited_data=bundes or low, missingness=[] if m['rating'] is not None else [m['score_reason']], warnings=warnings,
                 coverage=dict(supported_fixtures=len(m['numerator_match_ids']), excluded_fixtures=len(m['excluded_appearances']),
                     supported_minutes=float(unpack(m['supported_minutes'])), pressure_attempts=m['attempts']))
+            if recovery_release:
+                attributes[PUBLIC_KEYS.get(a,a)]['coverage']['partial_fixtures'] = partial_by_metric[a][p['player_id']] if a != 'press_resistance' else 0
         ovr = dict(value=p['overall'], status='calculated' if p['overall'] is not None else 'unavailable',
             eligible=p['eligible'], exclusion_reasons=p['exclusion_reasons'], comparison_position=p['comparison_group'])
         rows.append({k:previous[k] for k in ('id','player_id','name','season_name','comparison_position','positions','primary_position','secondary_positions')} |
@@ -67,14 +73,15 @@ def project(old, players, appearances, nonappearances, reference):
                 clubs=[dict(name=t,competition_name=c) for t,c in sorted(contexts.get(p['player_id'],set()))] or previous['clubs'],
                 coverage=coverage, attributes=attributes, ovr=ovr, badge_eligible=p['eligible']))
     complete = [p for p in rows if p['ovr']['value'] is not None]
-    return dict(schema_version='soccer-public-ratings/v2', release='2015-16-v2', season='2015/2016',
-        formula_version=old['formula_version'], eligibility_version=VERSION, reference_version='supported-mid-cb-2015-16/v2',
+    version = 'v3' if recovery_release else 'v2'
+    return dict(schema_version='soccer-public-ratings/'+version, release='2015-16-'+version, season='2015/2016',
+        formula_version=old['formula_version'], eligibility_version=VERSION, reference_version='supported-mid-cb-2015-16/'+version,
         disclosures=[
             'Experimental project ratings, not official EA Sports FC/FIFA ratings or validated player quality.',
             'Available observations do not establish complete seasons. Unsupported observations are excluded, not counted as zero performances.',
             'MID and CB have separate rebuilt references using the same supported-sample eligibility rule. Ratings are not directly comparable with the earlier release.',
             'Rankings require 900 supported minutes for every per90 metric and 40 supported pressure attempts. These are retained project cutoffs, not validated certainty thresholds; Bundesliga coverage remains outside the ranking cohort.',
-            'Progressive passing is a proxy and does not verify opponent defensive lines. Pressure ratios may use verified actions from fixtures without a confirmed final duration.'
+            'Progressive passing is a proxy and does not verify opponent defensive lines. Pressure ratios may use verified actions from fixtures without a confirmed final duration. Per90 samples may include verified portions of a match; partial portions are disclosed and remaining actions are excluded.' if recovery_release else 'Progressive passing is a proxy and does not verify opponent defensive lines. Pressure ratios may use verified actions from fixtures without a confirmed final duration.'
         ], counts=dict(examined=len(rows), available=len(rows), complete=len(complete), partial=len(rows)-len(complete),
             bundesliga_complete=sum(p['limited_data'] for p in complete),
             bundesliga_partial=sum(p['limited_data'] and p['ovr']['value'] is None for p in rows)), players=rows)
@@ -150,7 +157,10 @@ def finish(output, old, appearances, nonappearances, receipts, fixtures, event_c
         newly_eligible=sum(not p['old_eligible'] and p['eligible'] for p in changes),
         no_longer_eligible=sum(p['old_eligible'] and not p['eligible'] for p in changes),
         accepted_dismissals=sum(bool(r['dismissal'] and r['dismissal']['accepted']) for r in appearances),
-        unresolved_appearances=sum(r['seconds'] is None for r in appearances),
+        unresolved_appearances=sum(r['seconds'] is None or r.get('exposure_recovery',{}).get('seconds') is not None and not r['exposure_recovery']['complete'] for r in appearances),
+        fully_unresolved_appearances=sum(r['seconds'] is None for r in appearances),
+        partial_supported_appearances=sum(r.get('exposure_recovery',{}).get('seconds') is not None and not r['exposure_recovery']['complete'] for r in appearances),
+        fully_recovered_appearances=sum(r.get('exposure_recovery',{}).get('seconds') is not None and r['exposure_recovery']['complete'] for r in appearances),
         excluded_metric_appearances={a:sum(not r['metrics'][a]['included'] for r in appearances) for a in ATTRIBUTES},
         identity_conflicts=sum(bool(r['identity_reasons']) for r in appearances),
         reference_sha256=reference['sha256'], policy=POLICY,
@@ -162,7 +172,7 @@ def finish(output, old, appearances, nonappearances, receipts, fixtures, event_c
         write(output/name,value)
     with (output/'changes.csv').open('x',encoding='utf-8-sig',newline='') as handle:
         writer=csv.DictWriter(handle,fieldnames=list(changes[0])); writer.writeheader(); writer.writerows(changes)
-    implementation = {str(path.relative_to(ROOT)):sha(path) for path in [ROOT/'src/supported_sample_ratings.py',ROOT/'src/reconciled_source.py',ROOT/'src/dismissal_reconciliation.py',Path(__file__)]}
+    implementation = {str(path.relative_to(ROOT)):sha(path) for path in [ROOT/'src/supported_sample_ratings.py',ROOT/'src/reconciled_source.py',ROOT/'src/dismissal_reconciliation.py',ROOT/'src/appearance_recovery.py',ROOT/'scripts/recover_remaining_appearances.py',Path(__file__)] if path.exists()}
     write(output/'manifest.json',dict(version=VERSION,input_binding=bound,implementation=implementation,
         artifacts={p.name:sha(p) for p in output.iterdir() if p.is_file()}, policy=POLICY))
     print(json.dumps(result,indent=2),flush=True)

@@ -12,6 +12,7 @@ from src.participation_intervals import VALID
 from src.statsbomb_participation import SourceDocument, adapt_match
 from src.source_reconstruction import flatten_events, measure_events
 from src.supported_sample_ratings import ATTRIBUTES, pair
+from src.appearance_recovery import recover_exposure, contains
 
 DOCUMENT_CACHE = {}
 ALIASES = {3054: {'Fernando Luiz Rosa', 'Fernando Luiz Roza'}}
@@ -146,6 +147,7 @@ def replay(task):
         intervals = actor.observations
         seconds = validation.elapsed_seconds if validation.status == VALID else None
         dismissal = None
+        recovery = None
         if seconds is None:
             review = reconcile_dismissal(adapted, source, pid)
             dismissal = dict(accepted=review.candidate is not None, reasons=list(review.reasons),
@@ -155,6 +157,13 @@ def replay(task):
         names = {rosters[tid,pid]['player_name']} | {e['player']['name'] for e in events if e['team']['id']==tid and e.get('player',{}).get('id')==pid}
         identity_reasons = [] if all(identity_agrees(pid, identities[pid], name) for name in names) else ['UNRESOLVED_IDENTITY_NAME_CONFLICT']
         off_field = {d.event_ref.rsplit('/',1)[-1] for d in actor.off_field_discipline}
+        if seconds is None and adapted.competition_name != '1. Bundesliga':
+            recovery = recover_exposure(events, tid, pid, off_field_ids=off_field)
+            if recovery.seconds is not None:
+                seconds = recovery.seconds
+        recovered = recovery is not None and recovery.seconds is not None
+        partial = recovered and not recovery.complete
+        inside = lambda e: contains(e,recovery.segments) if recovered else within(e,intervals,adapted.boundaries)
         chronology = pressure_chronology(pid, tid, events, off_field)
         metrics = {}
         for a in ATTRIBUTES:
@@ -162,30 +171,40 @@ def replay(task):
             if set(numerator) != helper_sets[tid,pid][a]:
                 raise ValueError('independent metric selection disagrees: ' + str((mid,pid,a)))
             denominator = sorted(raw_sets[tid,pid]['press_attempts']) if a == 'press_resistance' else None
+            omitted = []
+            if partial and a != 'press_resistance':
+                omitted = [uid for uid in numerator if not inside(by_id[uid])]
+                numerator = [uid for uid in numerator if inside(by_id[uid])]
             reasons = list(identity_reasons)
             if mid == 3879594: reasons.append('PENDING_DELIVERED_FIXTURE_SCOPE')
             if a == 'press_resistance':
                 reasons.extend(chronology)
-                if seconds is not None and any(not within(by_id[uid], intervals, adapted.boundaries) for uid in denominator):
+                if seconds is not None and not partial and any(not inside(by_id[uid]) for uid in denominator):
                     reasons.append('PRESSURE_ACTION_OUTSIDE_EXPOSURE')
             else:
                 if seconds is None: reasons.append('UNRESOLVED_PARTICIPATION')
-                elif any(not within(by_id[uid], intervals, adapted.boundaries) for uid in numerator):
+                elif any(not inside(by_id[uid]) for uid in numerator):
                     reasons.append('NUMERATOR_DENOMINATOR_MISMATCH')
                 if a == 'progressive_passing':
                     # Missing geometry and eligible pass scope outside exposure
                     # withhold the fixture, including zero selected passes.
-                    if missing_by_actor[tid,pid]: reasons.append('MISSING_PASS_GEOMETRY')
+                    if any(not partial or inside(by_id[uid]) for uid in missing_by_actor[tid,pid]): reasons.append('MISSING_PASS_GEOMETRY')
                     if seconds is not None and any(e['team']['id']==tid and e.get('player',{}).get('id')==pid
                         and typ(e)=='Pass' and e.get('pass',{}).get('type',{}).get('name') in (None,'Recovery','Interception')
                         and e.get('pass',{}).get('outcome',{}).get('name') not in ('Unknown','Injury Clearance')
-                        and not within(e, intervals, adapted.boundaries) for e in events):
+                        and not inside(e) for e in events) and not partial:
                         reasons.append('PASS_SCOPE_OUTSIDE_EXPOSURE')
             metrics[a] = dict(included=not reasons, reasons=sorted(set(reasons)), numerator_ids=numerator, denominator_ids=denominator)
+            if partial and a != 'press_resistance': metrics[a]['omitted_numerator_ids'] = omitted
         if identity_reasons: seconds = None
-        rows.append(dict(player_id=pid, match_id=mid, team_id=tid, team=next(t['team_name'] for t in lineups.records() if t['team_id']==tid),
+        row = dict(player_id=pid, match_id=mid, team_id=tid, team=next(t['team_name'] for t in lineups.records() if t['team_id']==tid),
             competition=adapted.competition_name, season=adapted.season_name,
             seconds=pair(seconds), original_issues=[i.code for i in validation.issues], dismissal=dismissal,
             identity_names=sorted(names), identity_reasons=identity_reasons, chronology_reasons=chronology,
-            source_sha256=source.fingerprint, source=source.reference, metrics=metrics))
+            source_sha256=source.fingerprint, source=source.reference, metrics=metrics)
+        if recovery is not None:
+            row['exposure_recovery'] = dict(complete=recovery.complete, seconds=pair(recovery.seconds),
+                reasons=list(recovery.reasons), proof_references=list(recovery.proof_references),
+                segments=[dict(period=s.period,start=pair(s.start),end=pair(s.end),start_reference=s.start_reference,end_reference=s.end_reference) for s in recovery.segments])
+        rows.append(row)
     return dict(match_id=mid, appearances=rows, nonappearances=benches, event_ids=list(by_id), receipts=receipts)

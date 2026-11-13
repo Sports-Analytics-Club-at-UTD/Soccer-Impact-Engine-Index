@@ -17,7 +17,8 @@
     "positionToggle.test.js",
     "spatialDominance.test.js",
     "supportedSampleRatings.test.js",
-    "multipleArchetypes.test.js"
+    "multipleArchetypes.test.js",
+    "appearanceRecovery.test.js"
   ],
   "private_files": [
     "localExperimentalRatings.test.js",
@@ -44,8 +45,9 @@
     "foundationPlayers.test.js": "f0ab1b326bec0510e8350cff1d95bbd1d43a5fc7239aa3cd408dc402ab40e79d",
     "positionToggle.test.js": "746b40598b7faad3cd0be5c325bd3c91593a36b0d63cf2bfa66fcadb6916aef6",
     "spatialDominance.test.js": "98d8d05d2aeb5f7fda42479a61b3a4c4215f52d66f5276bf8d714d331b88eb87",
-    "supportedSampleRatings.test.js": "413c35a4c63c69f5c925fe90c6171cde921fe58278b94c256caac2817538907c",
-    "multipleArchetypes.test.js": "6342e437efe81a37d01e179b489c76f208991430cbf3dc15fbbc1ed6b9c72237"
+    "supportedSampleRatings.test.js": "8066a3c88d0093ef86d0e5c68948c3b09bca6d33f079f7551c05e7c3eb1ac4fd",
+    "multipleArchetypes.test.js": "6342e437efe81a37d01e179b489c76f208991430cbf3dc15fbbc1ed6b9c72237",
+    "appearanceRecovery.test.js": "9d40cd38c117b4649ee1dba371a4736f51791514b123306f5d982d8d7cd1c6ab"
   },
   "network_tests": {
     "public": [

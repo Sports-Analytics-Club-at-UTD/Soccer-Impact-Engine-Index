@@ -9,8 +9,8 @@ export const LEGACY_PUBLIC_RATINGS_RELEASE = Object.freeze({
 // Supported samples and rebuilt cohorts authorized in the player-audit review.
 // Exact path and bytes remain mandatory; payload flags cannot admit other data.
 export const PUBLIC_RATINGS_RELEASE = Object.freeze({
-  path: 'data/player-ratings-2015-16-v2.json',
-  sha256: 'e9fe1b6f3ca825eb8c961fea484ba08eed95d87c2cf8958f23303683d627e39d',
-  bytes: 1448401,
-  approval: 'User authorized source/scope corrections, measurement and reference rebuild, and a uniform eligibility rule on 2026-11-13. Aggregate ratings and coverage only; no deployment or raw-source publication.',
+  path: 'data/player-ratings-2015-16-v3.json',
+  sha256: 'ad2be90730ffd3019a3b8c66385bec2b5c1958a3e34bf476628e1238a65851bf',
+  bytes: 1512488,
+  approval: 'User authorized source/scope corrections and recovery of verified portions of remaining non-Bundesliga appearances on 2026-11-13. Aggregate ratings and coverage only; no deployment or raw-source publication.',
 });
