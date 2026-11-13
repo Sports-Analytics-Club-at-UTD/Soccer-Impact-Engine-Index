@@ -6,7 +6,7 @@
    { id, name, team, position: "CB" | "DM", minutes, photo?,
      pct: { T, I, C, P, LB, REC }   // percentiles 0–100 vs positional peers }   */
 import raw from "../data/players.json";
-import { classifyDemo, demoOverall } from "./archetypes.js";
+import { classifyDemo, classifyAllDemo, demoOverall } from "./archetypes.js";
 
 export const MIN_MINUTES = 1000;
 
@@ -14,4 +14,5 @@ export const PLAYERS = raw.map((p) => ({
   ...p,
   ovr: demoOverall(p),
   archetype: classifyDemo(p),
+  archetypes: classifyAllDemo(p),
 }));

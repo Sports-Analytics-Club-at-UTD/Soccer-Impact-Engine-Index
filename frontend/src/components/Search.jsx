@@ -25,7 +25,7 @@ function TopCard({ p, rank, onPick, on }) {
         <div className="mono t10 up c2">#{rank} · {p.position === 'DM' ? 'MID' : p.position}</div>
       </div>
       <div className="name display">{p.name}</div>
-      <div className="meta">{p.team} · {p.archetype.name}{p.archetype.tier ? ` · ${p.archetype.tier === '+' ? 'Gold' : 'Silver'}` : ""}</div>
+      <div className="meta">{p.team} · {p.archetype.name}{p.archetype.tier ? ` · ${p.archetype.tier === '+' ? 'Gold' : 'Silver'}` : ""}{p.archetypes?.length > 1 ? ` · +${p.archetypes.length - 1} more` : ''}</div>
       <div className="ovr">
         <div className="ovr-num display">{displayOverall(p.ovr)}</div>
         <div className="mono t9 up dim">Overall rating</div>

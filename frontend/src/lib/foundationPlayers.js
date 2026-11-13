@@ -1,4 +1,4 @@
-import { classify, METRICS } from './archetypes.js';
+import { classify, classifyAll, METRICS } from './archetypes.js';
 import { publicPlayerCopy } from './publicPlayerCopy.js';
 import { playerName } from './playerNames.js';
 
@@ -17,6 +17,7 @@ export function foundationPlayers(data) {
       ovr: p.ovr.value, ranked: p.ovr.eligible, publicRating: true,
       archetype: p.badge_eligible ? classify({ position, attributes: p.attributes })
         : { name: 'Archetype unavailable', tier: null },
+      archetypes: p.badge_eligible ? classifyAll({ position, attributes: p.attributes }) : [],
       ratingNotice: copy.notice,
     };
   });
@@ -30,7 +31,7 @@ export function publicRatingCard(player) {
         value: a.rating, text: a.rating === null ? 'N/A' : a.rating.toFixed(2), percentile: a.percentile };
     }),
     profileLabel: '2015/16 player ratings',
-    archetype: player.archetype, ovr: player.ovr, ovrLabel: 'Overall rating',
+    archetype: player.archetype, archetypes: player.archetypes, ovr: player.ovr, ovrLabel: 'Overall rating',
   };
 }
 
