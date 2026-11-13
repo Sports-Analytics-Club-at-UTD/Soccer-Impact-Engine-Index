@@ -11,6 +11,9 @@ function Member({ m, i }) {
         <h3 className="display">{m.name}</h3>
         <div className="role mono t10 up">{m.role}</div>
         <p>{m.does}</p>
+        <a className="member-link mono t10 up" href={m.linkedin} target="_blank" rel="noopener noreferrer" aria-label={`${m.name} on LinkedIn (opens in a new tab)`}>
+          LinkedIn <span aria-hidden="true">↗</span>
+        </a>
       </div>
     </div>
   );
