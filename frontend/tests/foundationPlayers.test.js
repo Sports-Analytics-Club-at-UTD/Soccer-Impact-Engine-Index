@@ -29,7 +29,8 @@ test('foundation adapter preserves every approved identity, score, club, positio
   for (let i = 0; i < players.length; i++) {
     const p = players[i], approved = data.players[i], card = publicRatingCard(p);
     assert.equal(p.id, approved.id); assert.equal(p.canonicalName, approved.name);
-    assert.equal(p.team, approved.clubs.map((c) => c.name).join(' / '));
+    const clubNames = approved.clubs.map((c) => c.name === 'Marseille' ? 'Olympique de Marseille' : c.name);
+    assert.equal(p.team, clubNames.filter((name, i) => clubNames.indexOf(name) === i).join(' / '));
     assert.equal(p.primaryPosition, approved.primary_position);
     assert.equal(p.minutes, approved.coverage.supported_minutes);
     assert.deepEqual(p.attributes, approved.attributes);
@@ -44,6 +45,18 @@ test('foundation adapter preserves every approved identity, score, club, positio
   assert.equal(players.filter((p) => p.ranked && p.position === 'CB').length, 107);
   assert.equal(players.filter((p) => p.ranked && p.position === 'DM').length, 124);
   assert.equal(players.filter((p) => p.ovr === null).length, 5);
+});
+
+test('club display collapses the verified Marseille alias while preserving transfers and source records', () => {
+  const source = data.players[0];
+  const clubs = [
+    { competition_name: 'Serie A', name: 'Juventus' },
+    { competition_name: 'Ligue 1', name: 'Marseille' },
+    { competition_name: 'Ligue 1', name: 'Olympique de Marseille' },
+  ];
+  const before = structuredClone(clubs);
+  assert.equal(foundationPlayers({ players: [{ ...source, clubs }] })[0].team, 'Juventus / Olympique de Marseille');
+  assert.deepEqual(clubs, before);
 });
 
 test('existing search finds real names with accents and retains excluded and incomplete profiles', () => {
