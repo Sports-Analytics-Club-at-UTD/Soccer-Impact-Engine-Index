@@ -45,7 +45,7 @@ export default function Search({ players = [], loaded = false, error = "", onRet
   const inputRef = useRef(null);
 
   const ranked = useMemo(
-    () => players.filter((p) => p.position === pos).sort((a, b) => (b.ovr ?? -1) - (a.ovr ?? -1)),
+    () => players.filter((p) => p.position === pos).sort((a, b) => Number(b.ranked === true) - Number(a.ranked === true) || (b.ovr ?? -1) - (a.ovr ?? -1)),
     [pos, players]
   );
   const top3 = ranked.filter((p) => p.ranked).slice(0, 3);
@@ -187,7 +187,7 @@ export default function Search({ players = [], loaded = false, error = "", onRet
             </div>
 
             <div className="placeholder-banner mono angular-sm">
-              Top 3 includes ranked players only. Directory numbers show browsing order by overall rating, including unranked players. Search covers every player and page.
+              Top 3 includes ranked players only. The directory shows ranked players first, then unranked players, each ordered by overall rating. Directory numbers show browsing order. Search covers everyone.
             </div>
           </div>
 

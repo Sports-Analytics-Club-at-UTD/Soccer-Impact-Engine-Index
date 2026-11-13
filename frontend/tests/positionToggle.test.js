@@ -25,7 +25,10 @@ let dom, root, container;
 const button = (name) => [...container.querySelectorAll('button')].find((el) => el.textContent === name);
 const click = (el) => act(() => el.click());
 const rows = () => [...container.querySelectorAll('.browse-row .nm')].map((el) => el.firstChild.textContent);
-const ranked = (pos) => players.filter((p) => p.position === pos).sort((a, b) => (b.ovr ?? -1) - (a.ovr ?? -1));
+const ranked = (pos) => {
+  const ordered = players.filter((p) => p.position === pos).sort((a, b) => (b.ovr ?? -1) - (a.ovr ?? -1));
+  return [...ordered.filter((p) => p.ranked), ...ordered.filter((p) => !p.ranked)];
+};
 const status = () => container.querySelector('.directory-pages [role=status]').textContent;
 function query(value) {
   const input = container.querySelector('input');
@@ -53,6 +56,22 @@ test('CB is selected by default with correctly sorted first-page players', () =>
   assert.equal(button('CB').getAttribute('aria-pressed'), 'true');
   assert.equal(button('DM').getAttribute('aria-pressed'), 'false');
   assert.deepEqual(rows(), ranked('CB').slice(0, 6).map((p) => p.name));
+});
+
+test('ranked players precede higher-rated unranked players while ties, missing ratings and search remain intact', () => {
+  const base = players.find((p) => p.position === 'CB' && p.ranked);
+  const sample = [
+    { ...base, id: 'unranked-high', name: 'Unranked High', ranked: false, ovr: 99 },
+    { ...base, id: 'ranked-low', name: 'Ranked Low', ranked: true, ovr: 60 },
+    { ...base, id: 'ranked-high', name: 'Ranked High', ranked: true, ovr: 80 },
+    { ...base, id: 'unranked-missing', name: 'Unranked Missing', ranked: false, ovr: null },
+    { ...base, id: 'ranked-tie', name: 'Ranked Tie', ranked: true, ovr: 80 },
+  ];
+  act(() => root.render(React.createElement(Search, { players: sample, loaded: true })));
+  assert.deepEqual(rows(), ['Ranked High', 'Ranked Tie', 'Ranked Low', 'Unranked High', 'Unranked Missing']);
+  assert.deepEqual([...container.querySelectorAll('.top-card .name')].map((el) => el.textContent), ['Ranked High', 'Ranked Tie', 'Ranked Low']);
+  query('Unranked High');
+  assert.match(container.querySelector('[role=listbox]').textContent, /Unranked High/);
 });
 test('CB to DM to CB updates selection, lists, counts and eligible top three', () => {
   for (const pos of ['DM', 'CB']) {
