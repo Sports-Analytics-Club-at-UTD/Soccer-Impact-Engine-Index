@@ -9,7 +9,7 @@ export function foundationPlayers(data) {
     const position = p.comparison_position === 'CB' ? 'CB' : 'DM';
     const copy = publicPlayerCopy(p);
     return {
-      id: p.id, ...playerName(p), team: p.clubs.map((c) => c.name).join(' / '),
+      id: p.id, ...playerName(p), team: [...new Set(p.clubs.map((c) => c.name === 'Marseille' ? 'Olympique de Marseille' : c.name))].join(' / '),
       position, primaryPosition: p.primary_position, season: p.season_name,
       minutes: p.coverage.supported_minutes, attributes: p.attributes,
       coverage: p.coverage, eligibilityReasons: p.ovr.exclusion_reasons,

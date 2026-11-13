@@ -186,9 +186,9 @@ export default function Search({ players = [], loaded = false, error = "", onRet
               </nav>
             </div>
 
-            <div className="placeholder-banner mono angular-sm">
-              Top 3 includes ranked players only. The directory shows ranked players first, then unranked players, each ordered by overall rating. Directory numbers show browsing order. Search covers everyone.
-            </div>
+            <p className="directory-note">
+              Ranked players first, then unranked; each sorted by overall rating. Numbers show browsing order. Top 3 includes ranked players only. Search covers everyone.
+            </p>
           </div>
 
           {isMobile && cardOpen && <div className="backdrop" onClick={() => setSelected(null)} />}
