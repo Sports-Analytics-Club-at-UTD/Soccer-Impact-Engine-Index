@@ -97,10 +97,10 @@ export const ABOUT = {
   intro: "Five members of the UTD Sports Analytics Club, eight weeks, one index.",
   // photo: "/team/name.jpg" — leave "" for a placeholder
   members: [
-    { name: "Vibhor Rajan", role: "Project Manager", does: "Led the project and shaped the website experience.", photo: "/team/vibhor-rajan.webp" },
-    { name: "Pratyush Malaviya", role: "Lead Developer", does: "Brought the five skills together and developed the press resistance analysis.", photo: "/team/pratyush-malaviya.webp" },
-    { name: "Arpit Gupta", role: "Engineer", does: "Developed the ball-winning analysis and team defensive maps using StatsBomb match data.", photo: "/team/arpit-gupta.webp" },
-    { name: "Ayush Mendhe", role: "Integration Lead", does: "Connected the match evidence, checked the ratings and brought the player profiles to the website.", photo: "/team/ayush-mendhe.webp" },
-    { name: "Joseph Olutayo", role: "Engineer", does: "Developed the progressive passing analysis to explore how players move the ball forward.", photo: "/team/joseph-olutayo.webp" },
+    { name: "Vibhor Rajan", role: "Project Manager", does: "Led the project and shaped the website experience.", photo: "/team/vibhor-rajan.webp", linkedin: "https://www.linkedin.com/in/vibhorrajan/" },
+    { name: "Pratyush Malaviya", role: "Lead Developer", does: "Brought the five skills together and developed the press resistance analysis.", photo: "/team/pratyush-malaviya.webp", linkedin: "https://www.linkedin.com/in/pratyushmalaviya/" },
+    { name: "Arpit Gupta", role: "Engineer", does: "Developed the ball-winning analysis and team defensive maps using StatsBomb match data.", photo: "/team/arpit-gupta.webp", linkedin: "https://www.linkedin.com/in/arpit-gupta-991658391/" },
+    { name: "Ayush Mendhe", role: "Integration Lead", does: "Connected the match evidence, checked the ratings and brought the player profiles to the website.", photo: "/team/ayush-mendhe.webp", linkedin: "https://www.linkedin.com/in/ayush-mendhe/" },
+    { name: "Joseph Olutayo", role: "Engineer", does: "Developed the progressive passing analysis to explore how players move the ball forward.", photo: "/team/joseph-olutayo.webp", linkedin: "https://www.linkedin.com/in/joseph-olutayo-920a11377/" },
   ],
 };
