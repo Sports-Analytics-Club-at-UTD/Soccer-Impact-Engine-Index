@@ -26,7 +26,7 @@ export default function DemoExperience({ theme, onToggle }) {
   return <>
     <Nav theme={theme} onToggle={onToggle} />
     <main>
-      <Hero /><Description /><Archetypes /><Search players={players} loaded={loaded} error={error} onRetry={() => setRetry((n) => n + 1)} /><Teams /><About />
+      <Hero /><Description /><Archetypes players={players} loaded={loaded} error={error} onRetry={() => setRetry((n) => n + 1)} /><Search players={players} loaded={loaded} error={error} onRetry={() => setRetry((n) => n + 1)} /><Teams /><About />
     </main>
     <Footer />
   </>;
