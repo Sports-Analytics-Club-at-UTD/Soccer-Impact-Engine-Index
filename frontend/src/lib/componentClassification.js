@@ -4,7 +4,7 @@ import { playerDataStatus } from './playerDataStatus.js';
 
 // Reuse the existing individual-attribute badge rules and strict eligibility.
 // Publication scope is controlled separately by the pinned public release.
-export const ATTRIBUTE_BADGE_METHODOLOGY = 'Gold indicates an attribute at or above the 90th percentile of its existing position-specific reference population. Silver indicates the 75th to below the 90th percentile. Badges are shown only for strictly eligible real-player profiles. They describe individual component strengths; Formula B remains the overall rating. Final 2015/16 ratings are approved for public display; raw research evidence is not distributed.';
+export const ATTRIBUTE_BADGE_METHODOLOGY = 'Gold indicates an attribute at or above the 90th percentile of its release’s position-specific reference population. Silver indicates the 75th to below the 90th percentile. Badges are shown only for eligible real-player profiles. They describe individual component strengths; Formula B remains the overall rating. Raw research evidence is not distributed.';
 
 export function experimentalComponentClassification(player) {
   const { presentation, ovr } = player;

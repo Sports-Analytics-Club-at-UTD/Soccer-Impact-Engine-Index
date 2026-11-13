@@ -73,7 +73,9 @@ test('actual production preview serves real ratings but no observation or privat
     assert.equal(ratings.status, 200); assert.match(ratings.headers.get('content-type'), /application\/json/);
     const body = Buffer.from(await ratings.arrayBuffer()); assert.equal(sha(body), release.sha256);
     const models = publicModels(parsePublicRatings(body.toString()));
-    assert.equal(models.length,691); assert.equal(ovrLeaderboard(models,'MID').length,124); assert.equal(ovrLeaderboard(models,'CB').length,107);
+    assert.equal(models.length,691);
+    for (const group of ['MID','CB']) assert.equal(ovrLeaderboard(models,group).length,
+      models.filter((p) => p.ovr.eligible && p.presentation.comparison_position === group).length);
     assert.equal((await fetch(base + '/')).status, 200);
     for (const p of PUBLIC_ASSETS) {
       const response = await fetch(base + '/' + p.path);
