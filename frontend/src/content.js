@@ -64,6 +64,7 @@ export const TEAMS_SECTION = {
 export const TEAMS = [
   {
     id: "psg",
+    crest: "/team/crests/psg.svg",
     short: "PSG",
     name: "Paris Saint-Germain",
     note: "The heat map shows the share of recorded space nearest to this team’s defenders when opponents have the ball. It describes defensive positioning, rather than the chance of winning possession.",
@@ -73,6 +74,7 @@ export const TEAMS = [
   },
   {
     id: "barca",
+    crest: "/team/crests/barca.svg",
     short: "Barça",
     name: "FC Barcelona",
     note: "The heat map shows the share of recorded space nearest to this team’s defenders when opponents have the ball. It describes defensive positioning, rather than the chance of winning possession.",
@@ -82,6 +84,7 @@ export const TEAMS = [
   },
   {
     id: "leverkusen",
+    crest: "/team/crests/leverkusen.svg",
     short: "Leverkusen",
     name: "Bayer 04 Leverkusen",
     note: "The heat map shows the share of recorded space nearest to this team’s defenders when opponents have the ball. It describes defensive positioning, rather than the chance of winning possession.",

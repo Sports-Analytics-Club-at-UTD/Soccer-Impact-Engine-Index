@@ -50,6 +50,12 @@ test('team selection, focus, arrow keys, Escape, hover and tap use the pitch zon
     act(() => root.render(React.createElement(Teams)));
     assert.equal(zones().length, 0);
     const badges = [...container.querySelectorAll('.badge')];
+    assert.deepEqual(badges.map((badge) => badge.querySelector('img').getAttribute('src')),
+      ['/team/crests/psg.svg', '/team/crests/barca.svg', '/team/crests/leverkusen.svg']);
+    for (const badge of badges) {
+      assert.equal(badge.querySelector('img').alt, '', 'adjacent club name labels the selector');
+      assert.equal(badge.querySelector('img').getAttribute('width'), '52');
+    }
     for (const [i, data] of Object.values(SPATIAL_DOMINANCE).entries()) {
       click(badges[i]);
       assert.equal(badges[i].getAttribute('aria-controls'), 'team-spatial-panel');
@@ -75,7 +81,7 @@ test('team selection, focus, arrow keys, Escape, hover and tap use the pitch zon
       assert.equal(tip(), null);
     }
     assert.equal(container.querySelectorAll('.spatial-zone').length, 9);
-    assert.equal(container.querySelectorAll('#teams img').length, 0);
+    assert.equal(container.querySelectorAll('#teams img').length, 3, 'only club crests use images; the pitch remains interactive');
     assert.match(container.querySelector('.spatial-methodology').textContent, /unrounded data, season and fixture lists are unavailable/);
     click(badges[2]);
     assert.equal(zones().length, 0);
