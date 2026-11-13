@@ -76,6 +76,14 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
     act(() => trigger('Libero').click());
     assert.equal(document.querySelector('[role=region]'), null);
     act(() => trigger('Stopper').click());
+    const close = document.querySelector('[aria-label="Close archetype list"]');
+    assert.equal(close.tagName, 'BUTTON');
+    assert.equal(close.tabIndex, 0);
+    act(() => close.click());
+    assert.equal(document.querySelector('[role=region]'), null);
+    assert.equal(trigger('Stopper').getAttribute('aria-expanded'), 'false');
+    assert.equal(document.activeElement, trigger('Stopper'));
+    act(() => trigger('Stopper').click());
     render({ loaded: false });
     assert.match(document.querySelector('[role=status]').textContent, /Loading/);
     let retries = 0;
