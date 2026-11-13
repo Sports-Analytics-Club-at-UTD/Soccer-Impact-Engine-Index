@@ -24,6 +24,8 @@ export function publicPlayerCopy(player) {
   if (codes.has('BELOW_40_SUPPORTED_ATTEMPTS')) add('Fewer than 40 actions under pressure are available for ranking.');
   if (codes.has('UNSUPPORTED_POSITION')) add('This playing position is not included in the rankings.');
   if (codes.has('METRIC_EXPOSURE_NOT_COMPLETE_900_MINUTES') && !explanations.length) add('The individual ratings do not all have the playing time required for ranking.');
+  if (codes.has('BELOW_900_SUPPORTED_METRIC_MINUTES')) add('At least one individual rating has fewer than 900 confirmed minutes.');
+  if (codes.has('MISSING_MEASUREMENT_DENOMINATOR')) add('At least one individual rating has no supported measurement.');
   if (!player.ovr.eligible && !explanations.length) add('This profile does not meet all the requirements for a like-for-like ranking.');
   const missing = Object.entries(player.attributes).filter(([, a]) => a.rating === null)
     .map(([key]) => ATTRIBUTE_NAMES[key] ?? 'An individual skill');
@@ -36,6 +38,14 @@ export function publicPlayerCopy(player) {
       ? 'No recorded actions under pressure are available to calculate this rating.'
       : 'There is not enough reliable match evidence to calculate this rating.';
     else if (a.warnings.includes('BELOW_40_PRESS_ACTIONS / LIMITED DATA')) note = 'Based on fewer than 40 actions under pressure.';
+    if (a.coverage) {
+      const c = a.coverage;
+      const sample = `${c.supported_fixtures} of ${player.coverage.observed_fixtures} recorded matches included`;
+      const denominator = key === 'press_resistance' ? `${c.pressure_attempts} supported actions under pressure`
+        : `${c.supported_minutes.toLocaleString(undefined, { maximumFractionDigits: 1 })} confirmed minutes`;
+      const exclusions = c.excluded_fixtures ? ` ${c.excluded_fixtures} ${c.excluded_fixtures === 1 ? 'match excluded' : 'matches excluded'} because the evidence could not be confirmed for this skill.` : '';
+      note = `${note ? `${note} ` : ''}${sample}; ${denominator}.${exclusions}`;
+    }
     return [key, note];
   }));
   const seasonCoverage = player.partial_season

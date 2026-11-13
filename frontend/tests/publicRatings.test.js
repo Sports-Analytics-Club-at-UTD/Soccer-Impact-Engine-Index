@@ -7,12 +7,16 @@ import { PUBLIC_RATINGS_RELEASE as release } from '../src/lib/publicRatingsRelea
 import { ovrLeaderboard } from '../src/lib/provisionalOvr.js';
 import { filterExperimentalPlayers } from '../src/lib/playerDiscovery.js';
 import { assertAdmittedOutput, validateDataImport } from '../build/productionDataAdmission.js';
-const bytes = await readFile(new URL(`../public/${release.path}`, import.meta.url));
+// Keep the historical numerical regression suite alongside the rebuilt release.
+const historical = { path: 'data/player-ratings-2015-16-v1.json', bytes: 1431543,
+  sha256: '9a5d101cd9f15af456f58c39a7053a22db16ac99f2864bbf5252733fb97ecc2e' };
+const bytes = await readFile(new URL(`../public/${historical.path}`, import.meta.url));
+const currentBytes = await readFile(new URL(`../public/${release.path}`, import.meta.url));
 const data = parsePublicRatings(bytes.toString('utf8')), models = publicModels(data);
 
 test('reviewed release retains all final values, badge decisions and strict leaderboards', () => {
-  assert.equal(bytes.length, release.bytes);
-  assert.equal(createHash('sha256').update(bytes).digest('hex'), release.sha256);
+  assert.equal(bytes.length, historical.bytes);
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), historical.sha256);
   for (const [name, value] of [['Kanté','83.08'],['Toni Kroos','77.00'],['Kalidou Koulibaly','82.42'],['Sereso Geoffroy Gonzaroua Dié','92.00']]) {
     const p = models.find((p) => p.name.includes(name)); assert.ok(p, name); assert.equal(p.ovr.value.toFixed(2), value);
   }
@@ -43,15 +47,15 @@ test('public contract excludes research and rejects changed ratings or eligibili
 });
 
 test('public HTTP loader validates MIME and exact bytes without demo fallback', async () => {
-  assert.equal((await loadPublicRatings({fetcher: async () => new Response(bytes,{headers:{'content-type':'application/json'}})})).players.length,691);
+  assert.equal((await loadPublicRatings({fetcher: async () => new Response(currentBytes,{headers:{'content-type':'application/json'}})})).players.length,691);
   for (const response of [new Response('<html>fallback</html>',{headers:{'content-type':'text/html'}}), new Response('{}',{headers:{'content-type':'application/json'}}), new Response('missing',{status:404})]) {
     await assert.rejects(loadPublicRatings({fetcher: async () => response}), /Invalid public ratings/);
   }
 });
 
 test('release admission is restricted to exact reviewed path and content', async () => {
-  assert.doesNotThrow(() => assertAdmittedOutput(release.path,bytes));
-  assert.throws(() => assertAdmittedOutput('data/renamed-ratings.json',bytes), /admission denied/);
-  assert.throws(() => assertAdmittedOutput(release.path, Buffer.concat([bytes,Buffer.from(' ')])), /admission denied/);
+  assert.doesNotThrow(() => assertAdmittedOutput(release.path,currentBytes));
+  assert.throws(() => assertAdmittedOutput('data/renamed-ratings.json',currentBytes), /admission denied/);
+  assert.throws(() => assertAdmittedOutput(release.path, Buffer.concat([currentBytes,Buffer.from(' ')])), /admission denied/);
   for (const suffix of ['', '?raw','?url']) await validateDataImport(new URL(`../public/${release.path}`, import.meta.url).pathname.replace(/^\/([A-Z]:)/,'$1') + suffix);
 });

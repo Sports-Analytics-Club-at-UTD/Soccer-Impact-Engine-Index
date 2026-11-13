@@ -7,6 +7,7 @@ preview
 !/public/data/
 /public/data/*
 !/public/data/player-ratings-2015-16-v1.json
+!/public/data/player-ratings-2015-16-v2.json
 /coverage/
 /test-results/
 /playwright-report/

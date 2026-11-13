@@ -69,7 +69,9 @@ function StandardPlayerCard({ player, onClose, demo = false }) {
 
       <div className="minutes mono">
         {player.publicRating ? "Confirmed minutes" : "Minutes played"}: <b>{Number.isFinite(player.minutes) ? player.minutes.toLocaleString(undefined, { maximumFractionDigits: 1 }) : "N/A"}</b>
-        {player.publicRating && <> · {player.coverage.observed_fixtures} recorded {player.coverage.observed_fixtures === 1 ? 'match' : 'matches'}</>}
+        {player.publicRating && <>
+          {' · '}{player.coverage.observed_fixtures} recorded {player.coverage.observed_fixtures === 1 ? 'match' : 'matches'}
+        </>}
       </div>
       {player.publicRating && <details className="card-detail mono t10">
         <summary>Rating details</summary>
