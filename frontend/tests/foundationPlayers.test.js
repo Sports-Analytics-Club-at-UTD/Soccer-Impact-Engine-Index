@@ -212,9 +212,10 @@ test('directory remains limited to six rows while search finds profiles outside 
   const html = renderToStaticMarkup(React.createElement(Search, { players, loaded: true }));
   assert.equal((html.match(/class="browse-row/g) ?? []).length, 6);
   const outside = players.find((p) => p.name.includes('Ramos'));
+  assert.equal(outside.ranked, false);
   assert.ok(search(outside.name, players).matches.includes(outside));
   assert.match(html, /Player directory pages/);
-  assert.match(html, /Not ranked/);
+  assert.doesNotMatch(html, /class="directory-status/);
 });
 
 test('loading and errors use visitor copy and never echo technical exceptions', () => {
