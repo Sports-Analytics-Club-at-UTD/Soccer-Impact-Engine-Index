@@ -59,6 +59,39 @@ test('club display collapses the verified Marseille alias while preserving trans
   assert.deepEqual(clubs, before);
 });
 
+test('public cards show local club watermarks while preserving ratings and the fallback for unavailable crests', () => {
+  const PlayerCard = component('../src/components/PlayerCard.jsx');
+  const busquets = players.find((p) => p.canonicalName === 'Sergio Busquets i Burgos');
+  const html = renderToStaticMarkup(React.createElement(PlayerCard, { player: busquets }));
+  assert.match(html, /class="ghost-crests" aria-hidden="true"/);
+  assert.match(html, /src="\/team\/crests\/barca.svg" alt=""/);
+  assert.doesNotMatch(html, /ghost-ovr/);
+  assert.ok(html.includes(displayOverall(busquets.ovr)));
+  const other = players.find((p) => p.name.includes('Ramos'));
+  const otherHtml = renderToStaticMarkup(React.createElement(PlayerCard, { player: other }));
+  assert.match(otherHtml, /src="\/team\/crests\/real-madrid.png"/);
+  assert.doesNotMatch(otherHtml, /ghost-ovr/);
+  const fallback = renderToStaticMarkup(React.createElement(PlayerCard, { player: { ...other, crests: [] } }));
+  assert.match(fallback, /ghost-ovr/);
+});
+
+test('all live player clubs have local crests, with aliases collapsed and genuine transfer clubs preserved', () => {
+  const live = parsePublicRatings(readFileSync(new URL('../public/data/player-ratings-2015-16-v3.json', import.meta.url), 'utf8'));
+  const adapted = foundationPlayers(live);
+  assert.equal(new Set(adapted.flatMap((p) => p.crests)).size, 98);
+  for (const p of adapted) {
+    assert.ok(p.crests.length > 0, p.name);
+    assert.equal(p.crests.length, new Set(p.crests).size);
+    for (const crest of p.crests) assert.ok(readFileSync(new URL(`../public${crest}`, import.meta.url)).length > 0);
+  }
+  const diarra = adapted.find((p) => p.name === 'Lassana Diarra');
+  assert.deepEqual(diarra.crests, ['/team/crests/marseille.png']);
+  const lemina = adapted.find((p) => p.name === 'Mario Lemina');
+  assert.deepEqual(lemina.crests, ['/team/crests/juventus.png', '/team/crests/marseille.png']);
+  const alias = { ...live.players[0], clubs: [{ name: 'Caen' }, { name: 'Stade Malherbe Caen' }] };
+  assert.deepEqual(foundationPlayers({ players: [alias] })[0].crests, ['/team/crests/caen.png']);
+});
+
 test('existing search finds real names with accents and retains excluded and incomplete profiles', () => {
   assert.ok(search('kante', players).matches.some((p) => p.name.includes('Kanté')));
   assert.equal(search('Marcus Delacroix', players).matches.length, 0);

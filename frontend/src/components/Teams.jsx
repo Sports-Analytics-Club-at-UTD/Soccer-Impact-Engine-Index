@@ -12,7 +12,7 @@ function Badge({ t, open, onToggle }) {
         type="button" {...tilt} onClick={onToggle} aria-expanded={open} aria-controls="team-spatial-panel"
         className="tilt sheen card-surface angular-sm badge"
       >
-        <span className="mk display">{t.short.slice(0, 3).toUpperCase()}</span>
+        <span className="mk"><img src={t.crest} alt="" width="52" height="52" /></span>
         <span>
           <h3 className="display">{t.short}</h3>
           <div className="nm">{t.name}</div>
