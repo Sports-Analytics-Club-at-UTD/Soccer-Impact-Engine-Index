@@ -1,4 +1,4 @@
-import { METRICS, DEMO_METRICS, classify, classifyDemo, demoOverall, percentileValue } from "./archetypes.js";
+import { METRICS, DEMO_METRICS, classify, classifyDemo, classifyAll, classifyAllDemo, demoOverall, percentileValue } from "./archetypes.js";
 
 export const OVR_PENDING = "N/A: POLICY NOT FINALIZED";
 export const ratingValue = (value) => percentileValue(value) !== null && value >= 1 ? value : null;
@@ -19,6 +19,7 @@ export function ratingCard(player, { demo = false } = {}) {
     attributes,
     profileLabel: demo ? "Fictional percentile profile" : "FIFA-style rating profile",
     archetype: demo ? classifyDemo(player) : classify(player),
+    archetypes: demo ? classifyAllDemo(player) : classifyAll(player),
     ovr: demo ? demoOverall(player) : null,
     ovrLabel: demo ? "Demo OVR" : OVR_PENDING,
   };

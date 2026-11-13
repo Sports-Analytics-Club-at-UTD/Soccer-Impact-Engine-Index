@@ -18,7 +18,7 @@ function StandardPlayerCard({ player, onClose, demo = false }) {
   const card = player.publicRating ? publicRatingCard(player) : ratingCard(player, { demo });
   const animatedOvr = useCountUp(card.ovr ?? 0);
   const ovr = player.publicRating ? displayOverall(card.ovr) : card.ovr === null ? "N/A" : animatedOvr;
-  const a = card.archetype;
+  const archetypes = card.archetypes?.length ? card.archetypes : [card.archetype];
   const low = demo && player.minutes < 1000;
   const extraExplanations = player.ratingDetails?.explanations.filter((reason) => !player.ratingNotice?.includes(reason)) ?? [];
 
@@ -38,16 +38,16 @@ function StandardPlayerCard({ player, onClose, demo = false }) {
             <div className="ovr-num display" aria-label={card.ovrLabel}>{ovr}</div>
             <div className="mono t10 up mute" style={{ paddingBottom: 6 }}>{card.ovrLabel}</div>
           </div>
-
-          <div className={`arch-badge angular-sm ${a.tier ? "" : "std"}`}>
-            <span className="tier mono">{demo ? a.tier || "·" : a.tier === "+" ? "Gold" : a.tier === "−" ? "Silver" : "·"}</span>
-            <span>
-              <span className="mono t9 up dim" style={{ display: "block" }}>Archetype</span>
-              <span className="display" style={{ fontSize: "1rem", lineHeight: 1.1 }}>{a.name}</span>
-            </span>
-          </div>
         </div>
       </div>
+
+      <div className="archetype-label mono t9 up mute">{archetypes.length > 1 ? 'Archetypes' : 'Archetype'}</div>
+      <ul className="archetype-badges" aria-label="Player archetypes">
+        {archetypes.map((a) => <li key={a.metric ?? a.name} className={`arch-badge angular-sm ${a.tier ? "" : "std"}`}>
+          <span className="tier mono">{demo ? a.tier || "·" : a.tier === "+" ? "Gold" : a.tier === "−" ? "Silver" : "·"}</span>
+          <span className="display archetype-name">{a.name}</span>
+        </li>)}
+      </ul>
 
       {player.ratingNotice && <p className="warn mono" role="note">{player.ratingNotice}</p>}
       <div className="viz">
