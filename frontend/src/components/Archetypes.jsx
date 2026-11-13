@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ARCHETYPES, GROUPS, METRICS, TIER, archetypeLeaders } from "../lib/archetypes.js";
 import { useTilt } from "../lib/hooks.js";
-import { IconDown, SectionHead } from "./ui.jsx";
+import { IconClose, IconDown, SectionHead } from "./ui.jsx";
 import PlayerCard from "./PlayerCard.jsx";
 
 const METRIC_LABEL = { ...Object.fromEntries(METRICS.map((m) => [m.key, m.label])), REC: "Ball recoveries", LB: "Progressive passing" };
@@ -24,6 +24,7 @@ function Arch({ a, position, onPick, expanded }) {
 export default function Archetypes({ players = [], loaded = false, error = "", onRetry }) {
   const [selected, setSelected] = useState(null), [player, setPlayer] = useState(null);
   const dialog = useRef(null);
+  const archetypeTrigger = useRef(null);
   useEffect(() => {
     if (!player) return;
     dialog.current.showModal();
@@ -56,12 +57,16 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
               <div className="arch-grid">
                 {["CB", "DM"].flatMap((pos) =>
                   ARCHETYPES[pos].filter((a) => a.group === g).map((a) => <Arch key={a.id} a={a} position={pos}
-                    expanded={selected?.a.id === a.id} onPick={() => setSelected(selected?.a.id === a.id ? null : { a, position: pos })} />)
+                    expanded={selected?.a.id === a.id} onPick={(e) => { archetypeTrigger.current = e.currentTarget; setSelected(selected?.a.id === a.id ? null : { a, position: pos }); }} />)
                 )}
               </div>
               <div id={`leaders-${g.replaceAll(' ', '-').toLowerCase()}`} hidden={selected?.a.group !== g}>
                 {selected?.a.group === g && <div className="archetype-dropdown" role="region" aria-labelledby="archetype-leaders-title">
-                  <h4 id="archetype-leaders-title" className="display">{selected.a.name} · {selected.position === 'DM' ? 'MID' : 'CB'} · Top 5</h4>
+                  <div className="archetype-dropdown-heading">
+                    <h4 id="archetype-leaders-title" className="display">{selected.a.name} · {selected.position === 'DM' ? 'MID' : 'CB'} · Top 5</h4>
+                    <button type="button" className="archetype-collapse" aria-label="Close archetype list"
+                            onClick={() => { setSelected(null); archetypeTrigger.current?.focus(); }}><IconClose size={18} /></button>
+                  </div>
                   <p className="directory-note">Ordered by {METRIC_LABEL[selected.a.metric].toLowerCase()} within this position. Select a player to open their card.</p>
                   {error ? <div role="alert"><p>We couldn’t load the player ratings.</p><button type="button" className="btn btn-ghost" onClick={onRetry}>Try again</button></div>
                     : !loaded ? <p role="status">Loading player ratings…</p>
