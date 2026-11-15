@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ARCHETYPES, GROUPS, METRICS, TIER, archetypeLeaders } from "../lib/archetypes.js";
 import { createSpring } from "../lib/motion.js";
 import { useTilt } from "../lib/hooks.js";
-import { IconClose, IconDown, SectionHead } from "./ui.jsx";
+import { IconArrow, IconClose, IconDown, Photo, SectionHead } from "./ui.jsx";
 import PlayerCard from "./PlayerCard.jsx";
 
 const METRIC_LABEL = { ...Object.fromEntries(METRICS.map((m) => [m.key, m.label])), REC: "Ball recoveries", LB: "Progressive passing" };
@@ -112,7 +112,10 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
                 }}>
                 {current && <div ref={open ? leadersRegion : undefined} className="archetype-dropdown" role={open ? 'region' : undefined} aria-labelledby={`archetype-leaders-${g.replaceAll(' ', '-').toLowerCase()}`}>
                   <div className="archetype-dropdown-heading">
-                    <h4 key={current.a.id} id={`archetype-leaders-${g.replaceAll(' ', '-').toLowerCase()}`} className="display">{current.a.name} · {current.position === 'DM' ? 'MID' : 'CB'} · Top 5</h4>
+                    <div>
+                      <div className="leader-context mono">Top 5 · {current.position === 'DM' ? 'Midfielders' : 'Centre-backs'}</div>
+                      <h4 key={current.a.id} id={`archetype-leaders-${g.replaceAll(' ', '-').toLowerCase()}`} className="display">{current.a.name}</h4>
+                    </div>
                     <button type="button" className="archetype-collapse" aria-label="Close archetype list"
                             onClick={() => { select(null); archetypeTrigger.current?.focus({ preventScroll: true }); scrollTo(archetypeTrigger.current); }}><IconClose size={18} /></button>
                   </div>
@@ -123,10 +126,16 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
                     : <>
                       <ol key={current.a.id} className="archetype-leaders">{leaders.map((p, i) => {
                         const badge = p.archetypes.find((a) => a.metric === current.a.metric);
-                        return <li key={p.id}><button type="button" className="browse-row" onClick={() => setPlayer(p)} aria-haspopup="dialog">
-                          <span className="n mono t11">{i + 1}</span>
-                          <span className="nm">{p.name}<span className="directory-status mono">{badge.tier === '+' ? 'Gold' : 'Silver'}</span></span>
-                          <span className="tm mono">{p.team}</span>
+                        return <li key={p.id}><button type="button" className={`browse-row leader-card angular-sm ${i === 0 ? 'leader-card-first' : ''}`} data-rank={i + 1}
+                          onClick={() => setPlayer(p)} aria-haspopup="dialog">
+                          <span className="leader-rank mono" aria-label={`Rank ${i + 1}`}>{String(i + 1).padStart(2, '0')}</span>
+                          <Photo src={p.photo} label="" className="leader-portrait" />
+                          <span className="leader-info">
+                            <span className="nm">{p.name}</span>
+                            <span className="leader-clubs">{p.crests?.map((crest) => <img key={crest} src={crest} alt="" width="20" height="20" loading="lazy" />)}{p.team}</span>
+                            <span className={`leader-tier mono ${badge.tier === '+' ? 'gold' : 'silver'}`}>{badge.tier === '+' ? 'Gold' : 'Silver'}</span>
+                          </span>
+                          <span className="leader-action mono">View profile <IconArrow /></span>
                         </button></li>;
                       })}</ol>
                     </>}

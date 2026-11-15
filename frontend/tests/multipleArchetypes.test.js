@@ -84,6 +84,14 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
     assert.equal(scrolls.at(-1).behavior, 'smooth');
     assert.equal(document.querySelector('dialog[open]'), null);
     assert.equal(document.querySelectorAll('.archetype-panel.open .archetype-leaders li').length, 5);
+    const expectedLeaders = archetypeLeaders(players, 'CB', ARCHETYPES.CB[0]);
+    const cards = [...document.querySelectorAll('.archetype-panel.open .leader-card')];
+    assert.deepEqual(cards.map((card) => card.querySelector('.nm').textContent), expectedLeaders.map((p) => p.name));
+    assert.deepEqual(cards.map((card) => card.querySelector('.leader-portrait img').getAttribute('src')), expectedLeaders.map((p) => p.photo));
+    assert.deepEqual(cards.map((card) => card.querySelector('.leader-clubs').textContent), expectedLeaders.map((p) => p.team));
+    assert.equal(cards.filter((card) => card.classList.contains('leader-card-first')).length, 1);
+    assert.equal(cards[0].querySelector('.leader-rank').getAttribute('aria-label'), 'Rank 1');
+
     assert.doesNotMatch(document.querySelector('[role=region]').textContent, /percentile/i);
     assert.equal(document.querySelector('.archetype-leaders .ov'), null);
     act(() => trigger('Libero').click());
