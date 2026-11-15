@@ -45,9 +45,9 @@
     "publicRatings.test.js": "360118d538979cd79104d3fca00bf314a33d9d27e5cbe15f2681cac7ce222b47",
     "foundationPlayers.test.js": "bb2601748144e69e2a27ef9ceafe80a03e53107bb15a7ea8992cc6d434c54bad",
     "positionToggle.test.js": "be9921a7f178393ce0bb646419d8e2fc2f8eb5b366a1fc2c55663e3a4574faef",
-    "spatialDominance.test.js": "8e31c23c330f01149e2abb291de0cfc8a03384ded75a3e497a4479c1b6252b5a",
+    "spatialDominance.test.js": "68d263933f901b28f88f46997fcc3a51b46094eae06bf3badd05a0cac94cea6b",
     "supportedSampleRatings.test.js": "8066a3c88d0093ef86d0e5c68948c3b09bca6d33f079f7551c05e7c3eb1ac4fd",
-    "multipleArchetypes.test.js": "372933bf6538fa7a3461d0ac27a8477b4683ef5d247e3878a229e09b20c51561",
+    "multipleArchetypes.test.js": "413f8680bf68306d8fa2587518404f23053b16047b40a428a0c1c4f954e90c89",
     "appearanceRecovery.test.js": "9d40cd38c117b4649ee1dba371a4736f51791514b123306f5d982d8d7cd1c6ab",
     "motion.test.js": "ce14e63a91ead86913cf87e27eb025d1fc0f47940ca4997f429d3488c3e7c975"
   },

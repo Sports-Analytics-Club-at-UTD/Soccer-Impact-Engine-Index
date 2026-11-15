@@ -437,9 +437,6 @@ main, footer { overflow-x: clip; }
 .badge .chev { margin-left: auto; color: var(--dim); transition: transform 0.35s ease, color 0.3s ease; }
 .badge[aria-expanded="true"] .chev { transform: rotate(180deg); color: var(--a1); }
 .badge[aria-expanded="true"] { box-shadow: inset 0 0 0 1px var(--a1), 0 0 38px -12px var(--glow); }
-.team-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.55s cubic-bezier(0.16, 1, 0.3, 1); }
-.team-panel.open { grid-template-rows: 1fr; }
-.team-panel > div { overflow: hidden; min-height: 0; }
 .team-inner { padding: 28px 0 0; }
 .team-inner .note { color: var(--mute); max-width: 640px; line-height: 1.6; }
 .slots { display: grid; gap: 14px; margin-top: 22px; grid-template-columns: 1fr; }
@@ -566,8 +563,8 @@ main, footer { overflow-x: clip; }
 /* SVG labels use viewBox units; the adjacent stat list scales with text. */
 .radar .lab, .radar .labv { font-size: 13px; }
 
-.archetype-panel { height: 0; overflow: hidden; scroll-margin-top: 5.5rem; }
-.archetype-clip { display: flow-root; }
+.expanding-panel { height: 0; overflow: hidden; scroll-margin-top: 5.5rem; }
+.expanding-panel-content { display: flow-root; }
 .archetype-dropdown-heading h4, .archetype-leaders { animation: archetypeContentIn .16s ease-out; }
 @keyframes archetypeContentIn { from { opacity: .4; } to { opacity: 1; } }
 

@@ -20,6 +20,8 @@ export default function SpatialDominancePitch({ team }) {
     return () => document.removeEventListener('pointerdown', dismiss);
   }, []);
 
+  useEffect(() => { setHovered(null); setFocused(null); setSelected(null); }, [team.id]);
+
   function onKeyDown(event) {
     if (event.key === 'Escape') {
       setHovered(null); setFocused(null); setSelected(null);
@@ -51,7 +53,7 @@ export default function SpatialDominancePitch({ team }) {
           onPointerEnter={(event) => { if (event.pointerType !== 'touch') setHovered(index); }}
           onFocus={() => setFocused(index)} onBlur={() => setFocused(null)}
           onClick={() => { setSelected(selected === index ? null : index); setFocused(null); setHovered(null); }}>
-          <span>{data.percentages[index]}%</span>
+          <span key={team.id}>{data.percentages[index]}%</span>
         </button>)}
       </div>
       <svg className="spatial-markings" viewBox="0 0 120 60" aria-hidden="true">

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ARCHETYPES, GROUPS, METRICS, TIER, archetypeLeaders } from "../lib/archetypes.js";
-import { createSpring } from "../lib/motion.js";
+import ExpandingPanel from "./ExpandingPanel.jsx";
 import { useTilt } from "../lib/hooks.js";
 import { IconArrow, IconClose, IconDown, Photo, SectionHead } from "./ui.jsx";
 import PlayerCard from "./PlayerCard.jsx";
@@ -22,37 +22,6 @@ function Arch({ a, position, onPick, expanded }) {
   );
 }
 
-
-function ArchetypePanel({ id, open, onSettled, children }) {
-  const panel = useRef(null), content = useRef(null), motion = useRef(null);
-  const target = useRef(-1), naturalHeight = useRef(1), notify = useRef(onSettled);
-  notify.current = onSettled;
-  useEffect(() => {
-    const spring = createSpring(0, (height) => {
-      panel.current.style.height = `${Math.max(0, height)}px`;
-      panel.current.style.opacity = String(Math.min(1, Math.max(0, height / naturalHeight.current)));
-    });
-    motion.current = spring;
-    return () => spring.stop();
-  }, []);
-  useEffect(() => {
-    const resize = () => {
-      naturalHeight.current = Math.max(1, content.current.getBoundingClientRect().height);
-      const next = open ? naturalHeight.current : 0;
-      if (target.current === next) return;
-      target.current = next;
-      motion.current.to(next, undefined, () => notify.current(open));
-    };
-    resize();
-    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(resize);
-    observer?.observe(content.current);
-    return () => observer?.disconnect();
-  }, [open, children]);
-  return <div ref={panel} id={id} className={`archetype-panel ${open ? 'open' : ''}`}
-    inert={open ? undefined : ''} aria-hidden={!open}>
-    <div ref={content} className="archetype-clip">{children}</div>
-  </div>;
-}
 
 export default function Archetypes({ players = [], loaded = false, error = "", onRetry }) {
   const [selected, setSelected] = useState(null), [closing, setClosing] = useState(null), [player, setPlayer] = useState(null);
@@ -105,7 +74,7 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
                     expanded={selected?.a.id === a.id} onPick={(e) => { archetypeTrigger.current = e.currentTarget; select(selected?.a.id === a.id ? null : { a, position: pos }); }} />)
                 )}
               </div>
-              <ArchetypePanel id={`leaders-${g.replaceAll(' ', '-').toLowerCase()}`} open={open}
+              <ExpandingPanel className="archetype-panel" id={`leaders-${g.replaceAll(' ', '-').toLowerCase()}`} open={open}
                 onSettled={(expanded) => {
                   if (expanded) scrollTo(leadersRegion.current);
                   else setClosing((previous) => previous?.a.group === g ? null : previous);
@@ -140,7 +109,7 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
                       })}</ol>
                     </>}
                 </div>}
-              </ArchetypePanel>
+              </ExpandingPanel>
             </div>
             );
           })}

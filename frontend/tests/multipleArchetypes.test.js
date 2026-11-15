@@ -61,7 +61,7 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
   const frames = new Map();
   globalThis.requestAnimationFrame = (callback) => { frames.set(++frameId, callback); return frameId; };
   globalThis.cancelAnimationFrame = (id) => frames.delete(id);
-  dom.window.HTMLElement.prototype.getBoundingClientRect = function () { return { height: this.className === 'archetype-clip' ? 600 : 0 }; };
+  dom.window.HTMLElement.prototype.getBoundingClientRect = function () { return { height: this.className === 'expanding-panel-content' ? 600 : 0 }; };
   const advance = (count = 180) => {
     for (let i = 0; i < count && frames.size; i++) {
       const pending = [...frames.values()]; frames.clear(); time += 16;
