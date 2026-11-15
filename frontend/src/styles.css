@@ -553,6 +553,11 @@ main, footer { overflow-x: clip; }
 .nav-links { flex-wrap: wrap; min-width: 0; justify-content: center; }
 .brand { flex-shrink: 0; }
 .nav-right { margin-left: auto; }
+@media (min-width: 960px) {
+  .nav-in { display: grid; grid-template-columns: minmax(8rem, 1fr) minmax(0, auto) minmax(8rem, 1fr); }
+  .nav-in > .brand { justify-self: start; }
+  .nav-right { justify-self: end; margin-left: 0; }
+}
 
 
 @media (max-width: 639px) {
