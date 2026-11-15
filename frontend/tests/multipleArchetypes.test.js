@@ -55,7 +55,19 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
   const { JSDOM } = await import('jsdom');
   const dom = new JSDOM('<div id="root"></div>');
   globalThis.window = dom.window; globalThis.document = dom.window.document;
-  globalThis.IS_REACT_ACT_ENVIRONMENT = true; globalThis.cancelAnimationFrame = () => {};
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  window.matchMedia = () => ({ matches: false });
+  let frameId = 0, time = 0;
+  const frames = new Map();
+  globalThis.requestAnimationFrame = (callback) => { frames.set(++frameId, callback); return frameId; };
+  globalThis.cancelAnimationFrame = (id) => frames.delete(id);
+  dom.window.HTMLElement.prototype.getBoundingClientRect = function () { return { height: this.className === 'archetype-clip' ? 600 : 0 }; };
+  const advance = (count = 180) => {
+    for (let i = 0; i < count && frames.size; i++) {
+      const pending = [...frames.values()]; frames.clear(); time += 16;
+      pending.forEach((callback) => callback(time));
+    }
+  };
   const { createRoot } = require('react-dom/client');
   const root = createRoot(document.getElementById('root')), Archetypes = component('Archetypes');
   const { act } = React;
@@ -68,7 +80,7 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
     act(() => trigger('Stopper').click());
     assert.equal(trigger('Stopper').getAttribute('aria-expanded'), 'true');
     assert.equal(scrolls.length, 0);
-    act(() => require('react-dom/test-utils').Simulate.transitionEnd(document.querySelector('.archetype-panel.open'), { propertyName: 'grid-template-rows' }));
+    act(() => advance());
     assert.equal(scrolls.at(-1).behavior, 'smooth');
     assert.equal(document.querySelector('dialog[open]'), null);
     assert.equal(document.querySelectorAll('.archetype-panel.open .archetype-leaders li').length, 5);
@@ -78,12 +90,13 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
     assert.equal(trigger('Stopper').getAttribute('aria-expanded'), 'false');
     assert.equal(document.querySelectorAll('[role=region]').length, 1);
     assert.match(document.querySelector('[role=region]').textContent, /Libero/);
+    act(() => advance(4));
     act(() => trigger('Libero').click());
     assert.equal(document.querySelector('[role=region]'), null);
     const collapsing = document.querySelector('.archetype-panel[aria-hidden="true"]:has(.archetype-dropdown)');
     assert.ok(collapsing.hasAttribute('inert'));
     assert.ok(collapsing.querySelector('.archetype-dropdown'));
-    act(() => require('react-dom/test-utils').Simulate.transitionEnd(collapsing, { propertyName: 'grid-template-rows' }));
+    act(() => advance());
     assert.equal(collapsing.querySelector('.archetype-dropdown'), null);
     act(() => trigger('Stopper').click());
     const close = document.querySelector('[aria-label="Close archetype list"]');
@@ -94,6 +107,19 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
     assert.equal(trigger('Stopper').getAttribute('aria-expanded'), 'false');
     assert.equal(document.activeElement, trigger('Stopper'));
     act(() => trigger('Stopper').click());
+    act(() => advance(4));
+    const panel = document.querySelector('.archetype-panel.open');
+    const openingHeight = panel.style.height;
+    act(() => trigger('Stopper').click());
+    assert.equal(panel.style.height, openingHeight, 'closing starts at the current on-screen height');
+    act(() => advance(2));
+    const reversingHeight = panel.style.height;
+    act(() => trigger('Stopper').click());
+    assert.equal(panel.style.height, reversingHeight, 'reopening never snaps to an endpoint');
+    act(() => advance());
+    assert.equal(panel.style.height, '600px');
+    assert.equal(trigger('Stopper').getAttribute('aria-expanded'), 'true');
+    assert.match(document.querySelector('[role=region]').textContent, /Stopper/);
     render({ loaded: false });
     assert.match(document.querySelector('[role=status]').textContent, /Loading/);
     let retries = 0;
@@ -105,7 +131,7 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
     assert.match(document.querySelector('[role=status]').textContent, /No ranked players/);
   } finally {
     act(() => root.unmount()); dom.window.close();
-    delete globalThis.window; delete globalThis.document; delete globalThis.IS_REACT_ACT_ENVIRONMENT; delete globalThis.cancelAnimationFrame;
+    delete globalThis.window; delete globalThis.document; delete globalThis.IS_REACT_ACT_ENVIRONMENT; delete globalThis.cancelAnimationFrame; delete globalThis.requestAnimationFrame;
   }
 });
 

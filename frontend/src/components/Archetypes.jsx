@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ARCHETYPES, GROUPS, METRICS, TIER, archetypeLeaders } from "../lib/archetypes.js";
+import { createSpring } from "../lib/motion.js";
 import { useTilt } from "../lib/hooks.js";
 import { IconClose, IconDown, SectionHead } from "./ui.jsx";
 import PlayerCard from "./PlayerCard.jsx";
@@ -19,6 +20,38 @@ function Arch({ a, position, onPick, expanded }) {
       <span className="arch-expand mono t10">Top 5 <IconDown /></span>
     </button>
   );
+}
+
+
+function ArchetypePanel({ id, open, onSettled, children }) {
+  const panel = useRef(null), content = useRef(null), motion = useRef(null);
+  const target = useRef(-1), naturalHeight = useRef(1), notify = useRef(onSettled);
+  notify.current = onSettled;
+  useEffect(() => {
+    const spring = createSpring(0, (height) => {
+      panel.current.style.height = `${Math.max(0, height)}px`;
+      panel.current.style.opacity = String(Math.min(1, Math.max(0, height / naturalHeight.current)));
+    });
+    motion.current = spring;
+    return () => spring.stop();
+  }, []);
+  useEffect(() => {
+    const resize = () => {
+      naturalHeight.current = Math.max(1, content.current.getBoundingClientRect().height);
+      const next = open ? naturalHeight.current : 0;
+      if (target.current === next) return;
+      target.current = next;
+      motion.current.to(next, undefined, () => notify.current(open));
+    };
+    resize();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(resize);
+    observer?.observe(content.current);
+    return () => observer?.disconnect();
+  }, [open, children]);
+  return <div ref={panel} id={id} className={`archetype-panel ${open ? 'open' : ''}`}
+    inert={open ? undefined : ''} aria-hidden={!open}>
+    <div ref={content} className="archetype-clip">{children}</div>
+  </div>;
 }
 
 export default function Archetypes({ players = [], loaded = false, error = "", onRetry }) {
@@ -72,17 +105,14 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
                     expanded={selected?.a.id === a.id} onPick={(e) => { archetypeTrigger.current = e.currentTarget; select(selected?.a.id === a.id ? null : { a, position: pos }); }} />)
                 )}
               </div>
-              <div id={`leaders-${g.replaceAll(' ', '-').toLowerCase()}`} className={`archetype-panel ${open ? 'open' : ''}`}
-                inert={open ? undefined : ''} aria-hidden={!open}
-                onTransitionEnd={(e) => {
-                  if (e.target !== e.currentTarget || e.propertyName !== 'grid-template-rows') return;
-                  if (open) scrollTo(leadersRegion.current);
+              <ArchetypePanel id={`leaders-${g.replaceAll(' ', '-').toLowerCase()}`} open={open}
+                onSettled={(expanded) => {
+                  if (expanded) scrollTo(leadersRegion.current);
                   else setClosing((previous) => previous?.a.group === g ? null : previous);
                 }}>
-                <div className="archetype-clip">
                 {current && <div ref={open ? leadersRegion : undefined} className="archetype-dropdown" role={open ? 'region' : undefined} aria-labelledby={`archetype-leaders-${g.replaceAll(' ', '-').toLowerCase()}`}>
                   <div className="archetype-dropdown-heading">
-                    <h4 id={`archetype-leaders-${g.replaceAll(' ', '-').toLowerCase()}`} className="display">{current.a.name} · {current.position === 'DM' ? 'MID' : 'CB'} · Top 5</h4>
+                    <h4 key={current.a.id} id={`archetype-leaders-${g.replaceAll(' ', '-').toLowerCase()}`} className="display">{current.a.name} · {current.position === 'DM' ? 'MID' : 'CB'} · Top 5</h4>
                     <button type="button" className="archetype-collapse" aria-label="Close archetype list"
                             onClick={() => { select(null); archetypeTrigger.current?.focus({ preventScroll: true }); scrollTo(archetypeTrigger.current); }}><IconClose size={18} /></button>
                   </div>
@@ -91,7 +121,7 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
                     : !loaded ? <p role="status">Loading player ratings…</p>
                     : !leaders.length ? <p role="status">No ranked players have earned this archetype.</p>
                     : <>
-                      <ol className="archetype-leaders">{leaders.map((p, i) => {
+                      <ol key={current.a.id} className="archetype-leaders">{leaders.map((p, i) => {
                         const badge = p.archetypes.find((a) => a.metric === current.a.metric);
                         return <li key={p.id}><button type="button" className="browse-row" onClick={() => setPlayer(p)} aria-haspopup="dialog">
                           <span className="n mono t11">{i + 1}</span>
@@ -101,8 +131,7 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
                       })}</ol>
                     </>}
                 </div>}
-                </div>
-              </div>
+              </ArchetypePanel>
             </div>
             );
           })}

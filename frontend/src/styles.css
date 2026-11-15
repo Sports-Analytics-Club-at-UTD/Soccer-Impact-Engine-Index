@@ -568,9 +568,7 @@ main, footer { overflow-x: clip; }
 /* SVG labels use viewBox units; the adjacent stat list scales with text. */
 .radar .lab, .radar .labv { font-size: 13px; }
 
-.archetype-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s cubic-bezier(.2, 0, .2, 1); scroll-margin-top: 5.5rem; }
-.archetype-panel.open { grid-template-rows: 1fr; }
-.archetype-clip { min-height: 0; overflow: hidden; }
-.archetype-panel .archetype-dropdown { opacity: 0; transform: translateY(-6px); transition: opacity .2s ease, transform .3s ease; }
-.archetype-panel.open .archetype-dropdown { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) { .archetype-panel .archetype-dropdown { transform: none; } }
+.archetype-panel { height: 0; overflow: hidden; scroll-margin-top: 5.5rem; }
+.archetype-clip { display: flow-root; }
+.archetype-dropdown-heading h4, .archetype-leaders { animation: archetypeContentIn .16s ease-out; }
+@keyframes archetypeContentIn { from { opacity: .4; } to { opacity: 1; } }
