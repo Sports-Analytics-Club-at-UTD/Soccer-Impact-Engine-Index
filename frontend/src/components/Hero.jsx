@@ -18,7 +18,7 @@ const TICKER = [
   SITE.org,
 ];
 
-function PitchBackdrop() {
+function PitchLoop() {
   return (
     <svg className="pitch-svg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <rect className="ln" x="60" y="60" width="1080" height="580" />
@@ -29,6 +29,7 @@ function PitchBackdrop() {
       <rect className="ln" x="60" y="268" width="62" height="164" />
       <rect className="ln" x="1078" y="268" width="62" height="164" />
       <circle className="press" cx="520" cy="250" r="90" />
+      <circle className="press b" cx="520" cy="250" r="90" />
       <circle className="ball" cx="0" cy="0" r="7" />
     </svg>
   );
@@ -45,16 +46,16 @@ export default function Hero() {
     <section id="home" className="hero">
       {/* ── BACKGROUND: your football clips ───────────────────────────────
           Set HERO.videoSrc in content.js (file in /public, e.g. "/clips/hero.mp4").
-          Until then the static pitch below shows.                       */}
+          Until then the animated pitch below shows.                       */}
       <div className="hero-bg">
         {HERO.videoSrc ? (
-          <video muted playsInline controls poster={HERO.poster || undefined}>
+          <video autoPlay muted loop playsInline poster={HERO.poster || undefined}>
             <source src={HERO.videoSrc} type="video/mp4" />
           </video>
         ) : (
           <>
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(150deg,var(--bg-2),var(--bg))" }} />
-            <PitchBackdrop />
+            <PitchLoop />
           </>
         )}
       </div>
@@ -99,9 +100,9 @@ export default function Hero() {
           </div>
           <div className="ticker-view">
             <div className="ticker-track">
-              {TICKER.map((t, i) => (
+              {[...TICKER, ...TICKER].map((t, i) => (
                 <span key={i} className="mono t10 up dim">
-                  {t}<span className="c2" style={{ marginLeft: 16 }}>/</span>
+                  {t}<span className="c2" style={{ marginLeft: 56 }}>/</span>
                 </span>
               ))}
             </div>
