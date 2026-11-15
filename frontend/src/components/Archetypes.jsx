@@ -22,12 +22,17 @@ function Arch({ a, position, onPick, expanded }) {
 }
 
 export default function Archetypes({ players = [], loaded = false, error = "", onRetry }) {
-  const [selected, setSelected] = useState(null), [player, setPlayer] = useState(null);
+  const [selected, setSelected] = useState(null), [closing, setClosing] = useState(null), [player, setPlayer] = useState(null);
   const dialog = useRef(null);
   const archetypeTrigger = useRef(null);
   const leadersRegion = useRef(null);
+  const previousGroup = useRef(null);
+  const scrollTo = (element) => element?.scrollIntoView?.({ block: 'nearest',
+    behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+  const select = (next) => { setClosing(selected); setSelected(next); };
   useEffect(() => {
-    leadersRegion.current?.scrollIntoView?.({ block: 'nearest', behavior: 'instant' });
+    if (selected && (previousGroup.current === selected.a.group || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)) scrollTo(leadersRegion.current);
+    previousGroup.current = selected?.a.group;
   }, [selected]);
   useEffect(() => {
     if (!player) return;
@@ -37,7 +42,6 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = previous; };
   }, [player]);
-  const leaders = selected ? archetypeLeaders(players, selected.position, selected.a) : [];
   return (
     <section id="archetypes" className="section">
       <div className="wrap">
@@ -55,29 +59,40 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
 
         <p className="directory-note">Select an archetype to explore its top 5 ranked players.</p>
         <div className="arch-groups">
-          {GROUPS.map((g) => (
+          {GROUPS.map((g) => {
+            const open = selected?.a.group === g;
+            const current = open ? selected : closing?.a.group === g ? closing : null;
+            const leaders = current ? archetypeLeaders(players, current.position, current.a) : [];
+            return (
             <div key={g} className="arch-group reveal">
               <h3>{g === 'Line-breaking passes' ? 'Progressive passing' : g}</h3>
               <div className="arch-grid">
                 {["CB", "DM"].flatMap((pos) =>
                   ARCHETYPES[pos].filter((a) => a.group === g).map((a) => <Arch key={a.id} a={a} position={pos}
-                    expanded={selected?.a.id === a.id} onPick={(e) => { archetypeTrigger.current = e.currentTarget; setSelected(selected?.a.id === a.id ? null : { a, position: pos }); }} />)
+                    expanded={selected?.a.id === a.id} onPick={(e) => { archetypeTrigger.current = e.currentTarget; select(selected?.a.id === a.id ? null : { a, position: pos }); }} />)
                 )}
               </div>
-              <div id={`leaders-${g.replaceAll(' ', '-').toLowerCase()}`} hidden={selected?.a.group !== g}>
-                {selected?.a.group === g && <div ref={leadersRegion} className="archetype-dropdown" role="region" aria-labelledby="archetype-leaders-title">
+              <div id={`leaders-${g.replaceAll(' ', '-').toLowerCase()}`} className={`archetype-panel ${open ? 'open' : ''}`}
+                inert={open ? undefined : ''} aria-hidden={!open}
+                onTransitionEnd={(e) => {
+                  if (e.target !== e.currentTarget || e.propertyName !== 'grid-template-rows') return;
+                  if (open) scrollTo(leadersRegion.current);
+                  else setClosing((previous) => previous?.a.group === g ? null : previous);
+                }}>
+                <div className="archetype-clip">
+                {current && <div ref={open ? leadersRegion : undefined} className="archetype-dropdown" role={open ? 'region' : undefined} aria-labelledby={`archetype-leaders-${g.replaceAll(' ', '-').toLowerCase()}`}>
                   <div className="archetype-dropdown-heading">
-                    <h4 id="archetype-leaders-title" className="display">{selected.a.name} · {selected.position === 'DM' ? 'MID' : 'CB'} · Top 5</h4>
+                    <h4 id={`archetype-leaders-${g.replaceAll(' ', '-').toLowerCase()}`} className="display">{current.a.name} · {current.position === 'DM' ? 'MID' : 'CB'} · Top 5</h4>
                     <button type="button" className="archetype-collapse" aria-label="Close archetype list"
-                            onClick={() => { setSelected(null); archetypeTrigger.current?.focus(); }}><IconClose size={18} /></button>
+                            onClick={() => { select(null); archetypeTrigger.current?.focus({ preventScroll: true }); scrollTo(archetypeTrigger.current); }}><IconClose size={18} /></button>
                   </div>
-                  <p className="directory-note">Ordered by {METRIC_LABEL[selected.a.metric].toLowerCase()} within this position. Select a player to open their card.</p>
+                  <p className="directory-note">Ordered by {METRIC_LABEL[current.a.metric].toLowerCase()} within this position. Select a player to open their card.</p>
                   {error ? <div role="alert"><p>We couldn’t load the player ratings.</p><button type="button" className="btn btn-ghost" onClick={onRetry}>Try again</button></div>
                     : !loaded ? <p role="status">Loading player ratings…</p>
                     : !leaders.length ? <p role="status">No ranked players have earned this archetype.</p>
                     : <>
                       <ol className="archetype-leaders">{leaders.map((p, i) => {
-                        const badge = p.archetypes.find((a) => a.metric === selected.a.metric);
+                        const badge = p.archetypes.find((a) => a.metric === current.a.metric);
                         return <li key={p.id}><button type="button" className="browse-row" onClick={() => setPlayer(p)} aria-haspopup="dialog">
                           <span className="n mono t11">{i + 1}</span>
                           <span className="nm">{p.name}<span className="directory-status mono">{badge.tier === '+' ? 'Gold' : 'Silver'}</span></span>
@@ -86,9 +101,11 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
                       })}</ol>
                     </>}
                 </div>}
+                </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <dialog ref={dialog} className="archetype-dialog" aria-label={player ? `${player.name} player profile` : 'Player profile'}

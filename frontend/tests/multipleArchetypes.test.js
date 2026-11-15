@@ -61,12 +61,17 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
   const { act } = React;
   const render = (props) => act(() => root.render(React.createElement(Archetypes, props)));
   const trigger = (name) => document.querySelector(`[aria-label="View ${name} top 5 · CB"]`);
+  const scrolls = [];
+  dom.window.HTMLElement.prototype.scrollIntoView = function (options) { scrolls.push(options); };
   try {
     render({ players, loaded: true });
     act(() => trigger('Stopper').click());
     assert.equal(trigger('Stopper').getAttribute('aria-expanded'), 'true');
+    assert.equal(scrolls.length, 0);
+    act(() => require('react-dom/test-utils').Simulate.transitionEnd(document.querySelector('.archetype-panel.open'), { propertyName: 'grid-template-rows' }));
+    assert.equal(scrolls.at(-1).behavior, 'smooth');
     assert.equal(document.querySelector('dialog[open]'), null);
-    assert.equal(document.querySelectorAll('.archetype-leaders li').length, 5);
+    assert.equal(document.querySelectorAll('.archetype-panel.open .archetype-leaders li').length, 5);
     assert.doesNotMatch(document.querySelector('[role=region]').textContent, /percentile/i);
     assert.equal(document.querySelector('.archetype-leaders .ov'), null);
     act(() => trigger('Libero').click());
@@ -75,6 +80,11 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
     assert.match(document.querySelector('[role=region]').textContent, /Libero/);
     act(() => trigger('Libero').click());
     assert.equal(document.querySelector('[role=region]'), null);
+    const collapsing = document.querySelector('.archetype-panel[aria-hidden="true"]:has(.archetype-dropdown)');
+    assert.ok(collapsing.hasAttribute('inert'));
+    assert.ok(collapsing.querySelector('.archetype-dropdown'));
+    act(() => require('react-dom/test-utils').Simulate.transitionEnd(collapsing, { propertyName: 'grid-template-rows' }));
+    assert.equal(collapsing.querySelector('.archetype-dropdown'), null);
     act(() => trigger('Stopper').click());
     const close = document.querySelector('[aria-label="Close archetype list"]');
     assert.equal(close.tagName, 'BUTTON');

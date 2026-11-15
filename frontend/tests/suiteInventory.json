@@ -47,7 +47,7 @@
     "positionToggle.test.js": "be9921a7f178393ce0bb646419d8e2fc2f8eb5b366a1fc2c55663e3a4574faef",
     "spatialDominance.test.js": "8e31c23c330f01149e2abb291de0cfc8a03384ded75a3e497a4479c1b6252b5a",
     "supportedSampleRatings.test.js": "8066a3c88d0093ef86d0e5c68948c3b09bca6d33f079f7551c05e7c3eb1ac4fd",
-    "multipleArchetypes.test.js": "ea2084c32c76a6f36ce23b59eabb6319bfe6b309f93e662eba0f88b1b1cbf06a",
+    "multipleArchetypes.test.js": "abd0f119e26891e0cc3e9aae2553c5345f9c773f7b03feff34d0734b4b4b7e2c",
     "appearanceRecovery.test.js": "9d40cd38c117b4649ee1dba371a4736f51791514b123306f5d982d8d7cd1c6ab",
     "motion.test.js": "ce14e63a91ead86913cf87e27eb025d1fc0f47940ca4997f429d3488c3e7c975"
   },
