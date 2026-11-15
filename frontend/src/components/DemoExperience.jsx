@@ -7,7 +7,7 @@ import Hero from "./Hero.jsx";
 import Nav from "./Nav.jsx";
 import Search from "./Search.jsx";
 import Teams from "./Teams.jsx";
-import { useRevealAll } from "../lib/hooks.js";
+import { useRevealAll, useSectionScrolling } from "../lib/hooks.js";
 import { loadPublicRatings } from "../lib/publicRatingsDelivery.js";
 import { foundationPlayers } from "../lib/foundationPlayers.js";
 
@@ -23,9 +23,11 @@ export default function DemoExperience({ theme, onToggle }) {
     return () => controller.abort();
   }, [retry]);
   useRevealAll();
+  useSectionScrolling();
   return <>
+    <a href="#main-content" className="skip-link">Skip to main content</a>
     <Nav theme={theme} onToggle={onToggle} />
-    <main>
+    <main id="main-content" tabIndex={-1}>
       <Hero /><Description /><Archetypes players={players} loaded={loaded} error={error} onRetry={() => setRetry((n) => n + 1)} /><Search players={players} loaded={loaded} error={error} onRetry={() => setRetry((n) => n + 1)} /><Teams /><About />
     </main>
     <Footer />

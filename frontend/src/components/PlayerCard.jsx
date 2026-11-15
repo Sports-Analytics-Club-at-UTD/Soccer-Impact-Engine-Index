@@ -13,11 +13,12 @@ export default function PlayerCard({ player, onClose, demo = false }) {
     : <StandardPlayerCard player={player} onClose={onClose} demo={demo} />;
 }
 
+function AnimatedOverall({ value }) { return useCountUp(value); }
+
 function StandardPlayerCard({ player, onClose, demo = false }) {
   const tilt = useTilt({ max: 0, scale: 1 });
   const card = player.publicRating ? publicRatingCard(player) : ratingCard(player, { demo });
-  const animatedOvr = useCountUp(card.ovr ?? 0);
-  const ovr = player.publicRating ? displayOverall(card.ovr) : card.ovr === null ? "N/A" : animatedOvr;
+  const ovr = player.publicRating ? displayOverall(card.ovr) : card.ovr === null ? "N/A" : <AnimatedOverall value={card.ovr} />;
   const archetypes = card.archetypes?.length ? card.archetypes : [card.archetype];
   const low = demo && player.minutes < 1000;
   const extraExplanations = player.ratingDetails?.explanations.filter((reason) => !player.ratingNotice?.includes(reason)) ?? [];

@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { ARCHETYPES, GROUPS, METRICS, TIER, archetypeLeaders } from "../lib/archetypes.js";
 import ExpandingPanel from "./ExpandingPanel.jsx";
-import { useTilt } from "../lib/hooks.js";
+import { scrollToElement, cancelAutoScroll } from "../lib/scrolling.js";
+import { useMediaQuery, useTilt } from "../lib/hooks.js";
 import { IconArrow, IconClose, IconDown, Photo, SectionHead } from "./ui.jsx";
 import PlayerCard from "./PlayerCard.jsx";
+import PlayerSheet from "./PlayerSheet.jsx";
 
 const METRIC_LABEL = { ...Object.fromEntries(METRICS.map((m) => [m.key, m.label])), REC: "Ball recoveries", LB: "Progressive passing" };
 
@@ -28,22 +30,21 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
   const dialog = useRef(null);
   const archetypeTrigger = useRef(null);
   const leadersRegion = useRef(null);
-  const previousGroup = useRef(null);
-  const scrollTo = (element) => element?.scrollIntoView?.({ block: 'nearest',
-    behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+  const playerTrigger = useRef(null);
+  const isMobile = useMediaQuery('(max-width: 959px)');
   const select = (next) => { setClosing(selected); setSelected(next); };
   useEffect(() => {
-    if (selected && (previousGroup.current === selected.a.group || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)) scrollTo(leadersRegion.current);
-    previousGroup.current = selected?.a.group;
+    if (selected) scrollToElement(leadersRegion.current);
   }, [selected]);
+  useEffect(() => cancelAutoScroll, []);
   useEffect(() => {
-    if (!player) return;
+    if (!player || isMobile) return;
     dialog.current.showModal();
     dialog.current.querySelector('.pcard .close')?.focus();
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = previous; };
-  }, [player]);
+  }, [player, isMobile]);
   return (
     <section id="archetypes" className="section">
       <div className="wrap">
@@ -76,8 +77,7 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
               </div>
               <ExpandingPanel className="archetype-panel" id={`leaders-${g.replaceAll(' ', '-').toLowerCase()}`} open={open}
                 onSettled={(expanded) => {
-                  if (expanded) scrollTo(leadersRegion.current);
-                  else setClosing((previous) => previous?.a.group === g ? null : previous);
+                  if (!expanded) setClosing((previous) => previous?.a.group === g ? null : previous);
                 }}>
                 {current && <div ref={open ? leadersRegion : undefined} className="archetype-dropdown" role={open ? 'region' : undefined} aria-labelledby={`archetype-leaders-${g.replaceAll(' ', '-').toLowerCase()}`}>
                   <div className="archetype-dropdown-heading">
@@ -86,7 +86,7 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
                       <h4 key={current.a.id} id={`archetype-leaders-${g.replaceAll(' ', '-').toLowerCase()}`} className="display">{current.a.name}</h4>
                     </div>
                     <button type="button" className="archetype-collapse" aria-label="Close archetype list"
-                            onClick={() => { select(null); archetypeTrigger.current?.focus({ preventScroll: true }); scrollTo(archetypeTrigger.current); }}><IconClose size={18} /></button>
+                            onClick={() => { select(null); archetypeTrigger.current?.focus({ preventScroll: true }); scrollToElement(archetypeTrigger.current); }}><IconClose size={18} /></button>
                   </div>
                   <p className="directory-note">Ordered by {METRIC_LABEL[current.a.metric].toLowerCase()} within this position. Select a player to open their card.</p>
                   {error ? <div role="alert"><p>We couldn’t load the player ratings.</p><button type="button" className="btn btn-ghost" onClick={onRetry}>Try again</button></div>
@@ -96,7 +96,7 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
                       <ol key={current.a.id} className="archetype-leaders">{leaders.map((p, i) => {
                         const badge = p.archetypes.find((a) => a.metric === current.a.metric);
                         return <li key={p.id}><button type="button" className={`browse-row leader-card angular-sm ${i === 0 ? 'leader-card-first' : ''}`} data-rank={i + 1}
-                          onClick={() => setPlayer(p)} aria-haspopup="dialog">
+                          onClick={(e) => { playerTrigger.current = e.currentTarget; setPlayer(p); }} aria-haspopup="dialog">
                           <span className="leader-rank mono" aria-label={`Rank ${i + 1}`}>{String(i + 1).padStart(2, '0')}</span>
                           <Photo src={p.photo} label="" className="leader-portrait" />
                           <span className="leader-info">
@@ -115,10 +115,10 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
           })}
         </div>
 
-        <dialog ref={dialog} className="archetype-dialog" aria-label={player ? `${player.name} player profile` : 'Player profile'}
+        {isMobile ? <PlayerSheet player={player} trigger={playerTrigger.current} onClose={() => setPlayer(null)} /> : <dialog ref={dialog} className="archetype-dialog" aria-label={player ? `${player.name} player profile` : 'Player profile'}
                 onClose={() => setPlayer(null)}>
           {player && <PlayerCard player={player} onClose={() => dialog.current.close()} />}
-        </dialog>
+        </dialog>}
 
         <div className="teams-only panel angular-sm reveal">
           <div className="mono t11 up c2" style={{ paddingTop: 3 }}>Teams only</div>

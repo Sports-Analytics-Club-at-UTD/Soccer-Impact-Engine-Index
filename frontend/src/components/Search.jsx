@@ -36,6 +36,28 @@ function TopCard({ p, rank, onPick, on }) {
   );
 }
 
+function LoadingPlayers() {
+  return <div className="search-loading">
+    <p role="status" className="sr-only">Loading player ratings…</p>
+    <div aria-hidden="true">
+      <div className="search-controls loading-controls">
+        <div className="skeleton-line" /><div className="loading-input" /><div className="loading-position" />
+      </div>
+      <div className="sub-label mono t10 up">Top 3</div>
+      <div className="top3">{[0, 1, 2].map((slot) => <div key={slot} className="loading-player-card card-surface angular-sm">
+        <div className="loading-portrait" /><div className="skeleton-line" /><div className="skeleton-line short" />
+      </div>)}</div>
+      <div className="search-grid">
+        <div className="loading-directory"><div className="loading-directory-heading skeleton-line" />
+          {[0, 1, 2, 3, 4, 5].map((row) => <div key={row} className="loading-directory-row"><div className="skeleton-line" /></div>)}
+          <div className="loading-directory-footer" />
+        </div>
+        <div className="card-col"><div className="loading-profile card-surface angular" /></div>
+      </div>
+    </div>
+  </div>;
+}
+
 export default function Search({ players = [], loaded = false, error = "", onRetry }) {
   const [pos, setPos] = useState("CB");
   const [q, setQ] = useState("");
@@ -122,7 +144,7 @@ export default function Search({ players = [], loaded = false, error = "", onRet
         />
 
         {error && <div role="alert"><p>We couldn’t load the player ratings.</p><button type="button" className="btn btn-ghost" style={{ marginTop: 12 }} onClick={onRetry}>Try again</button></div>}
-        {!loaded && !error && <p role="status">Loading player ratings…</p>}
+        {!loaded && !error && <LoadingPlayers />}
         {loaded && !error && <>
         <div className="search-controls">
           <div className="sub-label mono t10 up" style={{ marginTop: 0, marginBottom: 14 }}>Find a player</div>

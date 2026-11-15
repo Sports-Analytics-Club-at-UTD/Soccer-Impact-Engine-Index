@@ -94,7 +94,7 @@ main, footer { overflow-x: clip; }
 /* ── layout ───────────────────────────────────────────────────────────── */
 .wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 @media (min-width: 640px) { .wrap { padding: 0 32px; } }
-.section { position: relative; border-top: 1px solid var(--line); padding: 96px 0; scroll-margin-top: 5.5rem; }
+.section { position: relative; border-top: 1px solid var(--line); padding: 96px 0; scroll-margin-top: calc(var(--nav-height, 72px) + 16px); }
 @media (min-width: 640px) { .section { padding: 128px 0; } }
 .section-head { max-width: 760px; }
 .section-head h2 { margin-top: 20px; font-size: clamp(2rem, 5.4vw, 3.9rem); }
@@ -132,7 +132,7 @@ main, footer { overflow-x: clip; }
 .tilt:hover.sheen::after, .tilt:hover .sheen::after { opacity: 1; }
 
 /* reveal */
-.reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal { opacity: 0; transform: translateY(12px); transition: opacity .3s ease-out, transform .35s ease-out; }
 .reveal.in { opacity: 1; transform: none; }
 
 /* buttons */
@@ -563,7 +563,7 @@ main, footer { overflow-x: clip; }
 /* SVG labels use viewBox units; the adjacent stat list scales with text. */
 .radar .lab, .radar .labv { font-size: 13px; }
 
-.expanding-panel { height: 0; overflow: hidden; scroll-margin-top: 5.5rem; }
+.expanding-panel { height: 0; overflow: hidden; scroll-margin-top: calc(var(--nav-height, 72px) + 16px); }
 .expanding-panel-content { display: flow-root; }
 .archetype-dropdown-heading h4, .archetype-leaders { animation: archetypeContentIn .16s ease-out; }
 @keyframes archetypeContentIn { from { opacity: .4; } to { opacity: 1; } }
@@ -612,3 +612,25 @@ main, footer { overflow-x: clip; }
 }
 
 :root[data-theme="light"] .leader-tier.gold { color: #76520b; }
+
+.skip-link { position: fixed; top: 1rem; left: 1rem; z-index: 200; padding: .75rem 1rem; color: var(--on-a1); background: var(--a1); transform: translateY(-200%); }
+.skip-link:focus { transform: none; }
+#main-content:focus { outline: none; }
+.expanding-panel { overflow: clip; }
+.skeleton-line, .loading-input, .loading-position, .loading-portrait { background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+.skeleton-line { width: 70%; height: 1rem; }
+.skeleton-line.short { width: 45%; }
+.loading-controls { height: 181px; }
+.loading-controls > .skeleton-line { width: 8rem; margin-bottom: 14px; }
+.loading-input { height: 60px; }
+.loading-position { width: 104px; height: 44px; margin-top: 44px; }
+.loading-player-card { min-height: 260px; padding: 20px; }
+.loading-portrait { width: 80px; height: 96px; margin-bottom: 24px; }
+.loading-player-card .skeleton-line + .skeleton-line { margin-top: 20px; }
+.loading-directory { margin-top: 28px; }
+.loading-directory-heading { height: 45px; margin-bottom: 12px; }
+.loading-directory-row { display: flex; align-items: center; min-height: 88px; border-bottom: 1px solid var(--line); }
+.loading-directory-footer { min-height: 188px; }
+.loading-profile { min-height: 320px; }
+
+@media (min-width: 960px) { .loading-directory-footer { min-height: 117px; } }

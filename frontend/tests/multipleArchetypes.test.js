@@ -56,12 +56,18 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
   const dom = new JSDOM('<div id="root"></div>');
   globalThis.window = dom.window; globalThis.document = dom.window.document;
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-  window.matchMedia = () => ({ matches: false });
+  window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
   let frameId = 0, time = 0;
   const frames = new Map();
   globalThis.requestAnimationFrame = (callback) => { frames.set(++frameId, callback); return frameId; };
   globalThis.cancelAnimationFrame = (id) => frames.delete(id);
-  dom.window.HTMLElement.prototype.getBoundingClientRect = function () { return { height: this.className === 'expanding-panel-content' ? 600 : 0 }; };
+  Object.defineProperty(document.documentElement, 'scrollHeight', { value: 4000 });
+  window.scrollTo = (options) => { window.scrollY = options.top; scrolls.push(options); };
+  dom.window.HTMLElement.prototype.getBoundingClientRect = function () {
+    const height = this.className === 'expanding-panel-content' || this.classList.contains('archetype-dropdown') ? 600 : 0;
+    const top = (this.classList.contains('archetype-dropdown') ? 1200 : 400) - window.scrollY;
+    return { height, top, bottom: top + height };
+  };
   const advance = (count = 180) => {
     for (let i = 0; i < count && frames.size; i++) {
       const pending = [...frames.values()]; frames.clear(); time += 16;
@@ -81,7 +87,8 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
     assert.equal(trigger('Stopper').getAttribute('aria-expanded'), 'true');
     assert.equal(scrolls.length, 0);
     act(() => advance());
-    assert.equal(scrolls.at(-1).behavior, 'smooth');
+    assert.equal(scrolls.at(-1).behavior, 'instant');
+    assert.ok(window.scrollY > 0, 'the viewport follows the expanding panel through animation frames');
     assert.equal(document.querySelector('dialog[open]'), null);
     assert.equal(document.querySelectorAll('.archetype-panel.open .archetype-leaders li').length, 5);
     const expectedLeaders = archetypeLeaders(players, 'CB', ARCHETYPES.CB[0]);
