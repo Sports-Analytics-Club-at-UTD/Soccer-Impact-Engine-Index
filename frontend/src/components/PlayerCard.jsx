@@ -23,7 +23,7 @@ function StandardPlayerCard({ player, onClose, demo = false }) {
   const extraExplanations = player.ratingDetails?.explanations.filter((reason) => !player.ratingNotice?.includes(reason)) ?? [];
 
   return (
-    <article {...tilt} className="tilt sheen card-surface on angular pcard" key={player.id} tabIndex={0} aria-label={`${player.name} player card`}>
+    <article {...tilt} className="tilt sheen card-surface on angular pcard" tabIndex={0} aria-label={`${player.name} player card`}>
       {player.publicRating && player.crests?.length
         ? <span className="ghost-crests" aria-hidden="true">{player.crests.map((src) => <img key={src} src={src} alt="" />)}</span>
         : <span className="ghost-ovr display" aria-hidden="true">{player.publicRating ? displayOverall(card.ovr) : card.ovr ?? ""}</span>}

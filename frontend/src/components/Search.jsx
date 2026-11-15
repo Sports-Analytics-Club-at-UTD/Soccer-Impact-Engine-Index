@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
+import PlayerSheet from "./PlayerSheet.jsx";
 import { displayOverall } from "../lib/foundationPlayers.js";
 import { useMediaQuery, useTilt } from "../lib/hooks.js";
 import { search } from "../lib/search.js";
@@ -43,8 +45,19 @@ export default function Search({ players = [], loaded = false, error = "", onRet
   const [page, setPage] = useState(1);
   const isMobile = useMediaQuery("(max-width: 959px)");
   const inputRef = useRef(null);
-  const dialog = useRef(null);
+  const selectionTransition = useRef(null);
+  const selectionVersion = useRef(0);
   const playerTrigger = useRef(null);
+  const closePlayer = () => {
+    ++selectionVersion.current;
+    selectionTransition.current?.skipTransition();
+    setSelected(null);
+  };
+  useEffect(() => () => {
+    ++selectionVersion.current;
+    selectionTransition.current?.skipTransition();
+  }, []);
+
 
   const ranked = useMemo(
     () => players.filter((p) => p.position === pos).sort((a, b) => Number(b.ranked === true) - Number(a.ranked === true) || (b.ovr ?? -1) - (a.ovr ?? -1)),
@@ -59,40 +72,30 @@ export default function Search({ players = [], loaded = false, error = "", onRet
     setPos(position);
     setPage(1);
     setQ("");
-    setSelected(null);
+    closePlayer();
     setOpen(false);
     setHi(-1);
   };
 
   const pick = (p) => {
     playerTrigger.current = document.activeElement;
-    setSelected(p);
-    setPos(p.position);
-    setQ(p.name);
-    setOpen(false);
-    setHi(-1);
+    const version = ++selectionVersion.current;
+    const update = () => {
+      if (version !== selectionVersion.current) return;
+      setSelected(p); setPos(p.position); setQ(p.name); setOpen(false); setHi(-1);
+    };
+    selectionTransition.current?.skipTransition();
+    if (selected && !isMobile && document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      selectionTransition.current = document.startViewTransition(() => flushSync(update));
+      selectionTransition.current.ready.catch(() => {});
+    } else update();
   };
 
   useEffect(() => {
-    if (!selected) return;
-    const on = (e) => e.key === "Escape" && setSelected(null);
+    if (!selected || isMobile) return;
+    const on = (e) => e.key === "Escape" && closePlayer();
     window.addEventListener("keydown", on);
     return () => window.removeEventListener("keydown", on);
-  }, [isMobile, selected]);
-
-  useEffect(() => {
-    if (!(isMobile && selected)) return;
-    const surface = dialog.current;
-    const trigger = playerTrigger.current;
-    surface.showModal();
-    surface.querySelector('.pcard .close')?.focus();
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      surface.close();
-      document.body.style.overflow = previous;
-      if (trigger?.isConnected) trigger.focus({ preventScroll: true });
-    };
   }, [isMobile, selected]);
 
   const onKey = (e) => {
@@ -205,19 +208,15 @@ export default function Search({ players = [], loaded = false, error = "", onRet
             </p>
           </div>
 
-          {isMobile && <dialog ref={dialog} className="player-dialog" aria-label={selected ? `${selected.name} player profile` : 'Player profile'}
-            onCancel={(e) => { e.preventDefault(); setSelected(null); }}
-            onClick={(e) => { if (e.target === e.currentTarget) setSelected(null); }}>
-            {selected && <PlayerCard player={selected} onClose={() => setSelected(null)} />}
-          </dialog>}
+          {isMobile && <PlayerSheet player={selected} trigger={playerTrigger.current} onClose={closePlayer} />}
           <aside className={`card-col ${cardOpen ? "open" : ""}`} aria-live="polite">
             {selected && !isMobile ? (
-              <PlayerCard player={selected} onClose={() => setSelected(null)} />
+              <PlayerCard player={selected} onClose={closePlayer} />
             ) : (
               <div className="empty-card angular">
                 <Photo label="Player profile" />
                 <div className="display" style={{ fontSize: "1.3rem", color: "var(--text)" }}>Player card</div>
-                <p style={{ marginTop: 10, lineHeight: 1.6, fontSize: 14 }}>
+                <p style={{ marginTop: 10, lineHeight: 1.6, fontSize: ".875rem" }}>
                   Search a player or pick one from the list to see their archetype, percentile profile and minutes played.
                 </p>
               </div>

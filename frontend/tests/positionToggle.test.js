@@ -50,7 +50,7 @@ beforeEach(() => {
   container = document.getElementById('root'); root = createRoot(container);
   act(() => root.render(React.createElement(Search, { players, loaded: true })));
 });
-afterEach(() => { act(() => root.unmount()); dom.window.close(); delete globalThis.window; delete globalThis.document; delete globalThis.IS_REACT_ACT_ENVIRONMENT; delete globalThis.cancelAnimationFrame; });
+afterEach(() => { act(() => root.unmount()); dom.window.close(); delete globalThis.window; delete globalThis.document; delete globalThis.IS_REACT_ACT_ENVIRONMENT; delete globalThis.cancelAnimationFrame; delete globalThis.requestAnimationFrame; });
 
 test('CB is selected by default with correctly sorted first-page players', () => {
   assert.equal(button('CB').getAttribute('aria-pressed'), 'true');
@@ -161,4 +161,65 @@ test('mobile profile opens a native modal, focuses close, and restores focus on 
     assert.equal(document.activeElement, trigger);
     assert.equal(document.body.style.overflow, 'auto');
   }
+});
+
+
+test('sheet drag tracks its grab offset, can be cancelled, and dismisses on a downward flick', () => {
+  window.matchMedia = (query) => ({ matches: query.includes('max-width'), addEventListener() {}, removeEventListener() {} });
+  window.HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
+  window.HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); };
+  let id = 0, time = 0;
+  const frames = new Map();
+  globalThis.requestAnimationFrame = (callback) => { frames.set(++id, callback); return id; };
+  globalThis.cancelAnimationFrame = (frame) => frames.delete(frame);
+  const settle = () => act(() => {
+    for (let i = 0; i < 180 && frames.size; i++) {
+      const pending = [...frames.values()]; frames.clear(); time += 16;
+      pending.forEach((callback) => callback(time));
+    }
+    assert.equal(frames.size, 0);
+  });
+  try {
+    act(() => root.render(React.createElement(Search, { key: 'drag', players, loaded: true })));
+    const modal = container.querySelector('dialog');
+    modal.getBoundingClientRect = () => ({ height: 600 });
+    const trigger = container.querySelector('.browse-row'); trigger.focus(); click(trigger); settle();
+    const handle = modal.querySelector('.sheet-handle');
+    handle.setPointerCapture = () => {}; handle.hasPointerCapture = () => false;
+    const simulate = (type, y, stamp) => act(() => require('react-dom/test-utils').Simulate[type](handle,
+      { pointerId: 1, button: 0, clientY: y, timeStamp: stamp }));
+    simulate('pointerDown', 100, 0);
+    simulate('pointerMove', 105, 16);
+    assert.equal(modal.style.transform, 'translateY(0px)');
+    simulate('pointerMove', 150, 32);
+    assert.equal(modal.style.transform, 'translateY(50px)');
+    simulate('pointerCancel', 150, 48); settle();
+    assert.ok(modal.open); assert.equal(modal.style.transform, 'translateY(0px)');
+    simulate('pointerDown', 100, 100);
+    simulate('pointerMove', 220, 140);
+    simulate('pointerUp', 220, 150); settle();
+    assert.equal(modal.open, false);
+    assert.equal(document.activeElement, trigger);
+  } finally { delete globalThis.requestAnimationFrame; }
+});
+
+
+test('rapid player switching cancels obsolete crossfades and never overwrites a newer choice', () => {
+  globalThis.requestAnimationFrame = () => 1;
+  window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+  const controls = [...container.querySelectorAll('.browse-row')];
+  click(controls[0]);
+  const pending = [];
+  let skipped = 0;
+  document.startViewTransition = (update) => {
+    pending.push(update);
+    return { skipTransition() { skipped++; }, ready: Promise.resolve() };
+  };
+  click(controls[1]); click(controls[2]);
+  assert.equal(skipped, 1);
+  act(() => pending[1]()); act(() => pending[0]());
+  assert.equal(container.querySelector('.pcard h3').textContent, ranked('CB')[2].name);
+  click(controls[3]); click(button('DM')); act(() => pending[2]());
+  assert.equal(container.querySelector('.pcard'), null);
+  assert.equal(button('DM').getAttribute('aria-pressed'), 'true');
 });

@@ -61,13 +61,13 @@ export default function Nav({ theme, onToggle, sections = NAV, activeSection, on
         </div>
       </div>
 
-      {open && (
+      <div className={`mobile-menu-wrap ${open ? "open" : ""}`} inert={open ? undefined : ""} aria-hidden={!open}>
         <nav id="site-mobile-menu" aria-label="Mobile navigation" className="mobile-menu mono">
           {sections.map((n) => (
             <a key={n.id} href={n.href ?? `#${n.id}`} aria-current={current === n.id ? 'page' : undefined} onClick={(e) => follow(n.id, e)}>{n.label}</a>
           ))}
         </nav>
-      )}
+      </div>
     </header>
   );
 }
