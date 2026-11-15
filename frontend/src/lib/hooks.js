@@ -14,7 +14,7 @@ export function useTilt({ max = 9, scale = 1.03 } = {}) {
       const py = (e.clientY - r.top) / r.height;
       cancelAnimationFrame(raf.current);
       raf.current = requestAnimationFrame(() => {
-        el.style.transition = "transform .08s linear, box-shadow .35s ease";
+        el.style.transition = "box-shadow .2s ease";
         el.style.transform = `perspective(1100px) rotateX(${(0.5 - py) * 2 * max}deg) rotateY(${(px - 0.5) * 2 * max}deg) scale(${scale})`;
         el.style.setProperty("--mx", `${px * 100}%`);
         el.style.setProperty("--my", `${py * 100}%`);
@@ -27,7 +27,7 @@ export function useTilt({ max = 9, scale = 1.03 } = {}) {
     const el = ref.current;
     if (!el) return;
     cancelAnimationFrame(raf.current);
-    el.style.transition = "transform .6s cubic-bezier(.22,1.28,.36,1), box-shadow .4s ease";
+    el.style.transition = "transform .2s ease-out, box-shadow .2s ease";
     el.style.transform = "perspective(1100px) rotateX(0deg) rotateY(0deg) scale(1)";
   }, []);
 

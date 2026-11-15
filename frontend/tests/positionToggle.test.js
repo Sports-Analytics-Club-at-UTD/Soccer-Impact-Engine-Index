@@ -131,3 +131,34 @@ test('position control exposes named group, pressed states and focusable native 
     click(el); assert.equal(el.getAttribute('aria-pressed'), 'true');
   }
 });
+
+
+test('search and position controls precede featured players in reading order', () => {
+  const featured = container.querySelector('.top3');
+  for (const control of [container.querySelector('input'), container.querySelector('.position-toggle')]) {
+    assert.ok(control.compareDocumentPosition(featured) & window.Node.DOCUMENT_POSITION_FOLLOWING);
+  }
+});
+
+test('mobile profile opens a native modal, focuses close, and restores focus on dismissal', () => {
+  window.matchMedia = () => ({ matches: true, addEventListener() {}, removeEventListener() {} });
+  window.HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
+  window.HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); };
+  act(() => root.render(React.createElement(Search, { key: 'mobile', players, loaded: true })));
+  const trigger = container.querySelector('.browse-row');
+  document.body.style.overflow = 'auto';
+  for (const dismiss of ['close', 'cancel', 'backdrop']) {
+    trigger.focus(); click(trigger);
+    const modal = container.querySelector('dialog[open]');
+    assert.ok(modal);
+    assert.match(modal.getAttribute('aria-label'), /player profile/);
+    assert.equal(document.body.style.overflow, 'hidden');
+    assert.equal(document.activeElement, modal.querySelector('[aria-label="Close player card"]'));
+    if (dismiss === 'close') click(document.activeElement);
+    else if (dismiss === 'cancel') act(() => modal.dispatchEvent(new window.Event('cancel', { cancelable: true })));
+    else click(modal);
+    assert.equal(container.querySelector('dialog[open]'), null);
+    assert.equal(document.activeElement, trigger);
+    assert.equal(document.body.style.overflow, 'auto');
+  }
+});

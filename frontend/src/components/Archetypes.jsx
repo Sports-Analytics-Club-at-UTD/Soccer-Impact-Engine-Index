@@ -7,7 +7,7 @@ import PlayerCard from "./PlayerCard.jsx";
 const METRIC_LABEL = { ...Object.fromEntries(METRICS.map((m) => [m.key, m.label])), REC: "Ball recoveries", LB: "Progressive passing" };
 
 function Arch({ a, position, onPick, expanded }) {
-  const tilt = useTilt({ max: 6, scale: 1.03 });
+  const tilt = useTilt({ max: 3, scale: 1.01 });
   return (
     <button type="button" {...tilt} className="tilt sheen card-surface angular-sm arch" onClick={onPick}
             aria-label={`View ${a.name} top 5 · ${position === 'DM' ? 'MID' : position}`}
@@ -25,6 +25,10 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
   const [selected, setSelected] = useState(null), [player, setPlayer] = useState(null);
   const dialog = useRef(null);
   const archetypeTrigger = useRef(null);
+  const leadersRegion = useRef(null);
+  useEffect(() => {
+    leadersRegion.current?.scrollIntoView?.({ block: 'nearest', behavior: 'instant' });
+  }, [selected]);
   useEffect(() => {
     if (!player) return;
     dialog.current.showModal();
@@ -61,7 +65,7 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
                 )}
               </div>
               <div id={`leaders-${g.replaceAll(' ', '-').toLowerCase()}`} hidden={selected?.a.group !== g}>
-                {selected?.a.group === g && <div className="archetype-dropdown" role="region" aria-labelledby="archetype-leaders-title">
+                {selected?.a.group === g && <div ref={leadersRegion} className="archetype-dropdown" role="region" aria-labelledby="archetype-leaders-title">
                   <div className="archetype-dropdown-heading">
                     <h4 id="archetype-leaders-title" className="display">{selected.a.name} · {selected.position === 'DM' ? 'MID' : 'CB'} · Top 5</h4>
                     <button type="button" className="archetype-collapse" aria-label="Close archetype list"

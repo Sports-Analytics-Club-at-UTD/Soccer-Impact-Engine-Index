@@ -5,7 +5,7 @@ import { IconDown, SectionHead } from "./ui.jsx";
 import SpatialDominancePitch from "./SpatialDominancePitch.jsx";
 
 function Badge({ t, open, onToggle }) {
-  const tilt = useTilt({ max: 7, scale: 1.03 });
+  const tilt = useTilt({ max: 3, scale: 1.01 });
   return (
     <div className="reveal">
       <button
