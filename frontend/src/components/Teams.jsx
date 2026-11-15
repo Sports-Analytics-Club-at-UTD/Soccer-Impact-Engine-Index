@@ -2,10 +2,11 @@ import { useState } from "react";
 import { TEAMS, TEAMS_SECTION } from "../content.js";
 import { useTilt } from "../lib/hooks.js";
 import { IconDown, SectionHead } from "./ui.jsx";
+import ExpandingPanel from "./ExpandingPanel.jsx";
 import SpatialDominancePitch from "./SpatialDominancePitch.jsx";
 
 function Badge({ t, open, onToggle }) {
-  const tilt = useTilt({ max: 7, scale: 1.03 });
+  const tilt = useTilt({ max: 3, scale: 1.01 });
   return (
     <div className="reveal">
       <button
@@ -24,8 +25,8 @@ function Badge({ t, open, onToggle }) {
 }
 
 export default function Teams() {
-  const [openId, setOpenId] = useState(null);
-  const team = TEAMS.find((t) => t.id === openId);
+  const [openId, setOpenId] = useState(null), [shownId, setShownId] = useState(null);
+  const team = TEAMS.find((t) => t.id === (openId ?? shownId));
 
   return (
     <section id="teams" className="section">
@@ -34,21 +35,20 @@ export default function Teams() {
 
         <div className="badges">
           {TEAMS.map((t) => (
-            <Badge key={t.id} t={t} open={openId === t.id} onToggle={() => setOpenId(openId === t.id ? null : t.id)} />
+            <Badge key={t.id} t={t} open={openId === t.id} onToggle={() => { setShownId(t.id); setOpenId(openId === t.id ? null : t.id); }} />
           ))}
         </div>
 
         {/* one panel, content swaps with the selected team */}
-        <div id="team-spatial-panel" className={`team-panel ${team ? "open" : ""}`}>
-          <div>
+        <ExpandingPanel id="team-spatial-panel" className="team-panel" open={openId !== null}
+          onSettled={(expanded) => { if (!expanded) setShownId(null); }}>
             {team && (
               <div className="team-inner">
-                <h3 className="display" style={{ fontSize: "1.6rem" }}>{team.name}</h3>
-                <SpatialDominancePitch key={team.id} team={team} />
+                <h3 key={team.id} className="display" style={{ fontSize: "1.6rem" }}>{team.name}</h3>
+                <SpatialDominancePitch team={team} />
               </div>
             )}
-          </div>
-        </div>
+        </ExpandingPanel>
       </div>
     </section>
   );

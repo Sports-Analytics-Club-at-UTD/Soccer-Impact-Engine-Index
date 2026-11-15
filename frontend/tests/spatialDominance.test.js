@@ -56,8 +56,11 @@ test('team selection, focus, arrow keys, Escape, hover and tap use the pitch zon
       assert.equal(badge.querySelector('img').alt, '', 'adjacent club name labels the selector');
       assert.equal(badge.querySelector('img').getAttribute('width'), '52');
     }
+    let originalZones;
     for (const [i, data] of Object.values(SPATIAL_DOMINANCE).entries()) {
       click(badges[i]);
+      if (originalZones) assert.ok(zones().every((zone, index) => zone === originalZones[index]), 'team switching preserves the pitch for color interpolation');
+      else originalZones = zones();
       assert.equal(badges[i].getAttribute('aria-controls'), 'team-spatial-panel');
       assert.deepEqual(zones().map((el) => Number(el.textContent.replace('%', ''))), data.percentages);
       assert.match(container.querySelector('.spatial-heading').textContent, new RegExp(`${data.matches} matches`));
@@ -88,5 +91,53 @@ test('team selection, focus, arrow keys, Escape, hover and tap use the pitch zon
   } finally {
     act(() => root.unmount()); dom.window.close();
     delete globalThis.window; delete globalThis.document; delete globalThis.IS_REACT_ACT_ENVIRONMENT; delete globalThis.cancelAnimationFrame;
+  }
+});
+
+
+test('team panel can reverse mid-close without snapping or discarding the pitch', () => {
+  const dom = new JSDOM('<div id="root"></div>');
+  globalThis.window = dom.window; globalThis.document = dom.window.document;
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  window.matchMedia = () => ({ matches: false });
+  let nextId = 0, time = 0;
+  const frames = new Map();
+  globalThis.requestAnimationFrame = (callback) => { frames.set(++nextId, callback); return nextId; };
+  globalThis.cancelAnimationFrame = (id) => frames.delete(id);
+  dom.window.HTMLElement.prototype.getBoundingClientRect = () => ({ height: 600 });
+  const root = createRoot(document.getElementById('root'));
+  const click = (element) => act(() => element.click());
+  const advance = (count = 180) => act(() => {
+    for (let i = 0; i < count && frames.size; i++) {
+      const pending = [...frames.values()]; frames.clear(); time += 16;
+      pending.forEach((callback) => callback(time));
+    }
+  });
+  try {
+    act(() => root.render(React.createElement(Teams)));
+    const badges = [...document.querySelectorAll('.badge')], panel = document.querySelector('.team-panel');
+    click(badges[0]); advance(5);
+    const firstHeight = panel.style.height;
+    assert.ok(parseFloat(firstHeight) > 0 && parseFloat(firstHeight) < 600);
+    click(badges[0]);
+    assert.equal(panel.style.height, firstHeight);
+    assert.ok(panel.hasAttribute('inert'));
+    assert.equal(document.querySelectorAll('.spatial-zone').length, 9);
+    advance(2);
+    const closingHeight = panel.style.height;
+    click(badges[1]);
+    assert.equal(panel.style.height, closingHeight);
+    advance();
+    assert.equal(panel.style.height, '600px');
+    assert.equal(panel.dataset.settled, 'true');
+    assert.equal(panel.hasAttribute('inert'), false);
+    assert.deepEqual([...document.querySelectorAll('.spatial-zone')].map((zone) => Number(zone.textContent.replace('%', ''))), SPATIAL_DOMINANCE.barca.percentages);
+    click(badges[1]); advance();
+    assert.equal(panel.style.height, '0px');
+    assert.equal(document.querySelectorAll('.spatial-zone').length, 0);
+  } finally {
+    act(() => root.unmount()); dom.window.close();
+    delete globalThis.window; delete globalThis.document; delete globalThis.IS_REACT_ACT_ENVIRONMENT;
+    delete globalThis.requestAnimationFrame; delete globalThis.cancelAnimationFrame;
   }
 });

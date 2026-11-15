@@ -55,26 +55,64 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
   const { JSDOM } = await import('jsdom');
   const dom = new JSDOM('<div id="root"></div>');
   globalThis.window = dom.window; globalThis.document = dom.window.document;
-  globalThis.IS_REACT_ACT_ENVIRONMENT = true; globalThis.cancelAnimationFrame = () => {};
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+  let frameId = 0, time = 0;
+  const frames = new Map();
+  globalThis.requestAnimationFrame = (callback) => { frames.set(++frameId, callback); return frameId; };
+  globalThis.cancelAnimationFrame = (id) => frames.delete(id);
+  Object.defineProperty(document.documentElement, 'scrollHeight', { value: 4000 });
+  window.scrollTo = (options) => { window.scrollY = options.top; scrolls.push(options); };
+  dom.window.HTMLElement.prototype.getBoundingClientRect = function () {
+    const height = this.className === 'expanding-panel-content' || this.classList.contains('archetype-dropdown') ? 600 : 0;
+    const top = (this.classList.contains('archetype-dropdown') ? 1200 : 400) - window.scrollY;
+    return { height, top, bottom: top + height };
+  };
+  const advance = (count = 180) => {
+    for (let i = 0; i < count && frames.size; i++) {
+      const pending = [...frames.values()]; frames.clear(); time += 16;
+      pending.forEach((callback) => callback(time));
+    }
+  };
   const { createRoot } = require('react-dom/client');
   const root = createRoot(document.getElementById('root')), Archetypes = component('Archetypes');
   const { act } = React;
   const render = (props) => act(() => root.render(React.createElement(Archetypes, props)));
   const trigger = (name) => document.querySelector(`[aria-label="View ${name} top 5 · CB"]`);
+  const scrolls = [];
+  dom.window.HTMLElement.prototype.scrollIntoView = function (options) { scrolls.push(options); };
   try {
     render({ players, loaded: true });
     act(() => trigger('Stopper').click());
     assert.equal(trigger('Stopper').getAttribute('aria-expanded'), 'true');
+    assert.equal(scrolls.length, 0);
+    act(() => advance());
+    assert.equal(scrolls.at(-1).behavior, 'instant');
+    assert.ok(window.scrollY > 0, 'the viewport follows the expanding panel through animation frames');
     assert.equal(document.querySelector('dialog[open]'), null);
-    assert.equal(document.querySelectorAll('.archetype-leaders li').length, 5);
+    assert.equal(document.querySelectorAll('.archetype-panel.open .archetype-leaders li').length, 5);
+    const expectedLeaders = archetypeLeaders(players, 'CB', ARCHETYPES.CB[0]);
+    const cards = [...document.querySelectorAll('.archetype-panel.open .leader-card')];
+    assert.deepEqual(cards.map((card) => card.querySelector('.nm').textContent), expectedLeaders.map((p) => p.name));
+    assert.deepEqual(cards.map((card) => card.querySelector('.leader-portrait img').getAttribute('src')), expectedLeaders.map((p) => p.photo));
+    assert.deepEqual(cards.map((card) => card.querySelector('.leader-clubs').textContent), expectedLeaders.map((p) => p.team));
+    assert.equal(cards.filter((card) => card.classList.contains('leader-card-first')).length, 1);
+    assert.equal(cards[0].querySelector('.leader-rank').getAttribute('aria-label'), 'Rank 1');
+
     assert.doesNotMatch(document.querySelector('[role=region]').textContent, /percentile/i);
     assert.equal(document.querySelector('.archetype-leaders .ov'), null);
     act(() => trigger('Libero').click());
     assert.equal(trigger('Stopper').getAttribute('aria-expanded'), 'false');
     assert.equal(document.querySelectorAll('[role=region]').length, 1);
     assert.match(document.querySelector('[role=region]').textContent, /Libero/);
+    act(() => advance(4));
     act(() => trigger('Libero').click());
     assert.equal(document.querySelector('[role=region]'), null);
+    const collapsing = document.querySelector('.archetype-panel[aria-hidden="true"]:has(.archetype-dropdown)');
+    assert.ok(collapsing.hasAttribute('inert'));
+    assert.ok(collapsing.querySelector('.archetype-dropdown'));
+    act(() => advance());
+    assert.equal(collapsing.querySelector('.archetype-dropdown'), null);
     act(() => trigger('Stopper').click());
     const close = document.querySelector('[aria-label="Close archetype list"]');
     assert.equal(close.tagName, 'BUTTON');
@@ -84,6 +122,19 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
     assert.equal(trigger('Stopper').getAttribute('aria-expanded'), 'false');
     assert.equal(document.activeElement, trigger('Stopper'));
     act(() => trigger('Stopper').click());
+    act(() => advance(4));
+    const panel = document.querySelector('.archetype-panel.open');
+    const openingHeight = panel.style.height;
+    act(() => trigger('Stopper').click());
+    assert.equal(panel.style.height, openingHeight, 'closing starts at the current on-screen height');
+    act(() => advance(2));
+    const reversingHeight = panel.style.height;
+    act(() => trigger('Stopper').click());
+    assert.equal(panel.style.height, reversingHeight, 'reopening never snaps to an endpoint');
+    act(() => advance());
+    assert.equal(panel.style.height, '600px');
+    assert.equal(trigger('Stopper').getAttribute('aria-expanded'), 'true');
+    assert.match(document.querySelector('[role=region]').textContent, /Stopper/);
     render({ loaded: false });
     assert.match(document.querySelector('[role=status]').textContent, /Loading/);
     let retries = 0;
@@ -95,7 +146,7 @@ test('archetype dropdown expands inline, switches lists, collapses and handles l
     assert.match(document.querySelector('[role=status]').textContent, /No ranked players/);
   } finally {
     act(() => root.unmount()); dom.window.close();
-    delete globalThis.window; delete globalThis.document; delete globalThis.IS_REACT_ACT_ENVIRONMENT; delete globalThis.cancelAnimationFrame;
+    delete globalThis.window; delete globalThis.document; delete globalThis.IS_REACT_ACT_ENVIRONMENT; delete globalThis.cancelAnimationFrame; delete globalThis.requestAnimationFrame;
   }
 });
 

@@ -13,17 +13,18 @@ export default function PlayerCard({ player, onClose, demo = false }) {
     : <StandardPlayerCard player={player} onClose={onClose} demo={demo} />;
 }
 
+function AnimatedOverall({ value }) { return useCountUp(value); }
+
 function StandardPlayerCard({ player, onClose, demo = false }) {
   const tilt = useTilt({ max: 0, scale: 1 });
   const card = player.publicRating ? publicRatingCard(player) : ratingCard(player, { demo });
-  const animatedOvr = useCountUp(card.ovr ?? 0);
-  const ovr = player.publicRating ? displayOverall(card.ovr) : card.ovr === null ? "N/A" : animatedOvr;
+  const ovr = player.publicRating ? displayOverall(card.ovr) : card.ovr === null ? "N/A" : <AnimatedOverall value={card.ovr} />;
   const archetypes = card.archetypes?.length ? card.archetypes : [card.archetype];
   const low = demo && player.minutes < 1000;
   const extraExplanations = player.ratingDetails?.explanations.filter((reason) => !player.ratingNotice?.includes(reason)) ?? [];
 
   return (
-    <article {...tilt} className="tilt sheen card-surface on angular pcard" key={player.id} tabIndex={0} aria-label={`${player.name} player card`}>
+    <article {...tilt} className="tilt sheen card-surface on angular pcard" tabIndex={0} aria-label={`${player.name} player card`}>
       {player.publicRating && player.crests?.length
         ? <span className="ghost-crests" aria-hidden="true">{player.crests.map((src) => <img key={src} src={src} alt="" />)}</span>
         : <span className="ghost-ovr display" aria-hidden="true">{player.publicRating ? displayOverall(card.ovr) : card.ovr ?? ""}</span>}

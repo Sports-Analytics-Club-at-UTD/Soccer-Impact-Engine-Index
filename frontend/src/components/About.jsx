@@ -3,7 +3,7 @@ import { useTilt } from "../lib/hooks.js";
 import { Photo, SectionHead } from "./ui.jsx";
 
 function Member({ m, i }) {
-  const tilt = useTilt({ max: 8, scale: 1.04 });
+  const tilt = useTilt({ max: 3, scale: 1.01 });
   return (
     <div className="reveal" style={{ transitionDelay: `${i * 70}ms` }}>
       <div {...tilt} className="tilt sheen card-surface angular member">

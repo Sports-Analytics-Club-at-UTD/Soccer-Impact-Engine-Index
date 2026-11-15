@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { activeSectionAt } from "../lib/scrolling.js";
 import { NAV } from "../content.js";
 import { IconClose, IconMenu, IconMoon, IconSun, Mark } from "./ui.jsx";
 
@@ -6,7 +7,7 @@ export default function Nav({ theme, onToggle, sections = NAV, activeSection, on
   const [open, setOpen] = useState(false);
   const [solid, setSolid] = useState(false);
   const [active, setActive] = useState("home");
-  const menuButton = useRef(null);
+  const menuButton = useRef(null), headerContent = useRef(null), currentSection = useRef("home");
 
   useEffect(() => {
     const on = () => setSolid(window.scrollY > 40);
@@ -16,16 +17,30 @@ export default function Nav({ theme, onToggle, sections = NAV, activeSection, on
   }, []);
 
   useEffect(() => {
-    if (activeSection !== undefined || !("IntersectionObserver" in window)) return;
-    const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id)),
-      { rootMargin: "-45% 0px -50% 0px" }
-    );
-    sections.forEach((n) => {
-      const el = document.getElementById(n.id);
-      if (el) io.observe(el);
-    });
-    return () => io.disconnect();
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const height = headerContent.current.getBoundingClientRect().height;
+      if (document.documentElement.style.getPropertyValue('--nav-height') !== `${height}px`) document.documentElement.style.setProperty('--nav-height', `${height}px`);
+      if (activeSection !== undefined) return;
+      const positions = sections.map((section) => {
+        const element = document.getElementById(section.id);
+        return element ? { id: section.id, top: element.getBoundingClientRect().top } : null;
+      }).filter(Boolean);
+      const next = activeSectionAt(positions, height + Math.min(120, window.innerHeight * .2), currentSection.current);
+      if (next !== currentSection.current) { currentSection.current = next; setActive(next); }
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+    update();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(schedule);
+    observer?.observe(headerContent.current);
+    return () => {
+      cancelAnimationFrame(frame); observer?.disconnect();
+      window.removeEventListener('scroll', schedule); window.removeEventListener('resize', schedule);
+      document.documentElement.style.removeProperty('--nav-height');
+    };
   }, [sections, activeSection]);
 
   const light = theme === "light";
@@ -34,7 +49,7 @@ export default function Nav({ theme, onToggle, sections = NAV, activeSection, on
 
   return (
     <header className={`nav ${solid || open ? "solid" : ""}`} onKeyDown={(e) => { if (e.key === 'Escape' && open) { setOpen(false); menuButton.current?.focus(); } }}>
-      <div className="nav-in">
+      <div ref={headerContent} className="nav-in">
         <a href={sections.find((s) => s.id === 'home')?.href ?? '#home'} onClick={(e) => follow('home', e)} className="brand display" aria-label="Home">
           <Mark />
           <span>SAC <span className="c1">Index</span></span>
@@ -61,13 +76,13 @@ export default function Nav({ theme, onToggle, sections = NAV, activeSection, on
         </div>
       </div>
 
-      {open && (
+      <div className={`mobile-menu-wrap ${open ? "open" : ""}`} inert={open ? undefined : ""} aria-hidden={!open}>
         <nav id="site-mobile-menu" aria-label="Mobile navigation" className="mobile-menu mono">
           {sections.map((n) => (
             <a key={n.id} href={n.href ?? `#${n.id}`} aria-current={current === n.id ? 'page' : undefined} onClick={(e) => follow(n.id, e)}>{n.label}</a>
           ))}
         </nav>
-      )}
+      </div>
     </header>
   );
 }

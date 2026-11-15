@@ -3,7 +3,7 @@ import { useTilt } from "../lib/hooks.js";
 import { SectionHead } from "./ui.jsx";
 
 function Point({ p, i }) {
-  const tilt = useTilt({ max: 6, scale: 1.02 });
+  const tilt = useTilt({ max: 3, scale: 1.01 });
   return (
     <div className="reveal" style={{ transitionDelay: `${i * 80}ms` }}>
       <div {...tilt} className="tilt sheen panel angular point">

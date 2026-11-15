@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { cancelAutoScroll, scrollToElement } from "./scrolling.js";
 
 /* 3D tilt — pure CSS transforms (same hook as the Abdullah City FC site). */
 export function useTilt({ max = 9, scale = 1.03 } = {}) {
@@ -14,7 +15,7 @@ export function useTilt({ max = 9, scale = 1.03 } = {}) {
       const py = (e.clientY - r.top) / r.height;
       cancelAnimationFrame(raf.current);
       raf.current = requestAnimationFrame(() => {
-        el.style.transition = "transform .08s linear, box-shadow .35s ease";
+        el.style.transition = "box-shadow .2s ease";
         el.style.transform = `perspective(1100px) rotateX(${(0.5 - py) * 2 * max}deg) rotateY(${(px - 0.5) * 2 * max}deg) scale(${scale})`;
         el.style.setProperty("--mx", `${px * 100}%`);
         el.style.setProperty("--my", `${py * 100}%`);
@@ -27,7 +28,7 @@ export function useTilt({ max = 9, scale = 1.03 } = {}) {
     const el = ref.current;
     if (!el) return;
     cancelAnimationFrame(raf.current);
-    el.style.transition = "transform .6s cubic-bezier(.22,1.28,.36,1), box-shadow .4s ease";
+    el.style.transition = "transform .2s ease-out, box-shadow .2s ease";
     el.style.transform = "perspective(1100px) rotateX(0deg) rotateY(0deg) scale(1)";
   }, []);
 
@@ -38,23 +39,22 @@ export function useTilt({ max = 9, scale = 1.03 } = {}) {
 /* Fade-up on scroll for every .reveal element on the page. */
 export function useRevealAll() {
   useEffect(() => {
-    const els = document.querySelectorAll(".reveal:not(.in)");
-    if (!("IntersectionObserver" in window)) {
-      els.forEach((n) => n.classList.add("in"));
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((en) => {
-          if (en.isIntersecting) {
-            en.target.classList.add("in");
-            io.unobserve(en.target);
-          }
-        }),
-      { threshold: 0.1, rootMargin: "0px 0px -6% 0px" }
-    );
-    els.forEach((n) => io.observe(n));
-    return () => io.disconnect();
+    const reveal = (root) => {
+      const elements = [...(root.matches?.('.reveal:not(.in)') ? [root] : []), ...root.querySelectorAll('.reveal:not(.in)')];
+      elements.forEach((element) => observer ? observer.observe(element) : element.classList.add('in'));
+    };
+    const observer = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) { entry.target.classList.add('in'); observer.unobserve(entry.target); }
+      });
+    }, { threshold: .05, rootMargin: '0px 0px 24px 0px' }) : null;
+    const root = document.querySelector('main') ?? document.body;
+    reveal(root);
+    const mutations = new MutationObserver((entries) => entries.forEach((entry) => {
+      entry.addedNodes.forEach((node) => { if (node.nodeType === 1) reveal(node); });
+    }));
+    mutations.observe(root, { childList: true, subtree: true });
+    return () => { observer?.disconnect(); mutations.disconnect(); };
   }, []);
 }
 
@@ -91,4 +91,24 @@ export function useCountUp(target, { duration = 700 } = {}) {
     return () => cancelAnimationFrame(id);
   }, [target, duration]);
   return n;
+}
+
+
+export function useSectionScrolling() {
+  useEffect(() => {
+    const follow = (event) => {
+      const link = event.target.closest?.('a[href^="#"]');
+      if (!link || event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || link.target === '_blank' || link.hasAttribute('download')) return;
+      let id;
+      try { id = decodeURIComponent(link.hash.slice(1)); } catch { return; }
+      const target = document.getElementById(id);
+      if (!target) return;
+      event.preventDefault();
+      if (window.location.hash !== link.hash) window.history.pushState(null, '', link.hash);
+      if (target.hasAttribute('tabindex')) target.focus({ preventScroll: true });
+      scrollToElement(target, 'start');
+    };
+    document.addEventListener('click', follow);
+    return () => { document.removeEventListener('click', follow); cancelAutoScroll(); };
+  }, []);
 }
