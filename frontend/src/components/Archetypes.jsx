@@ -55,8 +55,8 @@ export default function Archetypes({ players = [], loaded = false, error = "", o
         />
 
         <div className="legend reveal">
-          <span className="chip angular-sm mono"><b>Gold</b> {TIER.plus}th percentile and up</span>
-          <span className="chip angular-sm mono"><b>Silver</b> {TIER.minus}th to below {TIER.plus}th</span>
+          <span className="chip angular-sm mono"><b className="leader-tier gold">Gold</b> {TIER.plus}th percentile and up</span>
+          <span className="chip angular-sm mono"><b className="leader-tier silver">Silver</b> {TIER.minus}th to below {TIER.plus}th</span>
           <span className="chip angular-sm mono"><b>Standard</b> below the {TIER.minus}th</span>
         </div>
 

@@ -2,7 +2,7 @@
    THEME TOKENS — change a hex here and the whole site follows.
    a1 = primary accent · a2 = secondary · a3 = tertiary
    Dark : black base + neon green / gold / white
-   Light: white base + pink / purple / red + black
+   Light: white base + purple / blue / red + black
    ═══════════════════════════════════════════════════════════════════════════ */
 :root,
 :root[data-theme="dark"] {
@@ -37,11 +37,11 @@
   --text: #0b0b10;
   --mute: #55526a;
   --dim: #666174;
-  --a1: #e0157a;
-  --a2: #6d28d9;
+  --a1: #6d28d9;
+  --a2: #2563eb;
   --a3: #dc2626;
   --on-a1: #ffffff;
-  --glow: rgba(224, 21, 122, 0.4);
+  --glow: rgba(109, 40, 217, 0.4);
   --shadow: rgba(60, 20, 90, 0.28);
   --grain: 0;
   --nav-bg: rgba(255, 255, 255, 0.82);
@@ -49,6 +49,16 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--a1) 65%, var(--card-a)) var(--card-b); }
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: var(--card-b); }
+  ::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--a1) 65%, var(--card-a)); border: 2px solid var(--card-b); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--a1); }
+}
+@media (forced-colors: active) {
+  * { scrollbar-color: auto; scrollbar-width: auto; }
+}
 html { scroll-behavior: smooth; }
 body {
   margin: 0;
@@ -128,7 +138,7 @@ main, footer { overflow-x: clip; }
   content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s ease;
   background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.14), transparent 42%);
 }
-:root[data-theme="light"] .sheen::after { background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(224, 21, 122, 0.1), transparent 42%); }
+:root[data-theme="light"] .sheen::after { background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(109, 40, 217, 0.1), transparent 42%); }
 .tilt:hover.sheen::after, .tilt:hover .sheen::after { opacity: 1; }
 
 /* reveal */
@@ -583,10 +593,10 @@ main, footer { overflow-x: clip; }
 .leader-card .nm { font-size: 1rem; font-weight: 700; line-height: 1.35; }
 .leader-clubs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--mute); font-size: .8125rem; line-height: 1.5; }
 .leader-clubs img { width: 20px; height: 20px; object-fit: contain; flex: none; }
-.leader-tier { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; font-size: .75rem; line-height: 1.5; letter-spacing: .08em; text-transform: uppercase; border: 1px solid currentColor; }
-.leader-tier::before { content: ""; width: 4px; height: 4px; background: currentColor; }
-.leader-tier.gold { color: var(--a2); }
-.leader-tier.silver { color: var(--mute); }
+.leader-tier, .attribute-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; font-size: .75rem; line-height: 1.5; letter-spacing: .08em; text-transform: uppercase; border: 1px solid currentColor; }
+.leader-tier::before, .attribute-badge::before { content: ""; width: 4px; height: 4px; background: currentColor; }
+.leader-tier.gold, .attribute-badge-gold { color: var(--a2); }
+.leader-tier.silver, .attribute-badge-silver { color: var(--mute); }
 .leader-action { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--a1); }
 .leader-action svg { transition: transform .2s ease; }
 .leader-card:hover .leader-action svg { transform: translateX(3px); }
@@ -611,7 +621,7 @@ main, footer { overflow-x: clip; }
   .leader-info { padding-right: 0; }
 }
 
-:root[data-theme="light"] .leader-tier.gold { color: #76520b; }
+:root[data-theme="light"] .leader-tier.gold, :root[data-theme="light"] .attribute-badge-gold { color: #76520b; }
 
 .skip-link { position: fixed; top: 1rem; left: 1rem; z-index: 200; padding: .75rem 1rem; color: var(--on-a1); background: var(--a1); transform: translateY(-200%); }
 .skip-link:focus { transform: none; }
@@ -634,3 +644,8 @@ main, footer { overflow-x: clip; }
 .loading-profile { min-height: 320px; }
 
 @media (min-width: 960px) { .loading-directory-footer { min-height: 117px; } }
+
+.attribute-rating { display: inline-flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
+.arch-badge.gold { color: #241a05; background: linear-gradient(135deg, #f3d974, #c99b35); box-shadow: inset 0 0 0 1px #f7df8d; }
+.arch-badge.silver { color: #17202a; background: linear-gradient(135deg, #e0e5eb, #a2adb9); box-shadow: inset 0 0 0 1px #edf1f5; }
+.arch-badge.gold .tier, .arch-badge.silver .tier { color: inherit; }

@@ -1,5 +1,7 @@
 import { FIVE_METRICS } from './fiveAttributePresentation.js';
 
+import { displayOverall } from './foundationPlayers.js';
+
 export const OVR_VERSION = 'soccer-ovr-formula-b/v1';
 export const ELIGIBILITY_VERSION = 'existing-strict-five-attribute-reference/v1';
 export const OVR_EXPLANATION = 'Overall rating is calculated by ranking the five measured attributes from highest to lowest and weighting them 30%, 25%, 20%, 15%, and 10%.';
@@ -26,7 +28,7 @@ export function validateOvrIntegration(integration, data) {
   }
 }
 
-export const formatOvr = (ovr) => ovr?.value == null ? 'N/A' : ovr.value.toFixed(2);
+export const formatOvr = (ovr) => displayOverall(ovr?.value);
 export function ovrLeaderboard(players, position) {
   if (!['MID', 'CB'].includes(position)) throw Error('Select MID or CB for the OVR leaderboard');
   return players.filter((p) => p.ovr?.eligible === true && p.ovr.status === 'calculated' && p.ovr.comparison_position === position && p.presentation.comparison_position === position && typeof p.ovr.value === 'number' && Number.isFinite(p.ovr.value) && p.ovr.value >= 1 && p.ovr.value <= 99)

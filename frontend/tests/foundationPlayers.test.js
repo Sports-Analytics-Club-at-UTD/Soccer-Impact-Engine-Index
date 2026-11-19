@@ -138,7 +138,7 @@ test('existing search finds real names with accents and retains excluded and inc
   assert.ok(search('kante', players).matches.some((p) => p.name.includes('Kanté')));
   assert.equal(search('Marcus Delacroix', players).matches.length, 0);
   const die = players.find((p) => p.canonicalName.includes('Sereso Geoffroy Gonzaroua Dié'));
-  assert.equal(die.ranked, false); assert.equal(displayOverall(die.ovr), '92.00');
+  assert.equal(die.ranked, false); assert.equal(displayOverall(die.ovr), '92');
   assert.ok(search(die.name, players).matches.includes(die));
   assert.match(die.ratingNotice, /Not ranked/);
   for (const p of players.filter((p) => p.ovr === null)) {
@@ -170,11 +170,11 @@ test('foundation search shows only eligible top-three cards and displays load an
   assert.doesNotMatch(failed, /top-card/);
 });
 
-test('original card presents exact approved OVR, missing scores and coverage without inventing values', () => {
+test('original card presents rounded-up OVR, missing scores and coverage without inventing values', () => {
   const PlayerCard = component('../src/components/PlayerCard.jsx');
   const kante = players.find((p) => p.name.includes('Kanté'));
   const html = renderToStaticMarkup(React.createElement(PlayerCard, { player: kante }));
-  assert.match(html, /83\.08/); assert.match(html, /Overall rating/);
+  assert.match(html, />84</); assert.match(html, /Overall rating/);
   assert.match(html, /Confirmed minutes/);
   assert.match(html, /Included in the position rankings/);
   assert.match(html, /Historical season coverage is unverified/);
@@ -343,4 +343,17 @@ test('shared methodology and homepage copy keep limitations clear without implem
   assert.match(description, /may not cover a full season|complete season record/);
   assert.doesNotMatch(renderToStaticMarkup(React.createElement(Hero)), /placeholder|MP4|1920|football clips/);
   assert.doesNotMatch(renderToStaticMarkup(React.createElement(Archetypes)), /Every player gets|Breaks lines with/);
+});
+
+test('OVR rounds up for display, retaining whole and missing values', () => {
+  for (const [value, expected] of [[83.08, '84'], [83.001, '84'], [92, '92'], [99, '99'], [null, 'N/A']]) assert.equal(displayOverall(value), expected);
+});
+
+test('archetype containers carry their tier while search retains compact tier labels', () => {
+  const player = players.find((p) => p.ranked && p.archetype.tier === '+');
+  const html = renderToStaticMarkup(React.createElement(component('../src/components/PlayerCard.jsx'), { player }));
+  assert.match(html, /arch-badge angular-sm gold/);
+  assert.doesNotMatch(html, /class="tier mono leader-tier/);
+  const searchHtml = renderToStaticMarkup(React.createElement(component('../src/components/Search.jsx'), { players, loaded: true }));
+  assert.match(searchHtml, /leader-tier mono gold/);
 });
