@@ -39,4 +39,4 @@ export function publicRatingCard(player) {
   };
 }
 
-export const displayOverall = (value) => value === null ? 'N/A' : value.toFixed(2);
+export const displayOverall = (value) => value == null ? 'N/A' : String(Math.ceil(value));

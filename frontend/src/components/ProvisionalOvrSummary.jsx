@@ -1,11 +1,12 @@
 // Rendering only; calculation, eligibility and source binding live in the adapter.
+import { displayOverall } from '../lib/foundationPlayers.js';
 import { playerDataStatus } from '../lib/playerDataStatus.js';
 
 export default function ProvisionalOvrSummary({ ovr, presentation }) {
   if (!ovr) return null;
   return <section className="five-ovr" aria-label="Provisional overall rating">
     <p className="mono">OVR · FORMULA B · PROVISIONAL</p>
-    <strong className="display">{ovr.value === null ? 'N/A' : ovr.value.toFixed(2)}</strong>
+    <strong className="display">{displayOverall(ovr.value)}</strong>
     <p>{playerDataStatus({ presentation, ovr }).label}</p>
     {ovr.value === null && <p>All five valid attributes are required for OVR.</p>}
     <details><summary>Overall methodology and eligibility</summary>

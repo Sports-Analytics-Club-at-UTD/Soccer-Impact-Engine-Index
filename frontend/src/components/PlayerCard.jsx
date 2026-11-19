@@ -46,8 +46,8 @@ function StandardPlayerCard({ player, onClose, demo = false }) {
 
       <div className="archetype-label mono t9 up mute">{archetypes.length > 1 ? 'Archetypes' : 'Archetype'}</div>
       <ul className="archetype-badges" aria-label="Player archetypes">
-        {archetypes.map((a) => <li key={a.metric ?? a.name} className={`arch-badge angular-sm ${a.tier ? "" : "std"}`}>
-          <span className="tier mono">{demo ? a.tier || "·" : a.tier === "+" ? "Gold" : a.tier === "−" ? "Silver" : "·"}</span>
+        {archetypes.map((a) => <li key={a.metric ?? a.name} className={`arch-badge angular-sm ${a.tier === "+" ? "gold" : a.tier === "−" ? "silver" : "std"}`}>
+          {a.tier && <span className="sr-only">{a.tier === "+" ? "Gold" : "Silver"} tier: </span>}
           <span className="display archetype-name">{a.name}</span>
         </li>)}
       </ul>

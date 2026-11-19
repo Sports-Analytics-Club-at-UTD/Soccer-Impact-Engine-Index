@@ -19,10 +19,6 @@
 .unified-visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @media (min-width: 960px) and (max-width: 1200px) { .nav-links { gap: 16px; } .nav-links a { font-size: 12px; } }
 @media (max-width: 700px) { .unified-destinations, .unified-pickers { grid-template-columns: 1fr; } }
-.attribute-rating { display: inline-flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
-.attribute-badge { display: inline-block; padding: 3px 7px; border: 1px solid; border-radius: 4px; font-size: .65rem; font-weight: 700; line-height: 1.25; letter-spacing: .03em; }
-.attribute-badge-gold { color: #ffe29a; background: #3a2d12; border-color: #a0843c; }
-.attribute-badge-silver { color: #e2e8f0; background: #29313c; border-color: #8090a3; }
 .five-ovr { padding: 20px; margin: 20px 0; border: 1px solid var(--line); overflow-wrap: anywhere; }
 .five-ovr > strong { font-size: 3rem; color: var(--a1); }
 .five-ovr p { margin: 12px 0; line-height: 1.6; }
